@@ -1,0 +1,8 @@
+{
+  "name": "alexandria-memory",
+  "version": "1.0.0",
+  "description": "Alexandria memory system integration - checks for stale memories at session start and provides slash commands for memory management",
+  "author": {
+    "name": "Alexandria"
+  }
+}
