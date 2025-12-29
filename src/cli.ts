@@ -27,6 +27,7 @@ import * as showCmd from './cli/commands/show.ts';
 import * as statsCmd from './cli/commands/stats.ts';
 import * as supersedeCmd from './cli/commands/supersede.ts';
 import * as symbolsCmd from './cli/commands/symbols.ts';
+import * as tuiCmd from './cli/commands/tui.ts';
 import * as verifyCmd from './cli/commands/verify.ts';
 import * as whereCmd from './cli/commands/where.ts';
 
@@ -58,6 +59,7 @@ yargs(hideBin(process.argv))
   .command(installCmd)
   .command(conflictsCmd)
   .command(symbolsCmd)
+  .command(tuiCmd)
   .demandCommand(1, 'You need at least one command')
   .strict()
   .help()

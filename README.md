@@ -76,6 +76,20 @@ alex install all
 
 See [Integrations](docs/integrations.md) for details.
 
+## Terminal UI
+
+Run the TUI side-by-side with your coding agent:
+
+```bash
+alex tui
+```
+
+Features:
+- Switch between project databases
+- Browse memories with type/status icons
+- View memory details and event trails
+- Verify/retire memories with keyboard shortcuts
+
 ## Core Commands
 
 ```bash
@@ -99,6 +113,9 @@ alex verify <id>                    # Mark as verified
 alex review                         # Review pending
 alex revalidate                     # Review stale
 alex conflicts                      # Find contradictions
+
+# TUI
+alex tui                            # Terminal UI
 ```
 
 ## Library Usage
