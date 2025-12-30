@@ -19,16 +19,19 @@ cp integrations/pi/hooks/*.ts ~/.pi/agent/hooks/
 
 ### alexandria.ts
 
-Full conversation capture with **real-time memory extraction**:
+Full conversation capture with **real-time memory extraction** and **automatic context injection**:
 
 | Event | What It Captures |
 |-------|------------------|
-| session (start) | Starts Alexandria session, loads context |
+| session (start) | Starts session, writes context to `.pi/ALEXANDRIA.md`, checks stale memories |
 | agent_start | User prompts |
 | turn_end | Assistant responses |
 | tool_call | Tool invocations |
 | tool_result | Tool outputs/errors |
 | session (end) | Shows pending memory count |
+
+**Context Injection:**
+On session start, Alexandria writes relevant memories to `.pi/ALEXANDRIA.md` in your project. This file is automatically picked up by pi's context file discovery and included in the system prompt.
 
 Memories are extracted **as events happen**, not at session end. This enables continuous sessions with ground truth capture.
 

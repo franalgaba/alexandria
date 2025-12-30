@@ -9,6 +9,7 @@ import * as addCmd from './cli/commands/add.ts';
 import * as addContractCmd from './cli/commands/add-contract.ts';
 import * as addDecisionCmd from './cli/commands/add-decision.ts';
 import * as checkCmd from './cli/commands/check.ts';
+import * as checkpointCmd from './cli/commands/checkpoint.ts';
 import * as conflictsCmd from './cli/commands/conflicts.ts';
 import * as editCmd from './cli/commands/edit.ts';
 import * as exportCmd from './cli/commands/export.ts';
@@ -53,6 +54,7 @@ yargs(hideBin(process.argv))
   .command(exportCmd)
   .command(whereCmd)
   .command(checkCmd)
+  .command(checkpointCmd)
   .command(verifyCmd)
   .command(linkCmd)
   .command(hooksCmd)

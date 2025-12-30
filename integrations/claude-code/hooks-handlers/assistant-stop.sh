@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Capture assistant's final response when it stops
+# Fire-and-forget to keep hooks fast (<100ms)
 
 # Check if alex is available
 if ! command -v alex &> /dev/null; then
@@ -18,7 +19,8 @@ TRANSCRIPT=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
 # If we have a transcript, we could extract the last assistant message
 # For now, just note the stop event
 if [ -n "$REASON" ]; then
-    echo "Agent stopped: $REASON" | alex ingest --type assistant_response --skip-embedding 2>/dev/null
+    # Run in background (fire-and-forget)
+    (echo "Agent stopped: $REASON" | alex ingest --type assistant_response --skip-embedding 2>/dev/null) &
 fi
 
 exit 0

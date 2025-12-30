@@ -3,11 +3,31 @@
  */
 
 import type { ArgumentsCamelCase, Argv } from 'yargs';
-import { Ingestor } from '../../ingestor/index.ts';
+import { Ingestor, OllamaProvider, ClaudeProvider, OpenAIProvider } from '../../ingestor/index.ts';
 import { closeConnection, getConnection } from '../../stores/connection.ts';
 import { SessionStore } from '../../stores/sessions.ts';
 import type { EventType } from '../../types/events.ts';
 import { error, info, success } from '../utils.ts';
+
+/**
+ * Get LLM provider from environment
+ */
+function getLLMProvider() {
+  // Check for API keys in environment
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+  const ollamaModel = process.env.OLLAMA_MODEL || 'llama3.2';
+
+  if (anthropicKey) {
+    return new ClaudeProvider(anthropicKey);
+  }
+  if (openaiKey) {
+    return new OpenAIProvider(openaiKey);
+  }
+  // Default to Ollama (local)
+  return new OllamaProvider(ollamaModel, ollamaUrl);
+}
 
 interface IngestArgs {
   content?: string;
@@ -62,7 +82,15 @@ export function builder(yargs: Argv): Argv<IngestArgs> {
 export async function handler(argv: ArgumentsCamelCase<IngestArgs>): Promise<void> {
   const db = getConnection();
   const sessions = new SessionStore(db);
-  const ingestor = new Ingestor(db);
+  
+  // Check if intelligent extraction is enabled via environment
+  const useIntelligent = process.env.ALEXANDRIA_INTELLIGENT_EXTRACTION === 'true';
+  const llmProvider = useIntelligent ? getLLMProvider() : undefined;
+  
+  const ingestor = new Ingestor(db, { 
+    llmProvider, 
+    useIntelligent,
+  });
 
   try {
     // Get or create session

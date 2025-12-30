@@ -1,51 +1,68 @@
 #!/usr/bin/env bash
 
-# Alexandria Memory Revalidation Hook
-# Checks for stale memories and adds context for Claude to prompt the user
+# Alexandria Memory Context Injection Hook
+# Injects relevant memories at session start and checks for stale memories
 
 # Check if alex is available
 if ! command -v alex &> /dev/null; then
     exit 0
 fi
 
+# Start a new session
+alex session start --json 2>/dev/null
+
+# Get context pack with memories (budget 1500 tokens, text format)
+CONTEXT_PACK=$(alex pack --level task -b 1500 -f text 2>/dev/null)
+
 # Get stale memories
 STALE_JSON=$(alex check --json 2>/dev/null)
-if [ $? -ne 0 ]; then
-    exit 0
+STALE_COUNT=$(echo "$STALE_JSON" | jq -r '.stale | length' 2>/dev/null || echo "0")
+
+# Build context string
+CONTEXT=""
+
+# Add memory context if we have any
+if [ -n "$CONTEXT_PACK" ] && [ "$CONTEXT_PACK" != "null" ]; then
+    CONTEXT="# Alexandria Memory Context
+
+The following memories from past sessions are relevant to this project:
+
+${CONTEXT_PACK}
+
+Use these memories to inform your responses. They contain past decisions, constraints, known fixes, and conventions for this codebase."
 fi
 
-# Parse the stale count
-STALE_COUNT=$(echo "$STALE_JSON" | jq -r '.stale | length' 2>/dev/null)
-if [ "$STALE_COUNT" = "0" ] || [ -z "$STALE_COUNT" ]; then
-    exit 0
-fi
+# Add stale memory warnings if any
+if [ "$STALE_COUNT" != "0" ] && [ -n "$STALE_COUNT" ]; then
+    STALE_LIST=$(echo "$STALE_JSON" | jq -r '.stale[] | "- [\(.type)] \"\(.content | .[0:50])...\" (Reason: \(.reasons | join(", ")))"' 2>/dev/null)
 
-# Build the list of stale memories for Claude
-STALE_LIST=$(echo "$STALE_JSON" | jq -r '.stale[] | "- **[\(.type)]** \"\(.content | .[0:60])...\" (Reason: \(.reasons | join(", ")))"' 2>/dev/null)
+    if [ -n "$CONTEXT" ]; then
+        CONTEXT="${CONTEXT}
 
-# Output the revalidation context as additionalContext
-cat << EOF
-{
-  "hookSpecificOutput": {
-    "hookEventName": "SessionStart",
-    "additionalContext": "📚 **Alexandria Memory Check**
+---
 
-I found ${STALE_COUNT} memory(ies) that may need revalidation:
+"
+    fi
+    CONTEXT="${CONTEXT}**Note:** ${STALE_COUNT} memory(ies) may be stale and need verification:
 
 ${STALE_LIST}
 
-Before we begin, I should ask you about each one:
+You can verify or retire these with \`alex verify <id>\` or \`alex retire <id>\`."
+fi
 
-For each stale memory, please tell me:
-- **[v] Verify** - if it's still valid
-- **[r] Retire** - if it no longer applies
-- **[s] Skip** - to review later
+# Only output if we have context
+if [ -n "$CONTEXT" ]; then
+    # Escape for JSON (replace newlines, quotes, backslashes)
+    ESCAPED_CONTEXT=$(echo "$CONTEXT" | jq -Rs '.')
 
-I'll run the appropriate \`alex verify <id>\` or \`alex retire <id>\` commands based on your choices.
-
-Would you like to review these memories now, or skip and continue with your task?"
+    cat << EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": ${ESCAPED_CONTEXT}
   }
 }
 EOF
+fi
 
 exit 0

@@ -10,6 +10,8 @@ import type { Event, EventType } from '../types/events.ts';
 import { classifyEventType } from './event-types.ts';
 import { extractFilePaths, sanitizeContent } from './parsers.ts';
 import { RealtimeExtractor } from './realtime-extractor.ts';
+import { IntelligentExtractor, type LLMProvider } from './intelligent-extractor.ts';
+import { Checkpoint, type CheckpointConfig, type CheckpointTrigger } from './checkpoint.ts';
 
 export interface IngestOptions {
   /** Skip embedding generation (faster, but no vector search) */
@@ -18,8 +20,12 @@ export interface IngestOptions {
   sanitize?: boolean;
   /** Override event type detection */
   eventType?: EventType;
-  /** Skip real-time memory extraction */
+  /** Skip real-time memory extraction (use checkpoint-based instead) */
   skipExtraction?: boolean;
+  /** Use intelligent (LLM-based) extraction instead of pattern matching */
+  useIntelligentExtraction?: boolean;
+  /** Use checkpoint-based curation (recommended, replaces real-time extraction) */
+  useCheckpoints?: boolean;
 }
 
 export interface IngestResult {
@@ -32,12 +38,31 @@ export class Ingestor {
   private ftsIndex: FTSIndex;
   private vectorIndex: VectorIndex;
   private realtimeExtractor: RealtimeExtractor;
+  private intelligentExtractor: IntelligentExtractor;
+  private checkpoint: Checkpoint;
+  private useIntelligent: boolean;
+  private useCheckpoints: boolean;
 
-  constructor(db: Database) {
+  constructor(
+    db: Database, 
+    options?: { 
+      llmProvider?: LLMProvider; 
+      useIntelligent?: boolean;
+      useCheckpoints?: boolean;
+      checkpointConfig?: Partial<CheckpointConfig>;
+    }
+  ) {
     this.eventStore = new EventStore(db);
     this.ftsIndex = new FTSIndex(db);
     this.vectorIndex = new VectorIndex(db);
     this.realtimeExtractor = new RealtimeExtractor(db);
+    this.intelligentExtractor = new IntelligentExtractor(db, options?.llmProvider);
+    this.checkpoint = new Checkpoint(db, {
+      llmProvider: options?.llmProvider,
+      ...options?.checkpointConfig,
+    });
+    this.useIntelligent = options?.useIntelligent ?? false;
+    this.useCheckpoints = options?.useCheckpoints ?? false;
   }
 
   /**
@@ -92,18 +117,79 @@ export class Ingestor {
       }
     }
 
-    // Real-time memory extraction
+    // Memory extraction strategy
     let memoriesExtracted = 0;
+    const useCheckpoints = options.useCheckpoints ?? this.useCheckpoints;
+    
     if (!options.skipExtraction && finalContent) {
-      try {
-        const extracted = await this.realtimeExtractor.processEvent(event, finalContent);
-        memoriesExtracted = extracted.length;
-      } catch (error) {
-        console.debug('Failed to extract memories:', error);
+      if (useCheckpoints) {
+        // Checkpoint-based: add to buffer, auto-checkpoint on triggers
+        try {
+          const trigger = await this.checkpoint.addEvent(event);
+          if (trigger) {
+            console.debug('Auto-checkpoint triggered:', trigger.type);
+          }
+        } catch (error) {
+          console.debug('Failed to add event to checkpoint buffer:', error);
+        }
+      } else {
+        // Legacy: real-time extraction
+        try {
+          const useIntelligent = options.useIntelligentExtraction ?? this.useIntelligent;
+          
+          if (useIntelligent) {
+            const extracted = await this.intelligentExtractor.processEvent(event, finalContent);
+            memoriesExtracted = extracted.length;
+          } else {
+            const extracted = await this.realtimeExtractor.processEvent(event, finalContent);
+            memoriesExtracted = extracted.length;
+          }
+        } catch (error) {
+          console.debug('Failed to extract memories:', error);
+        }
       }
     }
 
     return event;
+  }
+
+  /**
+   * Manually trigger a checkpoint
+   */
+  async checkpoint(reason?: string) {
+    return this.checkpoint.executeManual(reason);
+  }
+
+  /**
+   * Get checkpoint buffer statistics
+   */
+  getCheckpointStats() {
+    return this.checkpoint.getBufferStats();
+  }
+
+  /**
+   * Flush the intelligent extractor buffer (call on session end)
+   */
+  async flushExtractor(): Promise<number> {
+    try {
+      const extracted = await this.intelligentExtractor.flushBuffer();
+      return extracted.length;
+    } catch (error) {
+      console.debug('Failed to flush extractor:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Flush checkpoint buffer (call on session end)
+   * Returns checkpoint result if buffer had events, null otherwise
+   */
+  async flushCheckpoint(reason: string = 'Session end') {
+    const stats = this.checkpoint.getBufferStats();
+    if (stats.events > 0) {
+      return this.checkpoint.executeManual(reason);
+    }
+    return null;
   }
 
   /**
@@ -228,7 +314,25 @@ export class Ingestor {
   getRealtimeExtractor(): RealtimeExtractor {
     return this.realtimeExtractor;
   }
+
+  getIntelligentExtractor(): IntelligentExtractor {
+    return this.intelligentExtractor;
+  }
 }
 
 // Re-export
 export { RealtimeExtractor } from './realtime-extractor.ts';
+export { 
+  IntelligentExtractor, 
+  type LLMProvider,
+  OllamaProvider,
+  ClaudeProvider,
+  OpenAIProvider,
+} from './intelligent-extractor.ts';
+export { 
+  Checkpoint, 
+  type CheckpointConfig, 
+  type CheckpointTrigger,
+  type CheckpointResult,
+} from './checkpoint.ts';
+export { DeterministicCurator } from './deterministic-curator.ts';

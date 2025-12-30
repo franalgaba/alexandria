@@ -13,15 +13,10 @@ alex session end 2>/dev/null
 # Check how many pending review memories we have
 PENDING=$(alex list --json 2>/dev/null | jq '[.[] | select(.reviewStatus == "pending")] | length' 2>/dev/null)
 
+# SessionEnd hooks don't support hookSpecificOutput, so we print to stderr
+# which shows in the terminal without being parsed as JSON
 if [ -n "$PENDING" ] && [ "$PENDING" -gt 0 ] 2>/dev/null; then
-    cat << EOF
-{
-  "hookSpecificOutput": {
-    "hookEventName": "SessionEnd",
-    "systemMessage": "📚 Alexandria: $PENDING memory candidate(s) pending review. Run 'alex review' to approve or reject them."
-  }
-}
-EOF
+    echo "📚 Alexandria: $PENDING memory candidate(s) pending review. Run 'alex review' to approve or reject them." >&2
 fi
 
 exit 0

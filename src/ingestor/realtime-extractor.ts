@@ -1,5 +1,9 @@
 /**
  * Real-time memory extractor - extracts memories as events are ingested
+ * 
+ * IMPORTANT: This extractor is intentionally conservative to avoid noise.
+ * It focuses on high-signal patterns and requires multiple pattern matches.
+ * For better extraction, use session-end summarization with LLM.
  */
 
 import type { Database } from 'bun:sqlite';
@@ -9,56 +13,85 @@ import type { Event } from '../types/events.ts';
 import type { Confidence, MemoryCandidate, ObjectType } from '../types/memory-objects.ts';
 
 // Patterns for extracting potential memory objects
+// These are intentionally strict to reduce false positives
 const EXTRACTION_PATTERNS: Record<ObjectType, RegExp[]> = {
   failed_attempt: [
-    /(?:error|failed|doesn't work|broke|segfault|crash)/i,
-    /(?:tried|attempted|but|however).*(?:didn't|failed|error)/i,
-    /not working/i,
-    /doesn't compile/i,
-    /exit code [1-9]/i,
-    /exception|traceback|stack trace/i,
+    // Explicit failure statements with context
+    /(?:tried|attempted)\s+.{10,}?\s+but\s+(?:it\s+)?(?:didn't|failed|broke)/i,
+    /this\s+(?:approach|method|solution)\s+(?:doesn't|didn't)\s+work/i,
+    /(?:got|getting|received)\s+(?:an?\s+)?error\s+when/i,
+    // Don't match generic error messages - only insights about failures
   ],
   decision: [
-    /(?:chose|decided|going with|using|switched to)/i,
-    /(?:instead of|rather than|over)/i,
-    /let's use/i,
-    /we should|we'll/i,
-    /I'll implement|the approach is/i,
+    // Explicit decision statements with reasoning
+    /(?:^|\.\s+)(?:I|we)\s+(?:chose|decided\s+to|will\s+use|going\s+with)\s+.{5,}\s+(?:because|since|as|for)/i,
+    /(?:^|\.\s+)(?:instead\s+of|rather\s+than)\s+.{5,},?\s+(?:we|I|let's)\s+(?:use|will|should)/i,
+    /(?:^|\.\s+)the\s+(?:decision|choice)\s+(?:is|was)\s+to\s+/i,
+    /(?:^|\.\s+)(?:switching|switched)\s+(?:from|to)\s+.{3,}\s+(?:because|since|for)/i,
   ],
   constraint: [
-    /(?:must|always|never|required|cannot)/i,
-    /(?:strict mode|no implicit|forbidden)/i,
-    /don't ever|make sure to always/i,
-    /security|vulnerability/i,
-    /breaking change|deprecated/i,
+    // Hard rules with explicit language
+    /(?:^|\.\s+)(?:you\s+)?must\s+(?:always|never)?\s*.{5,}/i,
+    /(?:^|\.\s+)(?:always|never)\s+(?:use|do|call|import|include)\s+/i,
+    /(?:^|\.\s+)(?:do\s+not|don't|cannot|can't)\s+.{5,}\s+(?:because|since|or\s+else|otherwise)/i,
+    /(?:^|\.\s+)(?:required|mandatory|forbidden|prohibited):\s+/i,
+    /(?:^|\.\s+)this\s+(?:is|was)\s+(?:a\s+)?(?:security|breaking|critical)\s+/i,
   ],
   known_fix: [
-    /(?:fixed by|solution:|workaround:)/i,
-    /(?:the fix is|resolved by|works when)/i,
-    /that fixed it|solved by/i,
-    /the issue was|the problem was/i,
-    /now it works|turns out/i,
+    // Explicit fix statements
+    /(?:^|\.\s+)(?:the\s+)?(?:fix|solution|workaround)\s+(?:is|was)\s+to\s+/i,
+    /(?:^|\.\s+)(?:fixed|resolved|solved)\s+(?:it\s+)?by\s+/i,
+    /(?:^|\.\s+)(?:the\s+)?(?:issue|problem|bug)\s+was\s+(?:that|caused\s+by)\s+/i,
+    /(?:^|\.\s+)(?:it\s+)?works\s+(?:now\s+)?(?:after|when|if)\s+(?:you\s+)?/i,
+    /(?:^|\.\s+)turns\s+out\s+(?:that\s+)?(?:you\s+)?(?:need|have)\s+to\s+/i,
   ],
   convention: [
-    /(?:convention|pattern|style|format|naming)/i,
-    /(?:we use|always use|standard is)/i,
-    /in this codebase|our style/i,
-    /following the pattern|consistent with/i,
+    // Explicit coding standards
+    /(?:^|\.\s+)(?:in\s+this\s+(?:project|codebase|repo),?\s+)?we\s+(?:always\s+)?use\s+/i,
+    /(?:^|\.\s+)(?:the\s+)?(?:convention|standard|pattern)\s+(?:here\s+)?is\s+to\s+/i,
+    /(?:^|\.\s+)(?:follow|following)\s+(?:the\s+)?(?:pattern|convention)\s+of\s+/i,
+    /(?:^|\.\s+)(?:for\s+)?(?:naming|formatting|styling),?\s+(?:we\s+)?use\s+/i,
   ],
   preference: [
-    /(?:prefer|like|better|rather)/i,
-    /(?:usually|typically|generally)/i,
-    /cleaner|simpler|easier|more readable/i,
+    // Explicit preferences with reasoning
+    /(?:^|\.\s+)(?:I|we)\s+prefer\s+.{5,}\s+(?:because|since|as|for)/i,
+    /(?:^|\.\s+).{5,}\s+is\s+(?:cleaner|simpler|better|easier)\s+(?:than|because)/i,
+    /(?:^|\.\s+)(?:it's\s+)?(?:better|preferred)\s+to\s+.{5,}\s+(?:rather\s+than|instead\s+of)/i,
   ],
   environment: [
-    /(?:version|node|python|bun|npm)/i,
-    /(?:config|env|environment)/i,
-    /requires.*version/i,
+    // Explicit version/config requirements
+    /(?:^|\.\s+)(?:requires?|needs?)\s+(?:version\s+)?[\w.-]+\s+(?:v?[\d.]+|or\s+(?:higher|later|above))/i,
+    /(?:^|\.\s+)(?:using|running|installed)\s+(?:version\s+)?[\w.-]+\s+v?[\d.]+/i,
+    /(?:^|\.\s+)(?:set|configure|add)\s+.{3,}\s+(?:in\s+)?(?:the\s+)?(?:env|environment|config)/i,
   ],
 };
 
+// Patterns that indicate content should be EXCLUDED
+const EXCLUDE_PATTERNS: RegExp[] = [
+  /^```/,                                    // Code block start
+  /^[\s]*[{}()\[\];,][\s]*$/,               // Single punctuation
+  /^[\s]*\/\//,                              // Comment line
+  /^[\s]*#(?!\s)/,                           // Comment (but not markdown headers)
+  /^\d+\.\s+/,                               // Numbered list items
+  /^[-*]\s+/,                                // Bullet points (likely examples)
+  /^(?:let\s+me|now\s+I|first|then|next)/i,  // Meta-commentary
+  /^(?:here's|here\s+is)/i,                  // Introduction phrases
+  /^(?:the\s+)?(?:output|result)\s+(?:is|was|shows)/i, // Output descriptions
+  /(?:error|exception|traceback)\s*:/i,      // Error labels
+  /at\s+[\w./<>]+:\d+/,                      // Stack trace lines
+  /^\s*\|/,                                  // Table rows
+  /https?:\/\/\S+/,                          // URLs
+  /^\/[\w/.-]+$/,                            // File paths alone
+  /^\s*import\s+/,                           // Import statements
+  /^\s*(?:const|let|var|function)\s+/,       // Variable declarations
+  /\(\s*\d+\s*(?:bytes?|KB|MB|ms|s)\s*\)/,   // Size/time measurements
+];
+
 // Minimum content length to consider for extraction
-const MIN_CONTENT_LENGTH = 30;
+const MIN_CONTENT_LENGTH = 40;
+
+// Minimum word count for meaningful content
+const MIN_WORD_COUNT = 6;
 
 // Maximum memories to extract per event
 const MAX_MEMORIES_PER_EVENT = 3;
@@ -141,9 +174,46 @@ export class RealtimeExtractor {
   }
 
   /**
+   * Check if content should be excluded (noise, code, etc.)
+   */
+  private shouldExclude(content: string): boolean {
+    // Check against exclusion patterns
+    for (const pattern of EXCLUDE_PATTERNS) {
+      if (pattern.test(content)) {
+        return true;
+      }
+    }
+
+    // Check minimum word count
+    const words = content.split(/\s+/).filter(w => w.length > 1);
+    if (words.length < MIN_WORD_COUNT) {
+      return true;
+    }
+
+    // Exclude if mostly code-like (high ratio of special characters)
+    const specialChars = (content.match(/[{}()\[\];:=<>]/g) || []).length;
+    const alphaChars = (content.match(/[a-zA-Z]/g) || []).length;
+    if (alphaChars > 0 && specialChars / alphaChars > 0.3) {
+      return true;
+    }
+
+    // Exclude if it looks like a command or path
+    if (/^[a-z]+\s+[a-z-]+\s*/.test(content) && !content.includes(' because') && !content.includes(' to ')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Match patterns against content
    */
   private matchPatterns(content: string, event: Event): MemoryCandidate | null {
+    // First check exclusions
+    if (this.shouldExclude(content)) {
+      return null;
+    }
+
     let bestMatch: {
       type: ObjectType;
       matchCount: number;
@@ -164,12 +234,17 @@ export class RealtimeExtractor {
 
     if (!bestMatch) return null;
 
-    // Require at least 2 pattern matches for higher confidence
-    const confidence: Confidence = bestMatch.matchCount >= 3 ? 'high' : 
-                                   bestMatch.matchCount >= 2 ? 'medium' : 'low';
+    // Require at least 1 strong pattern match
+    // (patterns are now stricter, so 1 match is meaningful)
+    const confidence: Confidence = bestMatch.matchCount >= 2 ? 'high' : 'medium';
 
-    // Skip low confidence matches for noisy event types
-    if (confidence === 'low' && (event.eventType === 'tool_output' || event.eventType === 'tool_call')) {
+    // Skip for noisy event types unless high confidence
+    if (confidence !== 'high' && (event.eventType === 'tool_output' || event.eventType === 'tool_call')) {
+      return null;
+    }
+
+    // Additional validation: content should be actionable
+    if (!this.isActionable(content)) {
       return null;
     }
 
@@ -180,6 +255,21 @@ export class RealtimeExtractor {
       evidenceExcerpt: content.slice(0, 200),
       confidence,
     };
+  }
+
+  /**
+   * Check if content is actionable (useful for future sessions)
+   */
+  private isActionable(content: string): boolean {
+    // Must contain actionable verbs or clear guidance
+    const actionablePatterns = [
+      /\b(use|avoid|always|never|should|must|need|require|prefer)\b/i,
+      /\b(because|since|to\s+(?:avoid|prevent|ensure|fix))\b/i,
+      /\b(instead\s+of|rather\s+than|works?\s+when)\b/i,
+      /\b(the\s+(?:fix|solution|issue|problem)\s+(?:is|was))\b/i,
+    ];
+    
+    return actionablePatterns.some(p => p.test(content));
   }
 
   /**
