@@ -58,44 +58,58 @@ interface CheckpointOptions {
 
 async function executeCheckpoint(db: Database, options: CheckpointOptions) {
   const sessionStore = new SessionStore(db);
-  const ingestor = new Ingestor(db, {
+  // Use async factory to auto-detect Claude OAuth and enable tier1 (Haiku) if available
+  const ingestor = await Ingestor.create(db, {
     useCheckpoints: true,
-    checkpointConfig: {
-      curatorMode: 'tier0', // Start with deterministic only
-    },
+    // Don't specify curatorMode - let it auto-detect tier1 if LLM available
   });
 
   // Get current or specified session
   let sessionId = options.sessionId;
+  let session;
   if (!sessionId) {
-    const current = sessionStore.getCurrent();
-    if (!current) {
+    session = sessionStore.getCurrent();
+    if (!session) {
       console.error('❌ No active session. Start a session first or specify --session <id>');
       process.exit(1);
     }
-    sessionId = current.id;
+    sessionId = session.id;
+  } else {
+    session = sessionStore.get(sessionId);
   }
 
+  // Get last checkpoint time to only process new events
+  const lastCheckpointAt = session?.lastCheckpointAt;
+
+  // Load events from the session into checkpoint buffer (only since last checkpoint)
+  const eventCount = ingestor.loadSessionForCheckpoint(sessionId, lastCheckpointAt);
+  
   // Show buffer stats if requested
   if (options.showStats) {
     const stats = ingestor.getCheckpointStats();
-    console.log('\n📊 Checkpoint Buffer Statistics:');
+    console.log('\n📊 Session Events:');
     console.log(`   Events: ${stats.events}`);
     console.log(`   Tool Outputs: ${stats.toolOutputs}`);
     console.log(`   Errors: ${stats.errors}`);
-    console.log(`   Age: ${Math.round(stats.age / 1000)}s`);
-    console.log(`   Last Checkpoint: ${stats.lastCheckpoint.toISOString()}`);
     console.log('');
   }
 
+  if (eventCount === 0) {
+    console.log('ℹ️  No events in session, nothing to checkpoint');
+    return;
+  }
+
   // Execute checkpoint
-  console.log('🔄 Executing checkpoint...');
+  console.log(`🔄 Checkpointing ${eventCount} events...`);
   const result = await ingestor.flushCheckpoint(options.reason);
 
   if (!result) {
-    console.log('ℹ️  No events in buffer, nothing to checkpoint');
+    console.log('ℹ️  Checkpoint produced no results');
     return;
   }
+
+  // Mark checkpoint completed in session
+  sessionStore.markCheckpointCompleted(sessionId);
 
   // Display results
   console.log('\n✅ Checkpoint Complete');

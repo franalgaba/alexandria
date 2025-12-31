@@ -1,12 +1,17 @@
 /**
  * Checkpoint System - Replace continuous extraction with episodic curation
- * 
+ *
  * Implements the Checkpoint-Reset-Rehydrate loop:
  * 1. Detect checkpoint triggers (window pressure, task completion, etc.)
  * 2. Flush event buffer to store
  * 3. Run tiered curator on episode
  * 4. Update memory objects
  * 5. Generate fresh context pack (rehydration ready)
+ *
+ * Tiered Curation:
+ * - Tier 0: Deterministic patterns (always runs, no API needed)
+ * - Tier 1: Haiku extraction (if Claude OAuth available)
+ * - Tier 2: Full LLM with conflict detection (future)
  */
 
 import type { Database } from 'bun:sqlite';
@@ -16,7 +21,28 @@ import { SessionStore } from '../stores/sessions.ts';
 import type { Event } from '../types/events.ts';
 import type { MemoryCandidate } from '../types/memory-objects.ts';
 import { DeterministicCurator, type Episode } from './deterministic-curator.ts';
-import { IntelligentExtractor, type LLMProvider } from './intelligent-extractor.ts';
+import { IntelligentExtractor, ClaudeProvider, type LLMProvider } from './intelligent-extractor.ts';
+import { ConflictDetector, type Conflict } from './conflict-detector.ts';
+import { getAnthropicApiKey } from '../utils/claude-auth.ts';
+
+/**
+ * Create LLM provider from available credentials
+ * Priority: 1. Provided config, 2. ANTHROPIC_API_KEY, 3. Claude OAuth token
+ */
+async function createLLMProvider(configProvider?: LLMProvider): Promise<LLMProvider | undefined> {
+  // Use provided provider if available
+  if (configProvider) {
+    return configProvider;
+  }
+
+  // Try to get API key (checks env var then Claude OAuth)
+  const apiKey = await getAnthropicApiKey();
+  if (apiKey) {
+    return new ClaudeProvider(apiKey, 'claude-3-5-haiku-20241022');
+  }
+
+  return undefined;
+}
 
 export interface CheckpointTrigger {
   type: 'manual' | 'window_pressure' | 'task_complete' | 'topic_shift' | 'tool_burst';
@@ -30,6 +56,8 @@ export interface CheckpointResult {
   candidatesExtracted: number;
   memoriesCreated: number;
   memoriesUpdated: number;
+  conflictsDetected: number;
+  conflictsPending: number;
   rehydrationReady: boolean;
 }
 
@@ -56,7 +84,7 @@ const DEFAULT_CONFIG: CheckpointConfig = {
   toolBurstCount: 10,
   toolBurstWindowMs: 120000, // 2 minutes
   minEventsForCheckpoint: 5,
-  curatorMode: 'tier0', // Start conservative
+  curatorMode: 'tier0', // Start conservative, upgraded to tier1 if LLM available
 };
 
 export class Checkpoint {
@@ -67,10 +95,31 @@ export class Checkpoint {
   private deterministicCurator: DeterministicCurator;
   private intelligentExtractor: IntelligentExtractor;
   private config: CheckpointConfig;
-  
+  private llmAvailable: boolean = false;
+
   // Event buffer (pending checkpoint)
   private buffer: Event[] = [];
   private lastCheckpointTime: Date = new Date();
+
+  /**
+   * Create a checkpoint instance with auto-detected LLM provider
+   * Use this instead of constructor for automatic tier1 detection
+   */
+  static async create(db: Database, config: Partial<CheckpointConfig> = {}): Promise<Checkpoint> {
+    // Auto-detect LLM provider if not specified
+    const llmProvider = await createLLMProvider(config.llmProvider);
+
+    // Upgrade to tier1 if LLM is available and mode is not explicitly set
+    const finalConfig = { ...config };
+    if (llmProvider && !config.curatorMode) {
+      finalConfig.curatorMode = 'tier1';
+      finalConfig.llmProvider = llmProvider;
+    }
+
+    const checkpoint = new Checkpoint(db, finalConfig);
+    checkpoint.llmAvailable = !!llmProvider;
+    return checkpoint;
+  }
 
   constructor(db: Database, config: Partial<CheckpointConfig> = {}) {
     this.db = db;
@@ -99,6 +148,19 @@ export class Checkpoint {
   }
 
   /**
+   * Load events from a session into the buffer
+   * Used when checkpoint is called from CLI (events already in database)
+   * If sinceCheckpoint is provided, only loads events after that timestamp
+   */
+  loadSessionEvents(sessionId: string, sinceCheckpoint?: Date): number {
+    const events = sinceCheckpoint 
+      ? this.eventStore.getBySessionSince(sessionId, sinceCheckpoint)
+      : this.eventStore.getBySession(sessionId);
+    this.buffer = events;
+    return events.length;
+  }
+
+  /**
    * Manually trigger a checkpoint
    */
   async executeManual(reason: string = 'Manual checkpoint'): Promise<CheckpointResult> {
@@ -124,6 +186,8 @@ export class Checkpoint {
         candidatesExtracted: 0,
         memoriesCreated: 0,
         memoriesUpdated: 0,
+        conflictsDetected: 0,
+        conflictsPending: 0,
         rehydrationReady: false,
       };
     }
@@ -137,6 +201,8 @@ export class Checkpoint {
         candidatesExtracted: 0,
         memoriesCreated: 0,
         memoriesUpdated: 0,
+        conflictsDetected: 0,
+        conflictsPending: 0,
         rehydrationReady: false,
       };
     }
@@ -147,8 +213,8 @@ export class Checkpoint {
     // 3. Run tiered curator
     const candidates = await this.curate(episode);
 
-    // 4. Apply extractions (create/update memory objects)
-    const { created, updated } = await this.applyExtractions(candidates, episode);
+    // 4. Apply extractions (create/update memory objects, detect conflicts in tier2)
+    const { created, updated, conflictsDetected, conflictsPending } = await this.applyExtractions(candidates, episode);
 
     // 5. Clear buffer and update checkpoint time
     const episodeEventCount = this.buffer.length;
@@ -156,7 +222,12 @@ export class Checkpoint {
     this.lastCheckpointTime = new Date();
 
     const duration = Date.now() - startTime;
-    console.debug(`Checkpoint completed in ${duration}ms: ${created} created, ${updated} updated`);
+    console.debug(`Checkpoint completed in ${duration}ms: ${created} created, ${updated} updated, ${conflictsDetected} conflicts`);
+
+    // Notify user about pending conflicts
+    if (conflictsPending > 0) {
+      console.log(`\n⚠️  ${conflictsPending} conflict(s) need human review. Run: alex conflicts --interactive\n`);
+    }
 
     return {
       trigger,
@@ -164,6 +235,8 @@ export class Checkpoint {
       candidatesExtracted: candidates.length,
       memoriesCreated: created,
       memoriesUpdated: updated,
+      conflictsDetected,
+      conflictsPending,
       rehydrationReady: true,
     };
   }
@@ -303,22 +376,38 @@ export class Checkpoint {
    * Run tiered curator on episode
    */
   private async curate(episode: Episode): Promise<MemoryCandidate[]> {
+    let candidates: MemoryCandidate[];
+    
     switch (this.config.curatorMode) {
       case 'tier0':
         // Deterministic only
-        return this.deterministicCurator.extractCandidates(episode);
+        candidates = this.deterministicCurator.extractCandidates(episode);
+        break;
 
       case 'tier1':
         // Small LLM (intelligent extractor)
-        return this.curateWithIntelligent(episode);
+        candidates = await this.curateWithIntelligent(episode);
+        break;
 
       case 'tier2':
         // Big LLM (future: add escalation logic)
-        return this.curateWithIntelligent(episode);
+        candidates = await this.curateWithIntelligent(episode);
+        break;
 
       default:
-        return this.deterministicCurator.extractCandidates(episode);
+        candidates = this.deterministicCurator.extractCandidates(episode);
     }
+
+    // Extract and attach code refs to all candidates
+    const codeRefs = this.deterministicCurator.extractCodeRefs(episode);
+    if (codeRefs.length > 0) {
+      for (const candidate of candidates) {
+        // Merge with any existing code refs
+        candidate.codeRefs = [...(candidate.codeRefs || []), ...codeRefs];
+      }
+    }
+
+    return candidates;
   }
 
   /**
@@ -330,19 +419,36 @@ export class Checkpoint {
 
     // Then add intelligent extraction
     const tier1Candidates: MemoryCandidate[] = [];
-    
+
     try {
       // Process each event through intelligent extractor
       for (const event of episode.events) {
         if (event.content) {
           const extracted = await this.intelligentExtractor.processEvent(event, event.content);
-          tier1Candidates.push(...extracted);
+          // Convert ExtractedMemory to MemoryCandidate
+          for (const em of extracted) {
+            tier1Candidates.push({
+              content: em.content,
+              suggestedType: em.type,
+              evidenceEventIds: em.evidenceEventIds,
+              evidenceExcerpt: em.reasoning,
+              confidence: em.confidence,
+            });
+          }
         }
       }
 
       // Flush any buffered extractions
       const flushed = await this.intelligentExtractor.flushBuffer();
-      tier1Candidates.push(...flushed);
+      for (const em of flushed) {
+        tier1Candidates.push({
+          content: em.content,
+          suggestedType: em.type,
+          evidenceEventIds: em.evidenceEventIds,
+          evidenceExcerpt: em.reasoning,
+          confidence: em.confidence,
+        });
+      }
     } catch (error) {
       console.error('Intelligent extraction failed, falling back to tier0:', error);
       return tier0Candidates;
@@ -389,15 +495,48 @@ export class Checkpoint {
 
   /**
    * Apply extractions to memory store
+   * In tier2 mode, detects conflicts and queues them for human review
    */
   private async applyExtractions(
     candidates: MemoryCandidate[],
     episode: Episode
-  ): Promise<{ created: number; updated: number }> {
+  ): Promise<{ created: number; updated: number; conflictsDetected: number; conflictsPending: number }> {
     let created = 0;
     let updated = 0;
+    let conflictsDetected = 0;
+    let conflictsPending = 0;
+
+    // Use conflict detection in tier2 mode
+    const useConflictDetection = this.config.curatorMode === 'tier2';
+    const conflictDetector = useConflictDetection ? new ConflictDetector(this.db) : null;
 
     for (const candidate of candidates) {
+      // In tier2, check for conflicts first
+      if (conflictDetector) {
+        const conflicts = conflictDetector.detectConflicts(candidate);
+        
+        if (conflicts.length > 0) {
+          conflictsDetected += conflicts.length;
+          
+          // High-severity conflicts need human review
+          const highSeverity = conflicts.filter(c => c.severity === 'high');
+          if (highSeverity.length > 0) {
+            conflictsPending += highSeverity.length;
+            // Don't auto-create memory - wait for human review
+            continue;
+          }
+          
+          // Auto-resolve low/medium severity
+          for (const conflict of conflicts) {
+            conflictDetector.resolveConflict(conflict.id, {
+              option: conflict.suggestedResolution,
+              resolvedBy: 'auto',
+              reason: 'Auto-resolved (low/medium severity)',
+            });
+          }
+        }
+      }
+
       // Check for similar existing memory
       const similar = await this.findSimilarMemory(candidate);
 
@@ -429,7 +568,7 @@ export class Checkpoint {
       }
     }
 
-    return { created, updated };
+    return { created, updated, conflictsDetected, conflictsPending };
   }
 
   /**

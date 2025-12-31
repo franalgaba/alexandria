@@ -1,25 +1,21 @@
 #!/usr/bin/env bash
-# Capture assistant's final response when it stops
-# Fire-and-forget to keep hooks fast (<100ms)
+# Alexandria v2: Assistant Stop Hook
+#
+# Purpose: Buffer assistant responses for checkpoint curation
+# Memory extraction happens automatically via Haiku (if Claude OAuth available)
+# or Tier 0 deterministic patterns.
 
-# Check if alex is available
+# Graceful degradation
 if ! command -v alex &> /dev/null; then
     exit 0
 fi
 
-# Read the hook input from stdin
+# Read hook input
 INPUT=$(cat)
-
-# Extract the stop reason/response
 REASON=$(echo "$INPUT" | jq -r '.reason // empty' 2>/dev/null)
 
-# The transcript path contains the full conversation
-TRANSCRIPT=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
-
-# If we have a transcript, we could extract the last assistant message
-# For now, just note the stop event
+# Buffer the response (fire-and-forget)
 if [ -n "$REASON" ]; then
-    # Run in background (fire-and-forget)
     (echo "Agent stopped: $REASON" | alex ingest --type assistant_response --skip-embedding 2>/dev/null) &
 fi
 

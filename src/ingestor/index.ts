@@ -33,6 +33,13 @@ export interface IngestResult {
   memoriesExtracted: number;
 }
 
+export interface IngestorOptions {
+  llmProvider?: LLMProvider;
+  useIntelligent?: boolean;
+  useCheckpoints?: boolean;
+  checkpointConfig?: Partial<CheckpointConfig>;
+}
+
 export class Ingestor {
   private eventStore: EventStore;
   private ftsIndex: FTSIndex;
@@ -43,26 +50,36 @@ export class Ingestor {
   private useIntelligent: boolean;
   private useCheckpoints: boolean;
 
+  /**
+   * Create an Ingestor with auto-detected LLM provider for Haiku extraction.
+   * Use this instead of constructor for automatic tier1 detection.
+   */
+  static async create(db: Database, options?: IngestorOptions): Promise<Ingestor> {
+    // Create checkpoint with auto-detected LLM
+    const checkpoint = await Checkpoint.create(db, {
+      llmProvider: options?.llmProvider,
+      ...options?.checkpointConfig,
+    });
+
+    return new Ingestor(db, options, checkpoint);
+  }
+
   constructor(
-    db: Database, 
-    options?: { 
-      llmProvider?: LLMProvider; 
-      useIntelligent?: boolean;
-      useCheckpoints?: boolean;
-      checkpointConfig?: Partial<CheckpointConfig>;
-    }
+    db: Database,
+    options?: IngestorOptions,
+    checkpoint?: Checkpoint
   ) {
     this.eventStore = new EventStore(db);
     this.ftsIndex = new FTSIndex(db);
     this.vectorIndex = new VectorIndex(db);
     this.realtimeExtractor = new RealtimeExtractor(db);
     this.intelligentExtractor = new IntelligentExtractor(db, options?.llmProvider);
-    this.checkpoint = new Checkpoint(db, {
+    this.checkpoint = checkpoint ?? new Checkpoint(db, {
       llmProvider: options?.llmProvider,
       ...options?.checkpointConfig,
     });
     this.useIntelligent = options?.useIntelligent ?? false;
-    this.useCheckpoints = options?.useCheckpoints ?? false;
+    this.useCheckpoints = options?.useCheckpoints ?? true; // Default to checkpoint mode (v2.0)
   }
 
   /**
@@ -165,6 +182,15 @@ export class Ingestor {
    */
   getCheckpointStats() {
     return this.checkpoint.getBufferStats();
+  }
+
+  /**
+   * Load events from a session into the checkpoint buffer
+   * Used when checkpoint is called from CLI (events already stored in database)
+   * If sinceCheckpoint is provided, only loads events after that timestamp
+   */
+  loadSessionForCheckpoint(sessionId: string, sinceCheckpoint?: Date): number {
+    return this.checkpoint.loadSessionEvents(sessionId, sinceCheckpoint);
   }
 
   /**

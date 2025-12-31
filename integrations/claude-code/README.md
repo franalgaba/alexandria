@@ -1,14 +1,46 @@
-# Alexandria Plugin for Claude Code
+# Alexandria Integration for Claude Code
 
-This plugin integrates Alexandria's memory system with Claude Code, automatically capturing your entire conversation for memory extraction.
+Lifecycle-driven memory integration for Claude Code.
 
-## Features
+## Architecture
 
-- **Full Conversation Capture**: User prompts, assistant responses, tool calls, results
-- **Automatic Memory Extraction**: Pattern matching extracts decisions, fixes, constraints
-- **Stale Memory Detection**: Prompts for revalidation when code changes
-- **Slash Commands**: `/mem-search`, `/mem-add`, `/mem-pack`, `/mem-review`
-- **Skill**: Memory management guidance
+Alexandria v2 uses checkpoint-driven curation with progressive disclosure. Both Claude Code and pi-coding-agent integrations follow the same pattern:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              CLAUDE CODE SESSION                         │
+│                                                          │
+│  SessionStart → UserPrompt → ToolUse → Stop → End       │
+│       ↓            ↓           ↓         ↓       ↓       │
+│   [inject]     [buffer]    [buffer]  [buffer] [curate]  │
+└─────────────────────────────────────────────────────────┘
+         ↓            ↓           ↓         ↓       ↓
+┌─────────────────────────────────────────────────────────┐
+│                  ALEXANDRIA v2                           │
+│                                                          │
+│  Context      Event Buffer (fire-and-forget)    Tiered  │
+│  Pack Gen     ─────────────────────────────→    Curator │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Key Concepts
+
+1. **Progressive Disclosure**: Context packs at 3 levels
+   - `minimal` (~200 tokens): constraints + current goal
+   - `task` (~500 tokens): + relevant memories (default)
+   - `deep` (~1500 tokens): + evidence + history
+
+2. **Checkpoint-Driven Curation**: Events buffered during session, curated at checkpoint
+   - No per-event extraction noise
+   - Tiered curator processes buffered events
+   - Decision stability rules prevent meta-commentary from becoming memories
+
+3. **Fire-and-Forget Capture**: Non-blocking event ingestion
+   - All hooks run fast (<100ms)
+   - Events buffered asynchronously
+   - Doesn't slow down the main session
+
+4. **Graceful Degradation**: If Alexandria fails, Claude Code continues normally
 
 ## Installation
 
@@ -24,48 +56,45 @@ cp -r integrations/claude-code ~/.claude/plugins/alexandria-memory
 
 ## Hooks
 
-| Hook | What It Captures |
-|------|------------------|
-| SessionStart | Checks for stale memories, starts session |
-| UserPromptSubmit | Your prompts to Claude |
-| PreToolUse | Tool invocations (commands, edits) |
-| PostToolUse | Tool results (output, errors) |
-| Stop | When Claude completes a response |
-| SessionEnd | Ends session, processes for memories |
+| Hook | Action |
+|------|--------|
+| `SessionStart` | Start session, generate context pack, inject via `additionalContext` |
+| `UserPromptSubmit` | Buffer prompt (fire-and-forget) |
+| `PreToolUse` | Buffer tool call (fire-and-forget) |
+| `PostToolUse` | Buffer tool result (fire-and-forget) |
+| `Stop` | Buffer response (fire-and-forget) |
+| `SessionEnd` | Trigger checkpoint, run tiered curator, show pending count |
 
-## Real-time Memory Extraction
+### Context Injection
 
-Memories are extracted **as the conversation happens** - not at session end. When patterns are detected (decisions, fixes, constraints), they're immediately queued for review.
+On session start:
 
-Check pending memories anytime:
-```bash
-alex review --list    # See pending count
-alex review           # Interactive review
-```
+1. Starts Alexandria session (`alex session start`)
+2. Generates context pack at task level (`alex pack --level task`)
+3. Injects via `hookSpecificOutput.additionalContext`
+4. Checks for stale memories, notifies if found
 
-## Stale Memory Revalidation
+### Checkpoint Flow
 
-When a session starts, the hook:
+Checkpoints trigger after N events (default: 10, configure via `ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD`).
 
-1. Runs `alex check --json` to find stale memories
-2. If stale memories exist, injects context for Claude
-3. Claude asks you about each stale memory:
-   - **[v] Verify** - Mark as still valid
-   - **[r] Retire** - Remove from active use
-   - **[s] Skip** - Review later
+When checkpoint threshold is reached:
 
-### Example
+1. **Tier 0** (deterministic) always runs:
+   - Error→fix patterns
+   - User corrections
+   - Repeated patterns
 
-```
-📚 Alexandria Memory Check
+2. **Tier 1** (Haiku) runs automatically if Claude OAuth available:
+   - Extracts decisions, preferences, context
+   - Uses Claude Code's existing OAuth token (no separate API key needed!)
+   - Creates memories as "pending" for review
 
-I found 2 memory(ies) that may need revalidation:
+The OAuth token is automatically extracted from Claude Code's macOS Keychain storage.
 
-- **[decision]** "Use fetchUser() for API calls..." (Reason: File changed)
-- **[convention]** "Always use async/await..." (Reason: File deleted)
+### Slash Command
 
-Would you like to review these memories now?
-```
+Use `/mem-checkpoint` to manually trigger memory extraction and review pending memories.
 
 ## Slash Commands
 
@@ -75,39 +104,6 @@ Would you like to review these memories now?
 | `/mem-add` | Add a new memory |
 | `/mem-pack` | Generate context pack |
 | `/mem-review` | Review pending memories |
-
-## Skill
-
-The Alexandria skill (`skills/alexandria/SKILL.md`) provides guidance on:
-- When to add memories
-- Memory types and their uses
-- Best practices for memory management
-
-## Plugin Structure
-
-```
-integrations/claude-code/
-├── .claude-plugin/
-│   └── plugin.json           # Plugin metadata
-├── commands/
-│   ├── mem-add.md            # /mem-add command
-│   ├── mem-pack.md           # /mem-pack command
-│   ├── mem-review.md         # /mem-review command
-│   └── mem-search.md         # /mem-search command
-├── hooks/
-│   └── hooks.json            # Hook configuration
-├── hooks-handlers/
-│   ├── session-start.sh      # Check stale memories
-│   ├── user-prompt.sh        # Capture user prompts
-│   ├── tool-call.sh          # Capture tool invocations
-│   ├── tool-result.sh        # Capture tool results
-│   ├── assistant-stop.sh     # Capture stop events
-│   └── session-end.sh        # Process & extract memories
-├── skills/
-│   └── alexandria/
-│       └── SKILL.md          # Memory management skill
-└── README.md
-```
 
 ## Requirements
 

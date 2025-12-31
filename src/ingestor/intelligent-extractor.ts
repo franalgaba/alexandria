@@ -446,12 +446,16 @@ Only extract memories that would genuinely help in future sessions.`;
  */
 export interface LLMProvider {
   complete(prompt: string): Promise<string>;
+  /** Get last call's token usage (if available) */
+  getLastUsage?(): { inputTokens: number; outputTokens: number; model: string } | null;
 }
 
 /**
  * Simple LLM provider using local Ollama
  */
 export class OllamaProvider implements LLMProvider {
+  private lastUsage: { inputTokens: number; outputTokens: number; model: string } | null = null;
+
   constructor(
     private model: string = 'llama3.2',
     private baseUrl: string = 'http://localhost:11434'
@@ -473,37 +477,84 @@ export class OllamaProvider implements LLMProvider {
     }
 
     const data = await response.json();
+    
+    // Track usage (Ollama provides token counts)
+    this.lastUsage = {
+      inputTokens: data.prompt_eval_count || Math.ceil(prompt.length / 4),
+      outputTokens: data.eval_count || Math.ceil(data.response.length / 4),
+      model: 'local',
+    };
+    
     return data.response;
+  }
+
+  getLastUsage() {
+    return this.lastUsage;
   }
 }
 
 /**
  * Anthropic Claude provider
+ * Supports both API keys and OAuth tokens (from Claude Code)
  */
 export class ClaudeProvider implements LLMProvider {
-  constructor(private apiKey: string) {}
+  private lastUsage: { inputTokens: number; outputTokens: number; model: string } | null = null;
+  private isOAuth: boolean;
+
+  constructor(
+    private apiKey: string,
+    private model: string = 'claude-3-5-haiku-20241022'
+  ) {
+    // OAuth tokens start with sk-ant-oat
+    this.isOAuth = apiKey.startsWith('sk-ant-oat');
+  }
 
   async complete(prompt: string): Promise<string> {
+    // Build headers based on auth type
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+    };
+
+    if (this.isOAuth) {
+      // OAuth token requires different headers
+      headers['Authorization'] = `Bearer ${this.apiKey}`;
+      headers['anthropic-beta'] = 'oauth-2025-04-20';
+      headers['anthropic-dangerous-direct-browser-access'] = 'true';
+    } else {
+      // Standard API key
+      headers['x-api-key'] = this.apiKey;
+    }
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': this.apiKey,
-        'anthropic-version': '2023-06-01',
-      },
+      headers,
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
+        model: this.model,
         max_tokens: 1024,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Claude error: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Claude error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
+
+    // Track usage from API response
+    this.lastUsage = {
+      inputTokens: data.usage?.input_tokens || Math.ceil(prompt.length / 4),
+      outputTokens: data.usage?.output_tokens || Math.ceil(data.content[0].text.length / 4),
+      model: this.model,
+    };
+
     return data.content[0].text;
+  }
+
+  getLastUsage() {
+    return this.lastUsage;
   }
 }
 
@@ -511,7 +562,9 @@ export class ClaudeProvider implements LLMProvider {
  * OpenAI provider
  */
 export class OpenAIProvider implements LLMProvider {
-  constructor(private apiKey: string) {}
+  private lastUsage: { inputTokens: number; outputTokens: number; model: string } | null = null;
+
+  constructor(private apiKey: string, private model: string = 'gpt-4o-mini') {}
 
   async complete(prompt: string): Promise<string> {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -521,7 +574,7 @@ export class OpenAIProvider implements LLMProvider {
         'Authorization': `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: this.model,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 1024,
       }),
@@ -532,6 +585,18 @@ export class OpenAIProvider implements LLMProvider {
     }
 
     const data = await response.json();
+    
+    // Track usage from API response
+    this.lastUsage = {
+      inputTokens: data.usage?.prompt_tokens || Math.ceil(prompt.length / 4),
+      outputTokens: data.usage?.completion_tokens || Math.ceil(data.choices[0].message.content.length / 4),
+      model: this.model,
+    };
+    
     return data.choices[0].message.content;
+  }
+
+  getLastUsage() {
+    return this.lastUsage;
   }
 }
