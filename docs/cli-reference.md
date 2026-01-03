@@ -226,7 +226,14 @@ Check for stale memories.
 ```bash
 alex check            # Show stale memories
 alex check --json     # JSON output
+alex check --auto-verify-unchanged
+alex check --include-uncommitted
 ```
+
+**Options:**
+- `--json` - JSON output
+- `--auto-verify-unchanged` - Auto-verify memories whose files have not changed since last commit
+- `--include-uncommitted` - Include uncommitted file changes in staleness checks
 
 ### `alex verify <id>`
 

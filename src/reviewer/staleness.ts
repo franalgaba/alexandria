@@ -9,6 +9,7 @@
 import type { Database } from 'bun:sqlite';
 import { fileExistsInRepo, getCurrentCommit, hasFileChangedSince, isGitRepo } from '../code/git.ts';
 import { contentMatches } from '../code/hashing.ts';
+import { SymbolExtractor } from '../code/symbols.ts';
 import { MemoryObjectStore } from '../stores/memory-objects.ts';
 import type { CodeReference } from '../types/code-refs.ts';
 import type { MemoryObject } from '../types/memory-objects.ts';
@@ -138,6 +139,19 @@ export class StalenessChecker {
       };
     }
 
+    // Symbol-level check (ensure symbol still exists)
+    if (ref.type === 'symbol' && ref.symbol) {
+      const extractor = new SymbolExtractor();
+      const absolutePath = `${projectPath}/${ref.path}`;
+      const symbol = extractor.findSymbol(absolutePath, ref.symbol);
+      if (!symbol) {
+        return {
+          level: 'stale',
+          reason: `Symbol not found: ${ref.symbol} in ${ref.path}`,
+        };
+      }
+    }
+
     // COMMIT-BASED CHECK (preferred)
     if (inGitRepo && ref.verifiedAtCommit) {
       if (hasFileChangedSince(ref.path, ref.verifiedAtCommit, projectPath)) {
@@ -230,13 +244,18 @@ export class StalenessChecker {
   /**
    * Get summary of stale memories
    */
-  getSummary(projectPath: string = process.cwd()): {
+  getSummary(
+    optionsOrPath: StalenessCheckOptions | string = process.cwd(),
+  ): {
     total: number;
     verified: number;
     needsReview: number;
     stale: number;
     results: StalenessResult[];
   } {
+    const options =
+      typeof optionsOrPath === 'string' ? { projectPath: optionsOrPath } : optionsOrPath;
+    const projectPath = options.projectPath ?? process.cwd();
     const memories = this.store.getWithCodeRefs();
     const allResults: StalenessResult[] = [];
 
@@ -245,7 +264,7 @@ export class StalenessChecker {
     let stale = 0;
 
     for (const memory of memories) {
-      const result = this.check(memory, projectPath);
+      const result = this.check(memory, projectPath, options.includeUncommitted);
       allResults.push(result);
 
       switch (result.level) {
