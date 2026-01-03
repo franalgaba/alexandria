@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import {
   calculateDecayedStrength,
   calculateEffectiveScore,
+  calculateRecencyMultiplier,
   calculateReinforcedStrength,
   daysSince,
   isArchivable,
@@ -98,6 +99,27 @@ describe('decay utilities', () => {
       const score = calculateEffectiveScore(0.8, 0.5, 0.75);
       // 0.8 * 0.5 * (0.5 + 0.75) = 0.8 * 0.5 * 1.25 = 0.5
       expect(score).toBeCloseTo(0.5, 2);
+    });
+  });
+
+  describe('calculateRecencyMultiplier', () => {
+    test('returns baseline for missing date', () => {
+      expect(calculateRecencyMultiplier()).toBe(1.0);
+    });
+
+    test('decreases with older timestamps', () => {
+      const now = new Date();
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const nowMultiplier = calculateRecencyMultiplier(now);
+      const oldMultiplier = calculateRecencyMultiplier(thirtyDaysAgo);
+      expect(nowMultiplier).toBeGreaterThan(oldMultiplier);
+      expect(oldMultiplier).toBeGreaterThanOrEqual(1.0);
+    });
+
+    test('clamps for future timestamps', () => {
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const multiplier = calculateRecencyMultiplier(tomorrow);
+      expect(multiplier).toBeGreaterThanOrEqual(1.0);
     });
   });
 

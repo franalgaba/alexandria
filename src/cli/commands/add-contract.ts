@@ -7,7 +7,7 @@ import { closeConnection, getConnection } from '../../stores/connection.ts';
 import { MemoryObjectStore } from '../../stores/memory-objects.ts';
 import type { ContractStructured } from '../../types/structured.ts';
 import { formatMemoryObject } from '../../utils/format.ts';
-import { colorize, success } from '../utils.ts';
+import { colorize, success, warn } from '../utils.ts';
 
 interface AddContractArgs {
   name: string;
@@ -15,11 +15,12 @@ interface AddContractArgs {
   definition?: string;
   contractVersion?: string;
   file?: string;
+  constraint: boolean;
   approve: boolean;
 }
 
 export const command = 'add-contract <name>';
-export const describe = 'Add an API or interface contract';
+export const describe = 'Add an API or interface contract (deprecated)';
 
 export function builder(yargs: Argv): Argv<AddContractArgs> {
   return yargs
@@ -49,6 +50,11 @@ export function builder(yargs: Argv): Argv<AddContractArgs> {
       type: 'string',
       describe: 'File where the contract is defined',
     })
+    .option('constraint', {
+      type: 'boolean',
+      default: false,
+      describe: 'Store as a constraint instead of a decision',
+    })
     .option('approve', {
       type: 'boolean',
       default: false,
@@ -61,6 +67,10 @@ export async function handler(argv: ArgumentsCamelCase<AddContractArgs>): Promis
   const store = new MemoryObjectStore(db);
 
   try {
+    warn(
+      'add-contract is deprecated. Use `alex add-decision` or `alex add --type constraint` instead.',
+    );
+
     // Build structured data
     const structured: ContractStructured = {
       name: argv.name,
@@ -79,19 +89,28 @@ export async function handler(argv: ArgumentsCamelCase<AddContractArgs>): Promis
     if (argv.contractVersion) {
       content += ` v${argv.contractVersion}`;
     }
+    if (argv.file) {
+      content += ` @ ${argv.file}`;
+    }
+    if (argv.definition) {
+      const trimmed = argv.definition.trim();
+      const snippet = trimmed.length > 200 ? `${trimmed.slice(0, 200)}...` : trimmed;
+      content += ` — ${snippet}`;
+    }
 
     // Add code ref if file specified
     const codeRefs = argv.file ? [{ type: 'file' as const, path: argv.file }] : [];
+    const objectType = argv.constraint ? 'constraint' : 'decision';
 
     const obj = store.create({
       content,
-      objectType: 'convention', // Store contracts as conventions
+      objectType,
       reviewStatus: argv.approve ? 'approved' : 'pending',
       structured,
       codeRefs,
     });
 
-    success(`Added contract: ${obj.id}`);
+    success(`Added ${objectType}: ${obj.id}`);
     console.log(formatMemoryObject(obj));
 
     // Show structured data

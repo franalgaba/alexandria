@@ -9,9 +9,9 @@ import { MemoryObjectStore } from '../stores/memory-objects.ts';
 import type { SearchOptions } from '../types/common.ts';
 import type { MemoryObject, Status } from '../types/memory-objects.ts';
 import type { SearchResult } from '../types/retriever.ts';
-import { calculateEffectiveScore } from '../utils/decay.ts';
+import { calculateEffectiveScore, calculateRecencyMultiplier } from '../utils/decay.ts';
 import type { RetrievalPlan } from './router.ts';
-import { codeRefsMatchScope, extractScope } from './scope.ts';
+import { codeRefsMatchScope, extractScope, scoreScopeMatch } from './scope.ts';
 
 // RRF constant (standard value)
 const RRF_K = 60;
@@ -87,11 +87,15 @@ export class HybridSearch {
     return results
       .map((result) => ({
         ...result,
-        score: calculateEffectiveScore(
-          result.score,
-          result.object.strength,
-          result.object.outcomeScore,
-        ),
+        score:
+          calculateEffectiveScore(
+            result.score,
+            result.object.strength,
+            result.object.outcomeScore,
+          ) *
+          calculateRecencyMultiplier(
+            result.object.lastVerifiedAt ?? result.object.updatedAt ?? result.object.createdAt,
+          ),
       }))
       .sort((a, b) => b.score - a.score);
   }
@@ -173,9 +177,11 @@ export class HybridSearch {
       // Scope matching boost
       if (extractedScope) {
         const codeRefPaths = (obj.codeRefs || []).map((r) => r.path);
-        const scopeScore = codeRefsMatchScope(codeRefPaths, extractedScope.scope);
-        if (scopeScore > 0) {
-          boostedScore *= 1 + scopeScore * 0.5; // Up to 50% boost for scope match
+        const codeRefScore = codeRefsMatchScope(codeRefPaths, extractedScope.scope);
+        const scopeScore = scoreScopeMatch(obj.scope, extractedScope.scope);
+        const matchScore = Math.max(codeRefScore, scopeScore);
+        if (matchScore > 0) {
+          boostedScore *= 1 + matchScore * 0.5; // Up to 50% boost for scope match
         }
       }
 

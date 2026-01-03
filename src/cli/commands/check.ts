@@ -9,6 +9,8 @@ import { colorize } from '../utils.ts';
 
 interface CheckArgs {
   json: boolean;
+  autoVerifyUnchanged: boolean;
+  includeUncommitted: boolean;
 }
 
 export const command = 'check';
@@ -19,14 +21,29 @@ export function builder(yargs: Argv): Argv<CheckArgs> {
     type: 'boolean',
     default: false,
     describe: 'Output as JSON',
-  }) as Argv<CheckArgs>;
+  })
+    .option('auto-verify-unchanged', {
+      type: 'boolean',
+      default: false,
+      describe: 'Auto-verify memories whose files have not changed since last commit',
+    })
+    .option('include-uncommitted', {
+      type: 'boolean',
+      default: false,
+      describe: 'Include uncommitted file changes in staleness checks',
+    }) as Argv<CheckArgs>;
 }
 
 export async function handler(argv: ArgumentsCamelCase<CheckArgs>): Promise<void> {
   const db = getConnection();
   const checker = new StalenessChecker(db);
 
-  const summary = checker.getSummary();
+  let autoVerified = 0;
+  if (argv.autoVerifyUnchanged) {
+    autoVerified = checker.autoVerifyUnchanged();
+  }
+
+  const summary = checker.getSummary({ includeUncommitted: argv.includeUncommitted });
 
   if (argv.json) {
     // Filter to only stale/needs-review items for the hook
@@ -49,6 +66,7 @@ export async function handler(argv: ArgumentsCamelCase<CheckArgs>): Promise<void
           verified: summary.verified,
           needsReview: summary.needsReview,
           staleCount: summary.stale,
+          autoVerified,
           stale: staleItems, // For the Claude Code hook
         },
         null,
@@ -62,6 +80,10 @@ export async function handler(argv: ArgumentsCamelCase<CheckArgs>): Promise<void
     console.log(colorize('No memories with code references found.', 'dim'));
     console.log('Add code refs with: alex link <id> --file <path>');
     return;
+  }
+
+  if (autoVerified > 0) {
+    console.log(colorize(`✓ Auto-verified ${autoVerified} memory(s)`, 'green'));
   }
 
   const problemCount = summary.needsReview + summary.stale;

@@ -11,7 +11,7 @@ import type { MemoryObject } from '../types/memory-objects.ts';
 import type { ContextPack, LegacyContextPack, SearchResult } from '../types/retriever.ts';
 import type { PreviousSessionContext } from '../types/sessions.ts';
 import { generatePrompts, type RevalidationPrompt } from '../utils/revalidation.ts';
-import { estimateTokens } from '../utils/tokens.ts';
+import { estimateTokens, estimateTokensAsync } from '../utils/tokens.ts';
 import { HybridSearch } from './hybrid-search.ts';
 import { Reranker } from './reranker.ts';
 
@@ -44,14 +44,17 @@ export class ContextPackCompiler {
     // 1. Get previous session context
     const previousSession = this.sessions.getPreviousContext();
     if (previousSession) {
-      const sessionTokens = this.countSessionTokens(previousSession);
+      const sessionTokens = await this.countSessionTokens(previousSession);
       remaining -= Math.min(sessionTokens, PREVIOUS_SESSION_RESERVE);
     }
 
     // 2. Get all active constraints (always included)
     const constraints = this.store.getActiveConstraints();
-    for (const c of constraints) {
-      const tokens = estimateTokens(c.content) + TOKEN_OVERHEAD_PER_OBJECT;
+    const constraintTokenCounts = await Promise.all(
+      constraints.map((c) => estimateTokensAsync(c.content)),
+    );
+    for (const [index, c] of constraints.entries()) {
+      const tokens = constraintTokenCounts[index] + TOKEN_OVERHEAD_PER_OBJECT;
       remaining -= tokens;
       this.store.recordAccess(c.id);
     }
@@ -82,7 +85,7 @@ export class ContextPackCompiler {
       // Skip constraints (already included)
       if (result.object.objectType === 'constraint') continue;
 
-      const tokens = estimateTokens(result.object.content) + TOKEN_OVERHEAD_PER_OBJECT;
+      const tokens = (await estimateTokensAsync(result.object.content)) + TOKEN_OVERHEAD_PER_OBJECT;
 
       if (tokens <= remaining) {
         included.push(result.object);
@@ -187,13 +190,13 @@ export class ContextPackCompiler {
   /**
    * Count tokens in previous session context
    */
-  private countSessionTokens(session: PreviousSessionContext): number {
-    let tokens = estimateTokens(session.summary);
+  private async countSessionTokens(session: PreviousSessionContext): Promise<number> {
+    let tokens = await estimateTokensAsync(session.summary);
     if (session.workingFile) {
-      tokens += estimateTokens(session.workingFile) + 10;
+      tokens += (await estimateTokensAsync(session.workingFile)) + 10;
     }
     if (session.workingTask) {
-      tokens += estimateTokens(session.workingTask) + 10;
+      tokens += (await estimateTokensAsync(session.workingTask)) + 10;
     }
     return tokens;
   }

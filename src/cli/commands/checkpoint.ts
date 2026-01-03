@@ -12,6 +12,7 @@ interface CheckpointArgs {
   session?: string;
   reason: string;
   showStats: boolean;
+  curator?: 'tier0' | 'tier1' | 'tier2';
 }
 
 export const command = 'checkpoint';
@@ -33,6 +34,11 @@ export function builder(yargs: Argv) {
       type: 'boolean',
       description: 'Show checkpoint buffer statistics before executing',
       default: false,
+    })
+    .option('curator', {
+      type: 'string',
+      choices: ['tier0', 'tier1', 'tier2'],
+      description: 'Override curator mode (tier2 enables conflict detection)',
     });
 }
 
@@ -44,6 +50,7 @@ export async function handler(args: ArgumentsCamelCase<CheckpointArgs>) {
       sessionId: args.session,
       reason: args.reason,
       showStats: args.showStats,
+      curator: args.curator,
     });
   } catch (error) {
     console.error('Checkpoint failed:', error);
@@ -55,6 +62,7 @@ interface CheckpointOptions {
   sessionId?: string;
   reason: string;
   showStats?: boolean;
+  curator?: 'tier0' | 'tier1' | 'tier2';
 }
 
 async function executeCheckpoint(db: Database, options: CheckpointOptions) {
@@ -62,7 +70,7 @@ async function executeCheckpoint(db: Database, options: CheckpointOptions) {
   // Use async factory to auto-detect Claude OAuth and enable tier1 (Haiku) if available
   const ingestor = await Ingestor.create(db, {
     useCheckpoints: true,
-    // Don't specify curatorMode - let it auto-detect tier1 if LLM available
+    checkpointConfig: options.curator ? { curatorMode: options.curator } : undefined,
   });
 
   // Get current or specified session
