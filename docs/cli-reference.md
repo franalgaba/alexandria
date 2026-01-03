@@ -399,3 +399,6 @@ alex disclose --query "remind me about auth" -f text
 | `ALEXANDRIA_CONTEXT_THRESHOLD` | `50` | Context window % before suggesting clear |
 | `ALEXANDRIA_DISCLOSURE_THRESHOLD` | `15` | Events before re-evaluating disclosure |
 | `ALEXANDRIA_ERROR_BURST_THRESHOLD` | `3` | Consecutive errors before escalation |
+| `ALEXANDRIA_RECENCY_HALF_LIFE_DAYS` | `30` | Recency boost half-life for ranking |
+| `ALEXANDRIA_RECENCY_MAX_BOOST` | `0.2` | Max recency boost multiplier |
+| `ALEXANDRIA_TOKENIZER_PATH` | unset | Local tokenizer path for accurate token counts |

@@ -143,6 +143,13 @@ alex review                     # Review pending
 ```bash
 # Auto-checkpoint threshold (default: 10 events)
 export ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD=10
+
+# Recency boost tuning
+export ALEXANDRIA_RECENCY_HALF_LIFE_DAYS=30
+export ALEXANDRIA_RECENCY_MAX_BOOST=0.2
+
+# Tokenizer path for accurate token counting (local files only)
+export ALEXANDRIA_TOKENIZER_PATH="/path/to/tokenizer"
 ```
 
 ## Architecture
