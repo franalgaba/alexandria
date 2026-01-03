@@ -405,13 +405,15 @@ Only extract memories that would genuinely help in future sessions.`;
    * Save extracted memory to store
    */
   private async saveMemory(memory: ExtractedMemory): Promise<MemoryObject> {
+    const hasEvidence = memory.evidenceEventIds.length > 0;
+    const isHighConfidence = memory.confidence === 'high' || memory.confidence === 'certain';
     const obj = this.store.create({
       content: memory.content,
       objectType: memory.type,
       confidence: memory.confidence,
       evidenceEventIds: memory.evidenceEventIds,
       evidenceExcerpt: memory.reasoning,
-      reviewStatus: memory.confidence === 'high' ? 'approved' : 'pending',
+      reviewStatus: isHighConfidence && hasEvidence ? 'approved' : 'pending',
     });
 
     // Index for vector search
