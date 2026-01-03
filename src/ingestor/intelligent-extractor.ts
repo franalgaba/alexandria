@@ -8,6 +8,7 @@
  */
 
 import type { Database } from 'bun:sqlite';
+import { FTSIndex } from '../indexes/fts.ts';
 import { VectorIndex } from '../indexes/vector.ts';
 import { EventStore } from '../stores/events.ts';
 import { MemoryObjectStore } from '../stores/memory-objects.ts';
@@ -61,6 +62,8 @@ const ANALYSIS_TRIGGERS = {
     { name: 'architecture_pattern', detect: detectArchitecturePattern },
   ],
 };
+
+const DUPLICATE_SIMILARITY_THRESHOLD = 0.8;
 
 /**
  * Detect error -> attempts -> resolution pattern
@@ -144,6 +147,7 @@ function detectArchitecturePattern(buffer: ContextBuffer): boolean {
 export class IntelligentExtractor {
   private store: MemoryObjectStore;
   private eventStore: EventStore;
+  private fts: FTSIndex;
   private vector: VectorIndex;
   private buffer: ContextBuffer;
   private llmProvider: LLMProvider | null = null;
@@ -151,6 +155,7 @@ export class IntelligentExtractor {
   constructor(db: Database, llmProvider?: LLMProvider) {
     this.store = new MemoryObjectStore(db);
     this.eventStore = new EventStore(db);
+    this.fts = new FTSIndex(db);
     this.vector = new VectorIndex(db);
     this.llmProvider = llmProvider || null;
     this.buffer = this.createEmptyBuffer();
@@ -405,6 +410,11 @@ Only extract memories that would genuinely help in future sessions.`;
    * Save extracted memory to store
    */
   private async saveMemory(memory: ExtractedMemory): Promise<MemoryObject> {
+    const duplicate = this.findDuplicate(memory);
+    if (duplicate) {
+      return duplicate;
+    }
+
     const hasEvidence = memory.evidenceEventIds.length > 0;
     const isHighConfidence = memory.confidence === 'high' || memory.confidence === 'certain';
     const obj = this.store.create({
@@ -420,6 +430,68 @@ Only extract memories that would genuinely help in future sessions.`;
     await this.vector.indexObject(obj.id, obj.content);
 
     return obj;
+  }
+
+  /**
+   * Find duplicate memory based on content similarity
+   */
+  private findDuplicate(memory: ExtractedMemory): MemoryObject | null {
+    const candidates = this.findCandidateMemories(memory);
+    let best: { object: MemoryObject; score: number } | null = null;
+
+    for (const candidate of candidates) {
+      if (candidate.objectType !== memory.type) continue;
+      const similarity = this.calculateSimilarity(memory.content, candidate.content);
+      if (similarity >= DUPLICATE_SIMILARITY_THRESHOLD) {
+        if (!best || similarity > best.score) {
+          best = { object: candidate, score: similarity };
+        }
+      }
+    }
+
+    return best?.object ?? null;
+  }
+
+  /**
+   * Find likely candidate memories for deduplication
+   */
+  private findCandidateMemories(memory: ExtractedMemory): MemoryObject[] {
+    try {
+      const ftsResults = this.fts.searchObjects(memory.content, ['active'], 10);
+      if (ftsResults.length > 0) {
+        return ftsResults.map((r) => r.object);
+      }
+    } catch {
+      // Fallback to a bounded list
+    }
+
+    return this.store.list({ status: ['active'], limit: 200 });
+  }
+
+  /**
+   * Calculate content similarity (simple Jaccard-like)
+   */
+  private calculateSimilarity(a: string, b: string): number {
+    const tokensA = new Set(this.tokenize(a));
+    const tokensB = new Set(this.tokenize(b));
+
+    if (tokensA.size === 0 || tokensB.size === 0) return 0;
+
+    const intersection = new Set([...tokensA].filter((x) => tokensB.has(x)));
+    const union = new Set([...tokensA, ...tokensB]);
+
+    return intersection.size / union.size;
+  }
+
+  /**
+   * Tokenize text for comparison
+   */
+  private tokenize(text: string): string[] {
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter((t) => t.length > 2);
   }
 
   /**
