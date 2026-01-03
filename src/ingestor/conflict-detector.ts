@@ -12,7 +12,12 @@
 import type { Database } from 'bun:sqlite';
 import { FTSIndex } from '../indexes/fts.ts';
 import { MemoryObjectStore } from '../stores/memory-objects.ts';
-import type { MemoryCandidate, MemoryObject, ObjectType } from '../types/memory-objects.ts';
+import type {
+  MemoryCandidate,
+  MemoryObject,
+  ObjectType,
+  ReviewStatus,
+} from '../types/memory-objects.ts';
 
 export interface Conflict {
   id: string;
@@ -336,6 +341,7 @@ export class ConflictDetector {
 
       case 'replace': {
         // Supersede existing with new
+        const reviewStatus = this.getReviewStatus(conflict.newCandidate, resolution);
         const newMemory = this.store.create({
           content: conflict.newCandidate.content,
           objectType: conflict.newCandidate.suggestedType,
@@ -343,7 +349,7 @@ export class ConflictDetector {
           evidenceEventIds: conflict.newCandidate.evidenceEventIds,
           evidenceExcerpt: conflict.newCandidate.evidenceExcerpt,
           codeRefs: conflict.newCandidate.codeRefs,
-          reviewStatus: 'approved',
+          reviewStatus,
         });
 
         // Supersede existing
@@ -360,16 +366,26 @@ export class ConflictDetector {
           conflict.newCandidate.content,
           conflict.existingMemories.map((m) => m.content),
         );
+        const mergedEvidence = [
+          ...conflict.newCandidate.evidenceEventIds,
+          ...conflict.existingMemories.flatMap((m) => m.evidenceEventIds),
+        ];
+        const reviewStatus = this.getReviewStatus(
+          {
+            ...conflict.newCandidate,
+            confidence: 'high',
+            evidenceEventIds: mergedEvidence,
+          },
+          resolution,
+        );
 
         const mergedMemory = this.store.create({
           content: mergedContent,
           objectType: conflict.newCandidate.suggestedType,
           confidence: 'high',
-          evidenceEventIds: [
-            ...conflict.newCandidate.evidenceEventIds,
-            ...conflict.existingMemories.flatMap((m) => m.evidenceEventIds),
-          ],
-          reviewStatus: 'approved',
+          evidenceEventIds: mergedEvidence,
+          codeRefs: conflict.newCandidate.codeRefs,
+          reviewStatus,
         });
 
         // Supersede all existing
@@ -382,6 +398,7 @@ export class ConflictDetector {
 
       case 'keep_both':
         // Add candidate as new memory
+        const reviewStatus = this.getReviewStatus(conflict.newCandidate, resolution);
         return this.store.create({
           content: conflict.newCandidate.content,
           objectType: conflict.newCandidate.suggestedType,
@@ -389,7 +406,7 @@ export class ConflictDetector {
           evidenceEventIds: conflict.newCandidate.evidenceEventIds,
           evidenceExcerpt: conflict.newCandidate.evidenceExcerpt,
           codeRefs: conflict.newCandidate.codeRefs,
-          reviewStatus: 'approved',
+          reviewStatus,
         });
 
       case 'reject_both':
@@ -419,6 +436,21 @@ export class ConflictDetector {
 
     // Otherwise, create a combined statement
     return `${newContent}\n\n[Updated from: ${existing.slice(0, 100)}...]`;
+  }
+
+  /**
+   * Determine review status for auto-resolved conflicts
+   */
+  private getReviewStatus(candidate: MemoryCandidate, resolution: Resolution): ReviewStatus {
+    if (resolution.resolvedBy === 'human') {
+      return 'approved';
+    }
+
+    const hasEvidence = candidate.evidenceEventIds.length > 0;
+    const hasCodeRefs = candidate.codeRefs && candidate.codeRefs.length > 0;
+    const isHighConfidence = candidate.confidence === 'high' || candidate.confidence === 'certain';
+
+    return isHighConfidence && (hasEvidence || hasCodeRefs) ? 'approved' : 'pending';
   }
 
   /**
