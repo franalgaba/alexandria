@@ -72,7 +72,7 @@ export function calculateRecencyMultiplier(date?: Date): number {
   }
 
   const days = daysSince(date);
-  const decay = Math.exp(-days / DEFAULT_RECENCY_HALF_LIFE_DAYS);
+  const decay = Math.min(1, Math.max(0, Math.exp(-days / DEFAULT_RECENCY_HALF_LIFE_DAYS)));
   return 1 + DEFAULT_RECENCY_MAX_BOOST * decay;
 }
 
