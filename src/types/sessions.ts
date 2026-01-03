@@ -13,6 +13,15 @@ export interface Session {
   eventsCount: number;
   objectsCreated: number;
   objectsAccessed: number;
+  lastCheckpointAt?: Date;
+  eventsSinceCheckpoint: number;
+
+  // Progressive disclosure tracking
+  injectedMemoryIds: string[];
+  lastDisclosureAt?: Date;
+  errorCount: number;
+  disclosureLevel: 'minimal' | 'task' | 'deep';
+  lastTopic?: string;
 }
 
 export interface SessionRow {
@@ -26,6 +35,15 @@ export interface SessionRow {
   events_count: number;
   objects_created: number;
   objects_accessed: number;
+  last_checkpoint_at: string | null;
+  events_since_checkpoint: number;
+
+  // Progressive disclosure tracking
+  injected_memory_ids: string;
+  last_disclosure_at: string | null;
+  error_count: number;
+  disclosure_level: string;
+  last_topic: string | null;
 }
 
 export interface CreateSessionInput {

@@ -3,11 +3,11 @@
  */
 
 import type { ArgumentsCamelCase, Argv } from 'yargs';
-import { MemoryObjectStore } from '../../stores/memory-objects.ts';
 import { closeConnection, getConnection } from '../../stores/connection.ts';
+import { MemoryObjectStore } from '../../stores/memory-objects.ts';
 import type { ContractStructured } from '../../types/structured.ts';
-import { colorize, success } from '../utils.ts';
 import { formatMemoryObject } from '../../utils/format.ts';
+import { colorize, success } from '../utils.ts';
 
 interface AddContractArgs {
   name: string;
@@ -81,7 +81,7 @@ export async function handler(argv: ArgumentsCamelCase<AddContractArgs>): Promis
     }
 
     // Add code ref if file specified
-    const codeRefs = argv.file ? [{ path: argv.file }] : [];
+    const codeRefs = argv.file ? [{ type: 'file' as const, path: argv.file }] : [];
 
     const obj = store.create({
       content,

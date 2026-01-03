@@ -14,6 +14,10 @@ export interface SearchOptions {
   status?: string[];
   alpha?: number; // Weight for RRF fusion (0 = vector only, 1 = lexical only)
   objectType?: string;
+  /** Skip strength/outcome scoring (for benchmarking) */
+  skipStrengthScoring?: boolean;
+  /** Skip reinforcement on access (for benchmarking) */
+  skipReinforcement?: boolean;
 }
 
 export interface PackOptions {

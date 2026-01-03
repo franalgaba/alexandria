@@ -12,8 +12,6 @@ export interface VectorSearchResult {
   distance: number;
 }
 
-
-
 export class VectorIndex {
   private useNative: boolean;
   private memoryIndex: Map<string, Float32Array>;

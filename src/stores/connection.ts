@@ -1,7 +1,7 @@
 /**
  * Database connection and initialization
  * Uses Bun's built-in SQLite support (bun:sqlite)
- * 
+ *
  * Database Location Strategy:
  * All databases are stored under ~/.alexandria/projects/<project-hash>/
  * This allows:
@@ -65,7 +65,7 @@ function findProjectRoot(startDir: string = process.cwd()): string | null {
 
 /**
  * Get database path for a project
- * 
+ *
  * Structure: ~/.alexandria/projects/<project-name>_<hash>/alexandria.db
  */
 export function getDbPathForProject(projectPath: string): string {
@@ -75,7 +75,7 @@ export function getDbPathForProject(projectPath: string): string {
 
 /**
  * Get database file path
- * 
+ *
  * Priority:
  * 1. ALEXANDRIA_DB_PATH environment variable
  * 2. Project-specific database under ~/.alexandria/projects/
@@ -360,19 +360,97 @@ CREATE TABLE IF NOT EXISTS object_embeddings_fallback (
  */
 function runColumnMigrations(db: Database): void {
   // Check if code_refs column exists
-  const columns = db.query("PRAGMA table_info(memory_objects)").all() as Array<{ name: string }>;
-  const columnNames = columns.map(c => c.name);
-  
+  const columns = db.query('PRAGMA table_info(memory_objects)').all() as Array<{ name: string }>;
+  const columnNames = columns.map((c) => c.name);
+
   if (!columnNames.includes('code_refs')) {
     db.exec("ALTER TABLE memory_objects ADD COLUMN code_refs TEXT DEFAULT '[]'");
   }
-  
+
   if (!columnNames.includes('last_verified_at')) {
-    db.exec("ALTER TABLE memory_objects ADD COLUMN last_verified_at TEXT");
+    db.exec('ALTER TABLE memory_objects ADD COLUMN last_verified_at TEXT');
   }
-  
+
   if (!columnNames.includes('structured')) {
-    db.exec("ALTER TABLE memory_objects ADD COLUMN structured TEXT");
+    db.exec('ALTER TABLE memory_objects ADD COLUMN structured TEXT');
+  }
+
+  // Memory strength and decay (brain-inspired evolution)
+  if (!columnNames.includes('strength')) {
+    db.exec('ALTER TABLE memory_objects ADD COLUMN strength REAL DEFAULT 1.0');
+  }
+
+  if (!columnNames.includes('last_reinforced_at')) {
+    db.exec('ALTER TABLE memory_objects ADD COLUMN last_reinforced_at TEXT');
+  }
+
+  if (!columnNames.includes('outcome_score')) {
+    db.exec('ALTER TABLE memory_objects ADD COLUMN outcome_score REAL DEFAULT 0.5');
+  }
+
+  // Session tracking for progressive disclosure
+  runSessionMigrations(db);
+
+  // Memory outcomes table for tracking helpfulness
+  tryCreateOutcomesTable(db);
+}
+
+/**
+ * Run session-related migrations
+ */
+function runSessionMigrations(db: Database): void {
+  const sessionColumns = db.query('PRAGMA table_info(sessions)').all() as Array<{ name: string }>;
+  const sessionColumnNames = sessionColumns.map((c) => c.name);
+
+  if (!sessionColumnNames.includes('last_checkpoint_at')) {
+    db.exec('ALTER TABLE sessions ADD COLUMN last_checkpoint_at TEXT');
+  }
+
+  if (!sessionColumnNames.includes('events_since_checkpoint')) {
+    db.exec('ALTER TABLE sessions ADD COLUMN events_since_checkpoint INTEGER DEFAULT 0');
+  }
+
+  if (!sessionColumnNames.includes('injected_memory_ids')) {
+    db.exec("ALTER TABLE sessions ADD COLUMN injected_memory_ids TEXT DEFAULT '[]'");
+  }
+
+  if (!sessionColumnNames.includes('last_disclosure_at')) {
+    db.exec('ALTER TABLE sessions ADD COLUMN last_disclosure_at TEXT');
+  }
+
+  if (!sessionColumnNames.includes('error_count')) {
+    db.exec('ALTER TABLE sessions ADD COLUMN error_count INTEGER DEFAULT 0');
+  }
+
+  if (!sessionColumnNames.includes('disclosure_level')) {
+    db.exec("ALTER TABLE sessions ADD COLUMN disclosure_level TEXT DEFAULT 'task'");
+  }
+
+  if (!sessionColumnNames.includes('last_topic')) {
+    db.exec('ALTER TABLE sessions ADD COLUMN last_topic TEXT');
+  }
+}
+
+/**
+ * Create memory outcomes table for tracking helpfulness
+ */
+function tryCreateOutcomesTable(db: Database): void {
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS memory_outcomes (
+        id TEXT PRIMARY KEY,
+        memory_id TEXT NOT NULL,
+        session_id TEXT NOT NULL,
+        timestamp TEXT NOT NULL,
+        outcome TEXT NOT NULL CHECK (outcome IN ('helpful', 'unhelpful', 'neutral')),
+        context TEXT,
+        FOREIGN KEY (memory_id) REFERENCES memory_objects(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_memory_outcomes_memory_id ON memory_outcomes(memory_id);
+      CREATE INDEX IF NOT EXISTS idx_memory_outcomes_session_id ON memory_outcomes(session_id);
+    `);
+  } catch {
+    // Table may already exist
   }
 }
 

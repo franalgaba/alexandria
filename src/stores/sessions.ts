@@ -47,6 +47,11 @@ export class SessionStore {
       eventsCount: 0,
       objectsCreated: 0,
       objectsAccessed: 0,
+      eventsSinceCheckpoint: 0,
+      // Progressive disclosure defaults
+      injectedMemoryIds: [],
+      errorCount: 0,
+      disclosureLevel: 'task',
     };
   }
 
@@ -91,6 +96,21 @@ export class SessionStore {
     const row = this.db
       .query(`
       SELECT * FROM sessions ORDER BY started_at DESC LIMIT 1
+    `)
+      .get() as SessionRow | null;
+
+    if (!row) return null;
+
+    return this.rowToSession(row);
+  }
+
+  /**
+   * Get the current (active, not ended) session
+   */
+  getCurrent(): Session | null {
+    const row = this.db
+      .query(`
+      SELECT * FROM sessions WHERE ended_at IS NULL ORDER BY started_at DESC LIMIT 1
     `)
       .get() as SessionRow | null;
 
@@ -177,6 +197,48 @@ export class SessionStore {
   }
 
   /**
+   * Increment events since last checkpoint
+   * Returns the new count (for auto-checkpoint triggering)
+   */
+  incrementEventsSinceCheckpoint(id: string): number {
+    this.db
+      .query(`
+      UPDATE sessions SET events_since_checkpoint = events_since_checkpoint + 1 WHERE id = $id
+    `)
+      .run({ $id: id });
+
+    const row = this.db
+      .query(`SELECT events_since_checkpoint FROM sessions WHERE id = $id`)
+      .get({ $id: id }) as { events_since_checkpoint: number } | null;
+
+    return row?.events_since_checkpoint ?? 0;
+  }
+
+  /**
+   * Mark checkpoint completed - reset counter and update timestamp
+   */
+  markCheckpointCompleted(id: string): void {
+    this.db
+      .query(`
+      UPDATE sessions 
+      SET events_since_checkpoint = 0, last_checkpoint_at = $now 
+      WHERE id = $id
+    `)
+      .run({ $id: id, $now: new Date().toISOString() });
+  }
+
+  /**
+   * Get events since last checkpoint for a session
+   */
+  getEventsSinceCheckpoint(id: string): number {
+    const row = this.db
+      .query(`SELECT events_since_checkpoint FROM sessions WHERE id = $id`)
+      .get({ $id: id }) as { events_since_checkpoint: number } | null;
+
+    return row?.events_since_checkpoint ?? 0;
+  }
+
+  /**
    * List recent sessions
    */
   list(limit = 20): Session[] {
@@ -202,7 +264,115 @@ export class SessionStore {
     return row.count;
   }
 
+  // ============================================================================
+  // Progressive Disclosure Methods
+  // ============================================================================
+
+  /**
+   * Get injected memory IDs for session
+   */
+  getInjectedMemoryIds(id: string): string[] {
+    const row = this.db
+      .query(`SELECT injected_memory_ids FROM sessions WHERE id = $id`)
+      .get({ $id: id }) as { injected_memory_ids: string } | null;
+
+    if (!row || !row.injected_memory_ids) return [];
+
+    try {
+      return JSON.parse(row.injected_memory_ids);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Add memory IDs to injected list (dedupes automatically)
+   */
+  addInjectedMemoryIds(id: string, memoryIds: string[]): void {
+    const existing = this.getInjectedMemoryIds(id);
+    const combined = [...new Set([...existing, ...memoryIds])];
+
+    this.db
+      .query(`
+        UPDATE sessions
+        SET injected_memory_ids = $ids, last_disclosure_at = $now
+        WHERE id = $id
+      `)
+      .run({
+        $id: id,
+        $ids: JSON.stringify(combined),
+        $now: new Date().toISOString(),
+      });
+  }
+
+  /**
+   * Increment error count
+   */
+  incrementErrorCount(id: string): number {
+    this.db
+      .query(`UPDATE sessions SET error_count = error_count + 1 WHERE id = $id`)
+      .run({ $id: id });
+
+    const row = this.db
+      .query(`SELECT error_count FROM sessions WHERE id = $id`)
+      .get({ $id: id }) as { error_count: number } | null;
+
+    return row?.error_count ?? 0;
+  }
+
+  /**
+   * Reset error count (after successful disclosure)
+   */
+  resetErrorCount(id: string): void {
+    this.db.query(`UPDATE sessions SET error_count = 0 WHERE id = $id`).run({ $id: id });
+  }
+
+  /**
+   * Update current topic/file
+   */
+  updateTopic(id: string, topic: string): { shifted: boolean; previousTopic?: string } {
+    const row = this.db.query(`SELECT last_topic FROM sessions WHERE id = $id`).get({ $id: id }) as {
+      last_topic: string | null;
+    } | null;
+
+    const previousTopic = row?.last_topic;
+    const shifted = previousTopic !== null && previousTopic !== topic;
+
+    this.db
+      .query(`UPDATE sessions SET last_topic = $topic WHERE id = $id`)
+      .run({ $id: id, $topic: topic });
+
+    return { shifted, previousTopic: previousTopic ?? undefined };
+  }
+
+  /**
+   * Update disclosure level
+   */
+  updateDisclosureLevel(id: string, level: 'minimal' | 'task' | 'deep'): void {
+    this.db
+      .query(`UPDATE sessions SET disclosure_level = $level WHERE id = $id`)
+      .run({ $id: id, $level: level });
+  }
+
+  /**
+   * Get error count for a session
+   */
+  getErrorCount(id: string): number {
+    const row = this.db
+      .query(`SELECT error_count FROM sessions WHERE id = $id`)
+      .get({ $id: id }) as { error_count: number } | null;
+
+    return row?.error_count ?? 0;
+  }
+
   private rowToSession(row: SessionRow): Session {
+    let injectedMemoryIds: string[] = [];
+    try {
+      injectedMemoryIds = row.injected_memory_ids ? JSON.parse(row.injected_memory_ids) : [];
+    } catch {
+      injectedMemoryIds = [];
+    }
+
     return {
       id: row.id,
       startedAt: new Date(row.started_at),
@@ -214,6 +384,15 @@ export class SessionStore {
       eventsCount: row.events_count,
       objectsCreated: row.objects_created,
       objectsAccessed: row.objects_accessed,
+      lastCheckpointAt: row.last_checkpoint_at ? new Date(row.last_checkpoint_at) : undefined,
+      eventsSinceCheckpoint: row.events_since_checkpoint ?? 0,
+
+      // Progressive disclosure fields
+      injectedMemoryIds,
+      lastDisclosureAt: row.last_disclosure_at ? new Date(row.last_disclosure_at) : undefined,
+      errorCount: row.error_count ?? 0,
+      disclosureLevel: (row.disclosure_level as 'minimal' | 'task' | 'deep') ?? 'task',
+      lastTopic: row.last_topic ?? undefined,
     };
   }
 }

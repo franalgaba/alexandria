@@ -1,6 +1,6 @@
 /**
  * Intelligent Memory Extractor
- * 
+ *
  * Uses LLM to analyze session context and extract meaningful memories.
  * Works in two modes:
  * 1. Streaming: Analyzes chunks of conversation as they happen
@@ -8,11 +8,11 @@
  */
 
 import type { Database } from 'bun:sqlite';
-import { MemoryObjectStore } from '../stores/memory-objects.ts';
-import { EventStore } from '../stores/events.ts';
 import { VectorIndex } from '../indexes/vector.ts';
+import { EventStore } from '../stores/events.ts';
+import { MemoryObjectStore } from '../stores/memory-objects.ts';
 import type { Event } from '../types/events.ts';
-import type { MemoryObject, ObjectType, Confidence } from '../types/memory-objects.ts';
+import type { Confidence, MemoryObject, ObjectType } from '../types/memory-objects.ts';
 
 // Buffer for accumulating context
 interface ContextBuffer {
@@ -99,7 +99,7 @@ function detectExplicitDecision(buffer: ContextBuffer): boolean {
     'instead of using',
     'rather than',
   ];
-  return decisionPhrases.some(phrase => content.includes(phrase));
+  return decisionPhrases.some((phrase) => content.includes(phrase));
 }
 
 /**
@@ -109,16 +109,16 @@ function detectUserCorrection(buffer: ContextBuffer): boolean {
   const content = buffer.content.join('\n').toLowerCase();
   const correctionPhrases = [
     "no, don't",
-    "no, use",
+    'no, use',
     "that's wrong",
-    "actually,",
-    "not like that",
-    "instead,",
-    "you should",
-    "never do",
-    "always use",
+    'actually,',
+    'not like that',
+    'instead,',
+    'you should',
+    'never do',
+    'always use',
   ];
-  return correctionPhrases.some(phrase => content.includes(phrase));
+  return correctionPhrases.some((phrase) => content.includes(phrase));
 }
 
 /**
@@ -137,7 +137,7 @@ function detectArchitecturePattern(buffer: ContextBuffer): boolean {
     'in this project',
     'we follow',
   ];
-  const matchCount = patternPhrases.filter(phrase => content.includes(phrase)).length;
+  const matchCount = patternPhrases.filter((phrase) => content.includes(phrase)).length;
   return matchCount >= 2; // Multiple pattern-related terms
 }
 
@@ -243,7 +243,7 @@ export class IntelligentExtractor {
 
       // Use LLM for intelligent extraction
       const memories = await this.llmExtraction();
-      
+
       // Save extracted memories
       for (const memory of memories) {
         await this.saveMemory(memory);
@@ -266,42 +266,41 @@ export class IntelligentExtractor {
 
     // Pattern 1: Error resolution
     if (detectErrorResolution(buffer)) {
-      const errorSeq = buffer.toolSequences.find(s => s.exitCode !== 0);
-      const successSeq = buffer.toolSequences.find(s => s.exitCode === 0);
-      
+      const errorSeq = buffer.toolSequences.find((s) => s.exitCode !== 0);
+      const successSeq = buffer.toolSequences.find((s) => s.exitCode === 0);
+
       if (errorSeq && successSeq) {
         memories.push({
           type: 'known_fix',
           content: `When ${errorSeq.toolName} fails, the fix involves: ${successSeq.output.slice(0, 200)}`,
           reasoning: 'Detected error followed by successful resolution',
           confidence: 'medium',
-          evidenceEventIds: buffer.events.map(e => e.id),
+          evidenceEventIds: buffer.events.map((e) => e.id),
         });
       }
     }
 
     // Pattern 2: Explicit decisions (conservative)
     if (detectExplicitDecision(buffer)) {
-      const decisionContent = buffer.content.find(c => 
-        /(?:decided|choosing|going with|instead of)/i.test(c) &&
-        c.includes('because')
+      const decisionContent = buffer.content.find(
+        (c) => /(?:decided|choosing|going with|instead of)/i.test(c) && c.includes('because'),
       );
-      
+
       if (decisionContent) {
         memories.push({
           type: 'decision',
           content: decisionContent.slice(0, 300),
           reasoning: 'Explicit decision statement with reasoning',
           confidence: 'medium',
-          evidenceEventIds: buffer.events.map(e => e.id),
+          evidenceEventIds: buffer.events.map((e) => e.id),
         });
       }
     }
 
     // Pattern 3: User corrections (high signal)
     if (detectUserCorrection(buffer)) {
-      const correctionContent = buffer.content.find(c =>
-        /(?:no,|don't|never|always|instead,)/i.test(c)
+      const correctionContent = buffer.content.find((c) =>
+        /(?:no,|don't|never|always|instead,)/i.test(c),
       );
 
       if (correctionContent && correctionContent.length > 20) {
@@ -310,7 +309,7 @@ export class IntelligentExtractor {
           content: correctionContent.slice(0, 300),
           reasoning: 'User correction or explicit rule',
           confidence: 'high',
-          evidenceEventIds: buffer.events.map(e => e.id),
+          evidenceEventIds: buffer.events.map((e) => e.id),
         });
       }
     }
@@ -326,7 +325,7 @@ export class IntelligentExtractor {
 
     const prompt = this.buildExtractionPrompt();
     const response = await this.llmProvider.complete(prompt);
-    
+
     return this.parseExtractionResponse(response);
   }
 
@@ -336,7 +335,7 @@ export class IntelligentExtractor {
   private buildExtractionPrompt(): string {
     const context = this.buffer.content.slice(-10).join('\n\n---\n\n');
     const toolSummary = this.buffer.toolSequences
-      .map(s => `${s.toolName}: ${s.exitCode === 0 ? 'success' : 'failed'}`)
+      .map((s) => `${s.toolName}: ${s.exitCode === 0 ? 'success' : 'failed'}`)
       .join(', ');
 
     return `Analyze this coding session excerpt and extract actionable memories.
@@ -395,7 +394,7 @@ Only extract memories that would genuinely help in future sessions.`;
         content: m.content,
         reasoning: m.reasoning || '',
         confidence: (m.confidence || 'medium') as Confidence,
-        evidenceEventIds: this.buffer.events.map(e => e.id),
+        evidenceEventIds: this.buffer.events.map((e) => e.id),
       }));
     } catch {
       return [];
@@ -450,6 +449,23 @@ export interface LLMProvider {
   getLastUsage?(): { inputTokens: number; outputTokens: number; model: string } | null;
 }
 
+// API Response types for type safety
+interface OllamaResponse {
+  response: string;
+  prompt_eval_count?: number;
+  eval_count?: number;
+}
+
+interface ClaudeResponse {
+  content: Array<{ type: string; text: string }>;
+  usage?: { input_tokens: number; output_tokens: number };
+}
+
+interface OpenAIResponse {
+  choices: Array<{ message: { content: string } }>;
+  usage?: { prompt_tokens: number; completion_tokens: number };
+}
+
 /**
  * Simple LLM provider using local Ollama
  */
@@ -458,7 +474,7 @@ export class OllamaProvider implements LLMProvider {
 
   constructor(
     private model: string = 'llama3.2',
-    private baseUrl: string = 'http://localhost:11434'
+    private baseUrl: string = 'http://localhost:11434',
   ) {}
 
   async complete(prompt: string): Promise<string> {
@@ -476,15 +492,15 @@ export class OllamaProvider implements LLMProvider {
       throw new Error(`Ollama error: ${response.status}`);
     }
 
-    const data = await response.json();
-    
+    const data = (await response.json()) as OllamaResponse;
+
     // Track usage (Ollama provides token counts)
     this.lastUsage = {
       inputTokens: data.prompt_eval_count || Math.ceil(prompt.length / 4),
       outputTokens: data.eval_count || Math.ceil(data.response.length / 4),
       model: 'local',
     };
-    
+
     return data.response;
   }
 
@@ -503,7 +519,7 @@ export class ClaudeProvider implements LLMProvider {
 
   constructor(
     private apiKey: string,
-    private model: string = 'claude-3-5-haiku-20241022'
+    private model: string = 'claude-3-5-haiku-20241022',
   ) {
     // OAuth tokens start with sk-ant-oat
     this.isOAuth = apiKey.startsWith('sk-ant-oat');
@@ -541,7 +557,7 @@ export class ClaudeProvider implements LLMProvider {
       throw new Error(`Claude error: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as ClaudeResponse;
 
     // Track usage from API response
     this.lastUsage = {
@@ -564,14 +580,17 @@ export class ClaudeProvider implements LLMProvider {
 export class OpenAIProvider implements LLMProvider {
   private lastUsage: { inputTokens: number; outputTokens: number; model: string } | null = null;
 
-  constructor(private apiKey: string, private model: string = 'gpt-4o-mini') {}
+  constructor(
+    private apiKey: string,
+    private model: string = 'gpt-4o-mini',
+  ) {}
 
   async complete(prompt: string): Promise<string> {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify({
         model: this.model,
@@ -584,15 +603,16 @@ export class OpenAIProvider implements LLMProvider {
       throw new Error(`OpenAI error: ${response.status}`);
     }
 
-    const data = await response.json();
-    
+    const data = (await response.json()) as OpenAIResponse;
+
     // Track usage from API response
     this.lastUsage = {
       inputTokens: data.usage?.prompt_tokens || Math.ceil(prompt.length / 4),
-      outputTokens: data.usage?.completion_tokens || Math.ceil(data.choices[0].message.content.length / 4),
+      outputTokens:
+        data.usage?.completion_tokens || Math.ceil(data.choices[0].message.content.length / 4),
       model: this.model,
     };
-    
+
     return data.choices[0].message.content;
   }
 

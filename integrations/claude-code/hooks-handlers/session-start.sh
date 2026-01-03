@@ -1,41 +1,45 @@
 #!/usr/bin/env bash
+# Alexandria v2: Session Start Hook
+#
+# Purpose: Start session tracking and inject memory context
+# Matches pi-coding-agent behavior exactly
+#
+# Flow:
+#   1. Start Alexandria session tracking
+#   2. Generate context pack (task level, progressive disclosure)
+#   3. Check for stale memories
+#   4. Inject via hookSpecificOutput.additionalContext
 
-# Alexandria Memory Context Injection Hook
-# Injects relevant memories at session start and checks for stale memories
-
-# Check if alex is available
+# Graceful degradation - if alex not available, exit silently
 if ! command -v alex &> /dev/null; then
     exit 0
 fi
 
-# Start a new session
-alex session start --json 2>/dev/null
+# Start Alexandria session for tracking
+alex session start --json >/dev/null 2>&1
 
-# Get context pack with memories (budget 1500 tokens, text format)
-CONTEXT_PACK=$(alex pack --level task -b 1500 -f text 2>/dev/null)
+# Generate context pack with progressive disclosure
+# Default: task level (~500 tokens)
+# --hot prioritizes frequently accessed memories (won't increment access counts)
+CONTEXT_PACK=$(alex pack --level task --hot -f text 2>/dev/null)
 
-# Get stale memories
+# Check for stale memories
 STALE_JSON=$(alex check --json 2>/dev/null)
 STALE_COUNT=$(echo "$STALE_JSON" | jq -r '.stale | length' 2>/dev/null || echo "0")
 
-# Build context string
+# Build context to inject
 CONTEXT=""
 
-# Add memory context if we have any
-if [ -n "$CONTEXT_PACK" ] && [ "$CONTEXT_PACK" != "null" ]; then
+if [ -n "$CONTEXT_PACK" ] && [ "$CONTEXT_PACK" != "null" ] && [ ${#CONTEXT_PACK} -gt 50 ]; then
     CONTEXT="# Alexandria Memory Context
-
-The following memories from past sessions are relevant to this project:
 
 ${CONTEXT_PACK}
 
-Use these memories to inform your responses. They contain past decisions, constraints, known fixes, and conventions for this codebase."
+These memories contain past decisions, constraints, known fixes, and conventions for this codebase."
 fi
 
-# Add stale memory warnings if any
+# Add stale memory notice
 if [ "$STALE_COUNT" != "0" ] && [ -n "$STALE_COUNT" ]; then
-    STALE_LIST=$(echo "$STALE_JSON" | jq -r '.stale[] | "- [\(.type)] \"\(.content | .[0:50])...\" (Reason: \(.reasons | join(", ")))"' 2>/dev/null)
-
     if [ -n "$CONTEXT" ]; then
         CONTEXT="${CONTEXT}
 
@@ -43,18 +47,12 @@ if [ "$STALE_COUNT" != "0" ] && [ -n "$STALE_COUNT" ]; then
 
 "
     fi
-    CONTEXT="${CONTEXT}**Note:** ${STALE_COUNT} memory(ies) may be stale and need verification:
-
-${STALE_LIST}
-
-You can verify or retire these with \`alex verify <id>\` or \`alex retire <id>\`."
+    CONTEXT="${CONTEXT}⚠️ ${STALE_COUNT} memory(ies) may be stale. Run \`alex check\` to review."
 fi
 
-# Only output if we have context
+# Inject context via hookSpecificOutput
 if [ -n "$CONTEXT" ]; then
-    # Escape for JSON (replace newlines, quotes, backslashes)
     ESCAPED_CONTEXT=$(echo "$CONTEXT" | jq -Rs '.')
-
     cat << EOF
 {
   "hookSpecificOutput": {

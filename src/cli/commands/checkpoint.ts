@@ -4,9 +4,9 @@
 
 import type { Database } from 'bun:sqlite';
 import type { ArgumentsCamelCase, Argv } from 'yargs';
+import { Ingestor } from '../../ingestor/index.ts';
 import { getConnection } from '../../stores/connection.ts';
 import { SessionStore } from '../../stores/sessions.ts';
-import { Ingestor } from '../../ingestor/index.ts';
 
 interface CheckpointArgs {
   session?: string;
@@ -28,7 +28,8 @@ export function builder(yargs: Argv) {
       description: 'Reason for checkpoint',
       default: 'Manual checkpoint',
     })
-    .option('show-stats', {
+    .option('showStats', {
+      alias: 'show-stats',
       type: 'boolean',
       description: 'Show checkpoint buffer statistics before executing',
       default: false,
@@ -37,7 +38,7 @@ export function builder(yargs: Argv) {
 
 export async function handler(args: ArgumentsCamelCase<CheckpointArgs>) {
   const db = getConnection();
-  
+
   try {
     await executeCheckpoint(db, {
       sessionId: args.session,
@@ -83,7 +84,7 @@ async function executeCheckpoint(db: Database, options: CheckpointOptions) {
 
   // Load events from the session into checkpoint buffer (only since last checkpoint)
   const eventCount = ingestor.loadSessionForCheckpoint(sessionId, lastCheckpointAt);
-  
+
   // Show buffer stats if requested
   if (options.showStats) {
     const stats = ingestor.getCheckpointStats();

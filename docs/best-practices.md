@@ -2,46 +2,36 @@
 
 Tips for getting the most out of Alexandria.
 
-## When to Add Memories
+## Automatic Memory Extraction
 
-### Do Add Memories For:
+Memories are automatically extracted at checkpoints via tiered curation:
 
-**Decisions with rationale**
+1. **Tier 0 (Deterministic)** - Error→fix patterns, user corrections, repeated patterns
+2. **Tier 1 (Haiku LLM)** - Decisions, conventions, preferences (runs in background)
+3. **Manual** - Use `alex add` for things you want to explicitly remember
+
+### Good Memory Examples
+
 ```bash
-alex add-decision "Use SQLite instead of PostgreSQL" \
-  --rationale "Single-file deployment, good enough for our scale"
+# Decision with rationale
+alex add "Using Bun instead of Node for this project because it handles TypeScript natively and is faster" --type decision --approve
+
+# Specific fix with context
+alex add "When sharp fails to compile on Alpine, install vips-dev first" --type known_fix --approve
+
+# Hard constraint
+alex add "Never commit .env files - contains production secrets" --type constraint --approve
+
+# Project convention
+alex add "All API endpoints return { success: boolean, data?: T, error?: string }" --type convention --approve
 ```
 
-**Non-obvious constraints**
-```bash
-alex add "File uploads must not exceed 10MB - Lambda limit" \
-  --type constraint --approve
-```
+### Skip These
 
-**Solutions to tricky bugs**
-```bash
-alex add "CORS error fix: add credentials: 'include' to fetch options" \
-  --type known_fix
-```
-
-**Failed approaches** (so you don't repeat them)
-```bash
-alex add "Web Workers can't use canvas API - PDF generation must stay in main thread" \
-  --type failed_attempt
-```
-
-**Project-specific conventions**
-```bash
-alex add "All API handlers go in src/handlers/, one file per resource" \
-  --type convention
-```
-
-### Don't Add Memories For:
-
-- **Generic programming knowledge** - "Use try/catch for error handling"
-- **Obvious patterns** - "Functions should have descriptive names"  
-- **Temporary notes** - "TODO: fix this later"
-- **Duplicate information** - Check if it already exists first
+- **Meta-commentary**: "I will try X", "Let me check..."
+- **Generic knowledge**: "Use try/catch for errors"
+- **Obvious patterns**: "Functions should have descriptive names"
+- **Transient notes**: "TODO: fix this later"
 
 ## Memory Quality
 
@@ -68,18 +58,38 @@ alex link abc123 --file src/api/users.ts --symbol fetchUser
 
 This enables staleness detection when the code changes.
 
+## Checkpoint Flow
+
+Alexandria uses checkpoint-driven curation:
+
+### Tier 0 (Deterministic)
+Every 10 events, deterministic patterns are extracted:
+- Error → Fix patterns
+- User corrections ("don't", "never", "must")
+- Repeated patterns (3+ occurrences)
+
+### Tier 1 (Haiku LLM)
+If Claude OAuth is available (Claude Code) or API key is set:
+- Haiku extracts decisions, conventions, preferences
+- Background processing (doesn't slow down your session)
+- Memories created as "pending" for review
+
+### Manual
+You can always add memories manually:
+```bash
+alex add "Important learning" --type decision --approve
+```
+
 ## Review Workflow
 
-### Regular Review
-
-Run `alex review` periodically to process pending memories:
+### Check Pending Memories
 
 ```bash
+# See pending count
+alex review --list
+
 # Interactive review
 alex review
-
-# Quick list of pending
-alex review --list
 ```
 
 ### Revalidation
@@ -92,14 +102,6 @@ alex check
 
 # Interactive revalidation
 alex revalidate
-```
-
-### Conflict Detection
-
-Find memories that might contradict each other:
-
-```bash
-alex conflicts
 ```
 
 ## Confidence Tiers
@@ -133,7 +135,7 @@ alex pack --level minimal
 ```bash
 alex pack --level task
 ```
-- Constraints + query-relevant memories
+- Constraints + relevant memories
 - Use for: Most development tasks
 
 ### Deep (~1500 tokens)
@@ -160,41 +162,14 @@ alex add "This file has special formatting rules" \
   --type convention --scope file --scope-path src/legacy/parser.ts
 ```
 
-## Integration Tips
-
-### Claude Code
-
-The SessionStart hook automatically prompts for stale memory review. You can respond naturally:
-
-> "Yes, let's review them"
-> "Skip for now, I'll do it later"
-> "The first one is still valid, retire the second"
-
-### Git Workflow
-
-Install git hooks to get notified after commits:
+## Configuration
 
 ```bash
-alex hooks install
-```
+# Auto-checkpoint threshold (default: 10 events)
+export ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD=10
 
-After each commit, you'll see:
-```
-[Alexandria] ⚠️  Some memories may need attention:
-  • 2 memory(s) reference changed files
-  Run 'alex check' for details
-```
-
-### Team Usage
-
-Export memories for sharing:
-```bash
-alex export --file team-memories.json
-```
-
-Import on another machine:
-```bash
-alex export --import --file team-memories.json
+# More frequent checkpoints for shorter sessions
+export ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD=5
 ```
 
 ## Maintenance
@@ -207,14 +182,9 @@ alex list --status stale
 
 # Retire obsolete ones
 alex retire id1 id2 id3
-
-# Check for conflicts
-alex conflicts
 ```
 
 ### Database Location
-
-Alexandria stores data in `~/.alexandria/projects/<project-hash>/`:
 
 ```bash
 # Show current database path
@@ -222,4 +192,14 @@ alex where
 
 # View statistics
 alex stats
+```
+
+### Export/Import
+
+```bash
+# Export for backup or sharing
+alex export --file memories.json
+
+# Import on another machine
+alex export --import --file memories.json
 ```

@@ -11,16 +11,16 @@ export type RetrievalSource = 'memories' | 'events' | 'code';
 export interface RetrievalPlan {
   /** Detected query intent */
   intent: QueryIntent;
-  
+
   /** Which stores to query */
   sources: RetrievalSource[];
-  
+
   /** Memory types to prioritize (empty = all types) */
   typeFilters: ObjectType[];
-  
+
   /** Token budget for results */
   tokenBudget: number;
-  
+
   /** Boost factors for ranking */
   boosts: {
     /** Boost for grounded (code-linked) memories */
@@ -32,17 +32,17 @@ export interface RetrievalPlan {
     /** Boost for specific types */
     typeBoosts?: Partial<Record<ObjectType, number>>;
   };
-  
+
   /** Minimum confidence tier required */
   minConfidence?: ConfidenceTier;
-  
+
   /** Include stale memories? */
   includeStale?: boolean;
 }
 
 const RETRIEVAL_PLANS: Record<QueryIntent, Omit<RetrievalPlan, 'intent'>> = {
   debugging: {
-    sources: ['memories', 'events'],  // Include events for stack traces, errors
+    sources: ['memories', 'events'], // Include events for stack traces, errors
     typeFilters: ['failed_attempt', 'known_fix', 'constraint'],
     tokenBudget: 1000,
     boosts: {
@@ -55,7 +55,7 @@ const RETRIEVAL_PLANS: Record<QueryIntent, Omit<RetrievalPlan, 'intent'>> = {
     },
     includeStale: false,
   },
-  
+
   conventions: {
     sources: ['memories'],
     typeFilters: ['convention', 'preference', 'constraint'],
@@ -69,9 +69,9 @@ const RETRIEVAL_PLANS: Record<QueryIntent, Omit<RetrievalPlan, 'intent'>> = {
     },
     includeStale: false,
   },
-  
+
   implementation: {
-    sources: ['memories', 'code'],  // Include code for examples
+    sources: ['memories', 'code'], // Include code for examples
     typeFilters: ['decision', 'convention', 'known_fix', 'constraint'],
     tokenBudget: 800,
     boosts: {
@@ -84,7 +84,7 @@ const RETRIEVAL_PLANS: Record<QueryIntent, Omit<RetrievalPlan, 'intent'>> = {
     },
     includeStale: false,
   },
-  
+
   architecture: {
     sources: ['memories'],
     typeFilters: ['decision', 'convention'],
@@ -96,9 +96,9 @@ const RETRIEVAL_PLANS: Record<QueryIntent, Omit<RetrievalPlan, 'intent'>> = {
     },
     includeStale: false,
   },
-  
+
   history: {
-    sources: ['memories', 'events'],  // Include events for historical context
+    sources: ['memories', 'events'], // Include events for historical context
     typeFilters: ['decision'],
     tokenBudget: 500,
     boosts: {
@@ -110,9 +110,9 @@ const RETRIEVAL_PLANS: Record<QueryIntent, Omit<RetrievalPlan, 'intent'>> = {
     },
     includeStale: true, // Include old decisions for historical context
   },
-  
+
   validation: {
-    sources: ['memories', 'code'],  // Include code to verify against
+    sources: ['memories', 'code'], // Include code to verify against
     typeFilters: [],
     tokenBudget: 300,
     boosts: {
@@ -123,7 +123,7 @@ const RETRIEVAL_PLANS: Record<QueryIntent, Omit<RetrievalPlan, 'intent'>> = {
     minConfidence: 'grounded',
     includeStale: false,
   },
-  
+
   general: {
     sources: ['memories'],
     typeFilters: [],
@@ -142,13 +142,13 @@ export class RetrievalRouter {
   route(query: string): RetrievalPlan {
     const intent = classifyIntent(query);
     const plan = RETRIEVAL_PLANS[intent];
-    
+
     return {
       intent,
       ...plan,
     };
   }
-  
+
   /**
    * Get plan for a specific intent
    */
@@ -158,17 +158,18 @@ export class RetrievalRouter {
       ...RETRIEVAL_PLANS[intent],
     };
   }
-  
+
   /**
    * Merge a custom plan with defaults
    */
   customPlan(
     intent: QueryIntent,
-    overrides: Partial<Omit<RetrievalPlan, 'intent'>>
+    overrides: Partial<Omit<RetrievalPlan, 'intent'>>,
   ): RetrievalPlan {
     const base = RETRIEVAL_PLANS[intent];
     return {
       intent,
+      sources: overrides.sources ?? base.sources,
       typeFilters: overrides.typeFilters ?? base.typeFilters,
       tokenBudget: overrides.tokenBudget ?? base.tokenBudget,
       boosts: {
@@ -186,24 +187,24 @@ export class RetrievalRouter {
  */
 export function planToRerankerBoosts(plan: RetrievalPlan): Record<string, number> {
   const boosts: Record<string, number> = {};
-  
+
   if (plan.boosts.typeBoosts) {
     for (const [type, boost] of Object.entries(plan.boosts.typeBoosts)) {
       boosts[`type_${type}`] = boost;
     }
   }
-  
+
   if (plan.boosts.grounded) {
     boosts.grounded = plan.boosts.grounded;
   }
-  
+
   if (plan.boosts.hasCodeRefs) {
     boosts.hasCodeRefs = plan.boosts.hasCodeRefs;
   }
-  
+
   if (plan.boosts.recentlyVerified) {
     boosts.recentlyVerified = plan.boosts.recentlyVerified;
   }
-  
+
   return boosts;
 }

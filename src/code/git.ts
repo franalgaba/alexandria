@@ -58,7 +58,7 @@ export function getShortCommit(projectPath: string = process.cwd()): string | nu
  */
 export function getChangedFilesSince(
   commit: string,
-  projectPath: string = process.cwd()
+  projectPath: string = process.cwd(),
 ): string[] {
   try {
     const result = execSync(`git diff --name-only ${commit} HEAD`, {
@@ -81,19 +81,17 @@ export function getChangedFilesSince(
 export function hasFileChangedSince(
   filePath: string,
   commit: string,
-  projectPath: string = process.cwd()
+  projectPath: string = process.cwd(),
 ): boolean {
   const changedFiles = getChangedFilesSince(commit, projectPath);
-  const normalizedPath = filePath.startsWith('/') 
-    ? filePath 
-    : resolve(projectPath, filePath);
+  const normalizedPath = filePath.startsWith('/') ? filePath : resolve(projectPath, filePath);
   const gitRoot = getGitRoot(projectPath);
-  
+
   if (!gitRoot) return false;
-  
+
   // Convert to relative path from git root
   const relativePath = normalizedPath.replace(gitRoot + '/', '');
-  
+
   return changedFiles.includes(relativePath) || changedFiles.includes(filePath);
 }
 
@@ -103,7 +101,7 @@ export function hasFileChangedSince(
 export function getFileAtCommit(
   filePath: string,
   commit: string,
-  projectPath: string = process.cwd()
+  projectPath: string = process.cwd(),
 ): string | null {
   try {
     const result = execSync(`git show ${commit}:${filePath}`, {
@@ -120,17 +118,12 @@ export function getFileAtCommit(
 /**
  * Check if a file exists in the current working tree
  */
-export function fileExistsInRepo(
-  filePath: string,
-  projectPath: string = process.cwd()
-): boolean {
+export function fileExistsInRepo(filePath: string, projectPath: string = process.cwd()): boolean {
   const gitRoot = getGitRoot(projectPath);
   if (!gitRoot) return false;
-  
-  const fullPath = filePath.startsWith('/') 
-    ? filePath 
-    : join(gitRoot, filePath);
-  
+
+  const fullPath = filePath.startsWith('/') ? filePath : join(gitRoot, filePath);
+
   return existsSync(fullPath);
 }
 
@@ -139,7 +132,7 @@ export function fileExistsInRepo(
  */
 export function getLastModifiedCommit(
   filePath: string,
-  projectPath: string = process.cwd()
+  projectPath: string = process.cwd(),
 ): string | null {
   try {
     const result = execSync(`git log -1 --format=%H -- ${filePath}`, {
@@ -158,15 +151,15 @@ export function getLastModifiedCommit(
  */
 export function getRelativePath(
   absolutePath: string,
-  projectPath: string = process.cwd()
+  projectPath: string = process.cwd(),
 ): string | null {
   const gitRoot = getGitRoot(projectPath);
   if (!gitRoot) return null;
-  
+
   if (absolutePath.startsWith(gitRoot)) {
     return absolutePath.substring(gitRoot.length + 1);
   }
-  
+
   return absolutePath;
 }
 
@@ -175,10 +168,10 @@ export function getRelativePath(
  */
 export function resolveFromGitRoot(
   relativePath: string,
-  projectPath: string = process.cwd()
+  projectPath: string = process.cwd(),
 ): string | null {
   const gitRoot = getGitRoot(projectPath);
   if (!gitRoot) return null;
-  
+
   return join(gitRoot, relativePath);
 }

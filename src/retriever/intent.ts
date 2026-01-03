@@ -1,17 +1,17 @@
 /**
  * Query intent classification
- * 
+ *
  * Classifies user queries into intents to route retrieval strategies.
  */
 
 export type QueryIntent =
-  | 'debugging'      // errors, failures, bugs, fixes
-  | 'conventions'    // how we do things, naming, style
+  | 'debugging' // errors, failures, bugs, fixes
+  | 'conventions' // how we do things, naming, style
   | 'implementation' // how to build, add, create
-  | 'architecture'   // structure, design, patterns
-  | 'history'        // what we decided, past choices
-  | 'validation'     // is X still true, verify
-  | 'general';       // fallback
+  | 'architecture' // structure, design, patterns
+  | 'history' // what we decided, past choices
+  | 'validation' // is X still true, verify
+  | 'general'; // fallback
 
 interface IntentPattern {
   intent: QueryIntent;
@@ -32,10 +32,24 @@ const INTENT_PATTERNS: IntentPattern[] = [
       /troubleshoot/i,
     ],
     keywords: [
-      'error', 'fail', 'failed', 'failing', 'failure',
-      'bug', 'crash', 'broken', 'break', 'issue',
-      'problem', 'wrong', 'fix', 'debug', 'troubleshoot',
-      'exception', 'stack trace', 'stacktrace',
+      'error',
+      'fail',
+      'failed',
+      'failing',
+      'failure',
+      'bug',
+      'crash',
+      'broken',
+      'break',
+      'issue',
+      'problem',
+      'wrong',
+      'fix',
+      'debug',
+      'troubleshoot',
+      'exception',
+      'stack trace',
+      'stacktrace',
     ],
   },
   {
@@ -49,10 +63,20 @@ const INTENT_PATTERNS: IntentPattern[] = [
       /how\s+are\s+.*\s+named/i,
     ],
     keywords: [
-      'convention', 'conventions', 'style', 'naming',
-      'format', 'formatting', 'standard', 'standards',
-      'best practice', 'practices', 'guideline', 'guidelines',
-      'how do we', 'how should we',
+      'convention',
+      'conventions',
+      'style',
+      'naming',
+      'format',
+      'formatting',
+      'standard',
+      'standards',
+      'best practice',
+      'practices',
+      'guideline',
+      'guidelines',
+      'how do we',
+      'how should we',
     ],
   },
   {
@@ -66,10 +90,21 @@ const INTENT_PATTERNS: IntentPattern[] = [
       /write\s+(a|an|the)\s+/i,
     ],
     keywords: [
-      'implement', 'implementation', 'add', 'adding',
-      'create', 'creating', 'build', 'building',
-      'write', 'writing', 'make', 'making',
-      'how do i', 'how to', 'how can i',
+      'implement',
+      'implementation',
+      'add',
+      'adding',
+      'create',
+      'creating',
+      'build',
+      'building',
+      'write',
+      'writing',
+      'make',
+      'making',
+      'how do i',
+      'how to',
+      'how can i',
     ],
   },
   {
@@ -82,9 +117,17 @@ const INTENT_PATTERNS: IntentPattern[] = [
       /system\s+design/i,
     ],
     keywords: [
-      'architecture', 'structure', 'design', 'pattern',
-      'organized', 'layout', 'diagram', 'overview',
-      'high level', 'high-level', 'system',
+      'architecture',
+      'structure',
+      'design',
+      'pattern',
+      'organized',
+      'layout',
+      'diagram',
+      'overview',
+      'high level',
+      'high-level',
+      'system',
     ],
   },
   {
@@ -98,10 +141,20 @@ const INTENT_PATTERNS: IntentPattern[] = [
       /what\s+was\s+the\s+decision/i,
     ],
     keywords: [
-      'decided', 'decision', 'chose', 'chosen', 'picked',
-      'history', 'previous', 'previously', 'past',
-      'why did we', 'what did we', 'when did we',
-      'rationale', 'reasoning',
+      'decided',
+      'decision',
+      'chose',
+      'chosen',
+      'picked',
+      'history',
+      'previous',
+      'previously',
+      'past',
+      'why did we',
+      'what did we',
+      'when did we',
+      'rationale',
+      'reasoning',
     ],
   },
   {
@@ -115,9 +168,17 @@ const INTENT_PATTERNS: IntentPattern[] = [
       /is\s+.*\s+still\s+/i,
     ],
     keywords: [
-      'still true', 'still valid', 'still correct',
-      'verify', 'validate', 'confirm', 'check',
-      'accurate', 'up to date', 'up-to-date', 'current',
+      'still true',
+      'still valid',
+      'still correct',
+      'verify',
+      'validate',
+      'confirm',
+      'check',
+      'accurate',
+      'up to date',
+      'up-to-date',
+      'current',
     ],
   },
 ];
@@ -127,7 +188,7 @@ const INTENT_PATTERNS: IntentPattern[] = [
  */
 export function classifyIntent(query: string): QueryIntent {
   const lowerQuery = query.toLowerCase();
-  
+
   // Score each intent
   const scores: Record<QueryIntent, number> = {
     debugging: 0,
@@ -138,7 +199,7 @@ export function classifyIntent(query: string): QueryIntent {
     validation: 0,
     general: 0,
   };
-  
+
   for (const { intent, patterns, keywords } of INTENT_PATTERNS) {
     // Check patterns (higher weight)
     for (const pattern of patterns) {
@@ -146,7 +207,7 @@ export function classifyIntent(query: string): QueryIntent {
         scores[intent] += 3;
       }
     }
-    
+
     // Check keywords (lower weight)
     for (const keyword of keywords) {
       if (lowerQuery.includes(keyword.toLowerCase())) {
@@ -154,18 +215,18 @@ export function classifyIntent(query: string): QueryIntent {
       }
     }
   }
-  
+
   // Find highest scoring intent
   let maxScore = 0;
   let maxIntent: QueryIntent = 'general';
-  
+
   for (const [intent, score] of Object.entries(scores)) {
     if (score > maxScore) {
       maxScore = score;
       maxIntent = intent as QueryIntent;
     }
   }
-  
+
   // Only return specific intent if score is above threshold
   return maxScore >= 2 ? maxIntent : 'general';
 }

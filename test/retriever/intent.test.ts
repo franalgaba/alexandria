@@ -1,5 +1,9 @@
 import { describe, expect, test } from 'bun:test';
-import { classifyIntent, getIntentDescription, getIntentEmoji } from '../../src/retriever/intent.ts';
+import {
+  classifyIntent,
+  getIntentDescription,
+  getIntentEmoji,
+} from '../../src/retriever/intent.ts';
 
 describe('Intent Classifier', () => {
   describe('debugging intent', () => {

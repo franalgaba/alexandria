@@ -4,9 +4,9 @@
 
 import type { ArgumentsCamelCase, Argv } from 'yargs';
 import {
-  getDbPath,
   getAlexandriaHome,
   getCurrentProjectInfo,
+  getDbPath,
   isUsingGlobalDatabase,
   listProjectDatabases,
 } from '../../stores/connection.ts';
@@ -39,7 +39,7 @@ export async function handler(argv: ArgumentsCamelCase<WhereArgs>): Promise<void
   console.log(`Home: ${home}`);
   console.log(`Current DB: ${dbPath}`);
   console.log(
-    `Type: ${isGlobal ? colorize('Global', 'yellow') : colorize('Project-specific', 'green')}`
+    `Type: ${isGlobal ? colorize('Global', 'yellow') : colorize('Project-specific', 'green')}`,
   );
 
   if (projectInfo) {

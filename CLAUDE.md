@@ -1,21 +1,21 @@
 # Alexandria
 
-This is the Alexandria codebase - a local-first memory system for coding agents.
+This is the Alexandria codebase - a local-first memory system for coding agents with checkpoint-driven curation.
 
 ## Quick Reference
 
 ```bash
-# Search memories
-alex search "query"
+# Session management
+alex session start          # Start tracking
+alex checkpoint             # Manual checkpoint
+alex session end            # End session
 
-# Add memory
+# Memory management
 alex add "content" --type decision --approve
-
-# Context pack
-alex pack --level minimal|task|deep
-
-# Check stale memories
-alex check
+alex search "query"
+alex pack --level task
+alex list
+alex check                  # Find stale memories
 
 # Install integrations
 alex install claude-code
@@ -29,7 +29,7 @@ src/
 ├── cli/commands/     # CLI command implementations
 ├── code/             # Git integration, symbol extraction
 ├── indexes/          # FTS5 and vector indexes
-├── ingestor/         # Event ingestion
+├── ingestor/         # Event ingestion, checkpoint, curators
 ├── retriever/        # Search, context packs, intent routing
 ├── reviewer/         # Review pipeline, staleness
 ├── stores/           # SQLite stores
@@ -37,7 +37,7 @@ src/
 └── utils/            # Utilities
 
 integrations/
-├── claude-code/      # Claude Code plugin
+├── claude-code/      # Claude Code plugin (hooks + skill)
 └── pi/               # pi-coding-agent hooks
 
 test/                 # Test files
@@ -57,61 +57,64 @@ docs/dev/             # Development documentation
 
 ## Memory Extraction
 
-Alexandria supports two extraction modes:
+Alexandria uses **checkpoint-driven curation** with tiered extraction:
 
-### Pattern-Based (Default)
-- Analyzes events using regex patterns
-- Fast, works offline
-- Lower quality, may capture noise
+### How It Works
 
-### Intelligent Extraction (Recommended)
-- Buffers events and analyzes context
-- Detects patterns: error→fix, user corrections, architecture decisions
-- Uses LLM for synthesis (optional)
+1. **Events buffered** during session (fire-and-forget via hooks)
+2. **Every 10 events**, auto-checkpoint triggers tiered extraction:
+   - **Tier 0** (deterministic): error→fix patterns, user corrections, repeated patterns
+   - **Tier 1** (Haiku): decisions, conventions, preferences (if Claude OAuth available)
+3. **Session end**: Final checkpoint
 
-Enable with environment variable:
-```bash
-export ALEXANDRIA_INTELLIGENT_EXTRACTION=true
+### Automatic Haiku Extraction
 
-# Optional: Configure LLM provider
-export ANTHROPIC_API_KEY=sk-...   # Use Claude
-export OPENAI_API_KEY=sk-...      # Use GPT-4
-export OLLAMA_MODEL=llama3.2      # Use local Ollama (default)
-```
+When running in Claude Code, Alexandria automatically uses the existing OAuth token to call Haiku for intelligent extraction - **no separate API key needed!**
+
+Haiku extracts:
+- Decisions with rationale
+- Coding conventions
+- Preferences and patterns
+- Known fixes
+
+Memories are created as "pending" for review via `alex list` or `alex review`.
 
 ## When to Add Memories
 
-Add memories **explicitly** when:
-- Making technical decisions with rationale (`alex add-decision`)
-- Discovering hard constraints (`alex add --type constraint`)
-- Finding fixes after troubleshooting (`alex add --type known_fix`)
-- Documenting project conventions (`alex add --type convention`)
+Add memories when:
+- Making technical decisions with rationale
+- Discovering hard constraints
+- Finding fixes after troubleshooting
+- Documenting project conventions
 
 ### What Makes a Good Memory
 
 ✅ **Good memories are:**
 - Actionable - can be applied in future sessions
 - Specific - includes context and reasoning
-- Grounded - based on actual experience, not speculation
+- Grounded - based on actual experience
 
-❌ **Avoid storing:**
-- Casual conversation or meta-commentary
-- Code fragments without context
+❌ **Skip:**
+- Meta-commentary ("I will try X")
 - Generic/obvious statements
-- Transient information (one-time fixes)
+- Transient/one-time things
 
 ### Examples
 
 ```bash
 # Good: Specific fix with context
-alex add "When sharp fails to compile on Alpine, install vips-dev first" --type known_fix
+alex add "When sharp fails to compile on Alpine, install vips-dev first" --type known_fix --approve
 
 # Good: Decision with rationale  
-alex add "Using Bun instead of Node for this project because it handles TypeScript natively" --type decision
+alex add "Using Bun instead of Node because it handles TypeScript natively" --type decision --approve
 
-# Bad: Too vague
-alex add "Use the right version" --type constraint
+# Good: Hard constraint
+alex add "Never commit .env files - contains production secrets" --type constraint --approve
+```
 
-# Bad: Not actionable
-alex add "The build failed" --type failed_attempt
+## Configuration
+
+```bash
+# Auto-checkpoint threshold (default: 10 events)
+export ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD=10
 ```

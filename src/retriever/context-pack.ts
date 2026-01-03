@@ -8,7 +8,7 @@ import { MemoryObjectStore } from '../stores/memory-objects.ts';
 import { SessionStore } from '../stores/sessions.ts';
 import type { PackOptions } from '../types/common.ts';
 import type { MemoryObject } from '../types/memory-objects.ts';
-import type { ContextPack, SearchResult, LegacyContextPack } from '../types/retriever.ts';
+import type { ContextPack, LegacyContextPack, SearchResult } from '../types/retriever.ts';
 import type { PreviousSessionContext } from '../types/sessions.ts';
 import { generatePrompts, type RevalidationPrompt } from '../utils/revalidation.ts';
 import { estimateTokens } from '../utils/tokens.ts';
@@ -37,7 +37,7 @@ export class ContextPackCompiler {
   /**
    * Compile a context pack for session injection
    */
-  async compile(options: PackOptions = {}): Promise<ContextPack> {
+  async compile(options: PackOptions = {}): Promise<LegacyContextPack> {
     const budget = options.tokenBudget ?? 1500;
     let remaining = budget;
 
@@ -96,7 +96,7 @@ export class ContextPackCompiler {
     // 6. Check for stale memories and generate revalidation prompts
     const allIncluded = [...constraints, ...included];
     const stalenessResults = new Map(
-      allIncluded.map(m => [m.id, this.stalenessChecker.check(m)])
+      allIncluded.map((m) => [m.id, this.stalenessChecker.check(m)]),
     );
     const revalidationPrompts = generatePrompts(allIncluded, stalenessResults);
 
@@ -114,7 +114,7 @@ export class ContextPackCompiler {
   /**
    * Compile a minimal pack (constraints only)
    */
-  compileMinimal(): ContextPack {
+  compileMinimal(): LegacyContextPack {
     const constraints = this.store.getActiveConstraints();
     let tokenCount = 0;
 
@@ -201,7 +201,7 @@ export class ContextPackCompiler {
   /**
    * Refresh access counts for objects in a pack
    */
-  refreshAccessCounts(pack: ContextPack): void {
+  refreshAccessCounts(pack: LegacyContextPack): void {
     for (const obj of pack.constraints) {
       this.store.recordAccess(obj.id);
     }

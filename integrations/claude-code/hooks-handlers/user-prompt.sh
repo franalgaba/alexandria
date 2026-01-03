@@ -1,46 +1,70 @@
 #!/usr/bin/env bash
-# Capture user prompts and inject task-relevant memories for Alexandria
+# Alexandria v2: User Prompt Hook with Context Management
+#
+# Purpose:
+# 1. Buffer user prompts for checkpoint curation
+# 2. Check context window usage (threshold: 50%)
+# 3. Check for progressive disclosure triggers
+# 4. Re-inject memories if escalation detected
 
-# Check if alex is available
+# Graceful degradation
 if ! command -v alex &> /dev/null; then
     exit 0
 fi
 
-# Read the hook input from stdin
+# Read hook input
 INPUT=$(cat)
-
-# Extract user prompt from the input
 USER_PROMPT=$(echo "$INPUT" | jq -r '.user_prompt // empty' 2>/dev/null)
+TRANSCRIPT=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
 
+# Skip short prompts
 if [ -z "$USER_PROMPT" ] || [ ${#USER_PROMPT} -lt 10 ]; then
     exit 0
 fi
 
-# Ingest the user prompt (fire-and-forget, run in background)
-echo "$USER_PROMPT" | alex ingest --type user_prompt --skip-embedding 2>/dev/null &
+# Fire-and-forget: buffer for checkpoint curation
+(echo "$USER_PROMPT" | alex ingest --type user_prompt --skip-embedding 2>/dev/null) &
 
-# Search for relevant memories based on the user's query
-SEARCH_RESULTS=$(alex search "$USER_PROMPT" --limit 5 --json 2>/dev/null)
-RESULT_COUNT=$(echo "$SEARCH_RESULTS" | jq -r 'length' 2>/dev/null || echo "0")
+# Check context window usage (if transcript available)
+if [ -n "$TRANSCRIPT" ] && [ -f "$TRANSCRIPT" ]; then
+    CONTEXT_CHECK=$(alex context --transcript "$TRANSCRIPT" --json 2>/dev/null)
+    EXCEEDS=$(echo "$CONTEXT_CHECK" | jq -r '.exceeds50Percent' 2>/dev/null)
+    PERCENTAGE=$(echo "$CONTEXT_CHECK" | jq -r '.percentage' 2>/dev/null)
 
-# If we found relevant memories, inject them as context
-if [ "$RESULT_COUNT" != "0" ] && [ "$RESULT_COUNT" != "null" ] && [ -n "$RESULT_COUNT" ]; then
-    # Format the results
-    MEMORY_LIST=$(echo "$SEARCH_RESULTS" | jq -r '.[] | "- [\(.object.objectType)] \(.object.content)"' 2>/dev/null)
+    if [ "$EXCEEDS" = "true" ]; then
+        # Extract learnings before suggesting clear
+        alex checkpoint --reason "Auto: context at ${PERCENTAGE}%" 2>/dev/null
 
-    if [ -n "$MEMORY_LIST" ]; then
-        CONTEXT="**Relevant memories for this task:**
-
-${MEMORY_LIST}"
-
-        # Escape for JSON
-        ESCAPED_CONTEXT=$(echo "$CONTEXT" | jq -Rs '.')
-
+        # Output message to user
         cat << EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "UserPromptSubmit",
-    "additionalContext": ${ESCAPED_CONTEXT}
+    "additionalContext": "⚠️ Context window at ${PERCENTAGE}%. Memories extracted via checkpoint. Consider using /clear to continue with fresh context and preserved learnings."
+  }
+}
+EOF
+        exit 0
+    fi
+fi
+
+# Check for progressive disclosure triggers
+DISCLOSURE=$(alex disclose --check --query "$USER_PROMPT" 2>/dev/null)
+NEEDED=$(echo "$DISCLOSURE" | jq -r '.needed' 2>/dev/null)
+
+if [ "$NEEDED" = "true" ]; then
+    TRIGGER=$(echo "$DISCLOSURE" | jq -r '.trigger' 2>/dev/null)
+
+    # Get incremental context
+    CONTEXT=$(alex disclose --query "$USER_PROMPT" -f text 2>/dev/null)
+
+    if [ -n "$CONTEXT" ] && [ ${#CONTEXT} -gt 50 ]; then
+        ESCAPED=$(echo "$CONTEXT" | jq -Rs '.')
+        cat << EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "UserPromptSubmit",
+    "additionalContext": ${ESCAPED}
   }
 }
 EOF

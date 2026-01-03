@@ -3,14 +3,14 @@
  */
 
 import type { ArgumentsCamelCase, Argv } from 'yargs';
+import { StalenessChecker } from '../../reviewer/staleness.ts';
 import { getConnection } from '../../stores/connection.ts';
 import { MemoryObjectStore } from '../../stores/memory-objects.ts';
-import { StalenessChecker } from '../../reviewer/staleness.ts';
-import { 
-  isDecisionStructured, 
-  isContractStructured, 
-  formatDecision,
+import {
   formatContract,
+  formatDecision,
+  isContractStructured,
+  isDecisionStructured,
 } from '../../types/structured.ts';
 import { getConfidenceEmoji, getConfidenceLabel } from '../../utils/confidence.ts';
 import { colorize } from '../utils.ts';
@@ -41,54 +41,59 @@ export async function handler(argv: ArgumentsCamelCase<ShowArgs>): Promise<void>
   const db = getConnection();
   const store = new MemoryObjectStore(db);
   const checker = new StalenessChecker(db);
-  
+
   // Find memory by ID or prefix
   const allMemories = store.list({});
-  const memory = allMemories.find(m => 
-    m.id === argv.id || m.id.startsWith(argv.id)
-  );
-  
+  const memory = allMemories.find((m) => m.id === argv.id || m.id.startsWith(argv.id));
+
   if (!memory) {
     console.error(colorize(`Memory not found: ${argv.id}`, 'red'));
     process.exit(1);
   }
-  
+
   // Check staleness
   const stalenessResult = checker.check(memory);
-  
+
   if (argv.json) {
-    console.log(JSON.stringify({
-      ...memory,
-      isStale: stalenessResult.isStale,
-      stalenessReasons: stalenessResult.reasons,
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          ...memory,
+          isStale: stalenessResult.isStale,
+          stalenessReasons: stalenessResult.reasons,
+        },
+        null,
+        2,
+      ),
+    );
     return;
   }
-  
+
   // Format output
-  const typeEmoji = {
-    decision: '🎯',
-    constraint: '🚫',
-    convention: '📏',
-    known_fix: '✅',
-    failed_attempt: '❌',
-    preference: '⭐',
-    environment: '⚙️',
-  }[memory.objectType] || '📝';
-  
+  const typeEmoji =
+    {
+      decision: '🎯',
+      constraint: '🚫',
+      convention: '📏',
+      known_fix: '✅',
+      failed_attempt: '❌',
+      preference: '⭐',
+      environment: '⚙️',
+    }[memory.objectType] || '📝';
+
   const statusColor = {
     active: 'green',
     stale: 'yellow',
     superseded: 'dim',
     retired: 'dim',
   }[memory.status] as 'green' | 'yellow' | 'dim';
-  
+
   console.log();
   console.log(`${typeEmoji} ${colorize(`[${memory.objectType}]`, 'cyan')} ${memory.content}`);
   console.log();
   const tierEmoji = getConfidenceEmoji(memory.confidenceTier);
   const tierLabel = getConfidenceLabel(memory.confidenceTier);
-  
+
   console.log(`  ID:         ${memory.id}`);
   console.log(`  Status:     ${colorize(memory.status, statusColor)}`);
   console.log(`  Confidence: ${tierEmoji} ${tierLabel}`);
@@ -96,31 +101,45 @@ export async function handler(argv: ArgumentsCamelCase<ShowArgs>): Promise<void>
   console.log(`  Created:    ${memory.createdAt.toISOString()}`);
   console.log(`  Updated:    ${memory.updatedAt.toISOString()}`);
   console.log(`  Accessed:   ${memory.accessCount} times`);
-  
+
   if (memory.lastAccessed) {
     console.log(`  Last used:  ${memory.lastAccessed.toISOString()}`);
   }
-  
+
   if (memory.lastVerifiedAt) {
     console.log(`  Verified:   ${memory.lastVerifiedAt.toISOString()}`);
   }
-  
+
+  // Brain-inspired evolution fields
+  const strengthPercent = Math.round(memory.strength * 100);
+  const strengthBar = '█'.repeat(Math.round(strengthPercent / 10)) + '░'.repeat(10 - Math.round(strengthPercent / 10));
+  const strengthColor = memory.strength > 0.7 ? 'green' : memory.strength > 0.3 ? 'yellow' : 'red';
+  console.log(`  Strength:   ${colorize(`[${strengthBar}]`, strengthColor)} ${strengthPercent}%`);
+
+  const outcomePercent = Math.round(memory.outcomeScore * 100);
+  const outcomeLabel = memory.outcomeScore > 0.7 ? 'helpful' : memory.outcomeScore < 0.3 ? 'unhelpful' : 'neutral';
+  console.log(`  Outcome:    ${outcomePercent}% (${outcomeLabel})`);
+
+  if (memory.lastReinforcedAt) {
+    console.log(`  Reinforced: ${memory.lastReinforcedAt.toISOString()}`);
+  }
+
   // Code refs
   if (memory.codeRefs.length > 0) {
     console.log();
     console.log(colorize('  Code References:', 'bold'));
-    
+
     for (const ref of memory.codeRefs) {
       let refLine = `    📄 ${ref.path}`;
-      
+
       if (ref.type === 'symbol' && ref.symbol) {
         refLine = `    🔧 ${ref.path}:${ref.symbol}`;
       } else if (ref.type === 'line_range' && ref.lineRange) {
         refLine = `    📍 ${ref.path}:${ref.lineRange[0]}-${ref.lineRange[1]}`;
       }
-      
+
       console.log(refLine);
-      
+
       if (ref.verifiedAtCommit) {
         console.log(`       Verified at: ${ref.verifiedAtCommit.substring(0, 7)}`);
       }
@@ -129,7 +148,7 @@ export async function handler(argv: ArgumentsCamelCase<ShowArgs>): Promise<void>
       }
     }
   }
-  
+
   // Staleness warning
   if (stalenessResult.isStale) {
     console.log();
@@ -140,23 +159,23 @@ export async function handler(argv: ArgumentsCamelCase<ShowArgs>): Promise<void>
     console.log();
     console.log(`  Run: alex verify ${memory.id.substring(0, 8)}`);
   }
-  
+
   // Evidence
   if (memory.evidenceEventIds.length > 0) {
     console.log();
     console.log(colorize('  Evidence:', 'bold'));
     console.log(`    Event IDs: ${memory.evidenceEventIds.join(', ')}`);
   }
-  
+
   if (memory.evidenceExcerpt) {
     console.log(`    Excerpt: "${memory.evidenceExcerpt.slice(0, 100)}..."`);
   }
-  
+
   // Structured data
   if (memory.structured) {
     console.log();
     console.log(colorize('  Structured Data:', 'bold'));
-    
+
     if (isDecisionStructured(memory.structured)) {
       const lines = formatDecision(memory.structured).split('\n');
       for (const line of lines) {
@@ -171,6 +190,6 @@ export async function handler(argv: ArgumentsCamelCase<ShowArgs>): Promise<void>
       console.log(`    ${JSON.stringify(memory.structured, null, 2)}`);
     }
   }
-  
+
   console.log();
 }

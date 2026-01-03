@@ -15,18 +15,18 @@ interface SupersedeArgs {
 export const command = 'supersede <old-id> <new-id>';
 export const describe = 'Mark an object as superseded by another';
 
-export function builder(yargs: Argv): Argv<SupersedeArgs> {
+export function builder(yargs: Argv) {
   return yargs
-    .positional('old-id', {
+    .positional('oldId', {
       type: 'string',
       demandOption: true,
       describe: 'ID of object to supersede',
     })
-    .positional('new-id', {
+    .positional('newId', {
       type: 'string',
       demandOption: true,
       describe: 'ID of replacement object',
-    }) as Argv<SupersedeArgs>;
+    });
 }
 
 export async function handler(argv: ArgumentsCamelCase<SupersedeArgs>): Promise<void> {

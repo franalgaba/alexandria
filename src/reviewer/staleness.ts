@@ -1,22 +1,17 @@
 /**
  * Staleness checker - detects when memories are out of sync with code
- * 
+ *
  * Uses COMMIT-BASED checking to avoid noise during active development.
  * Memories are only marked stale when referenced files change in a COMMIT,
  * not on every file save.
  */
 
 import type { Database } from 'bun:sqlite';
-import type { CodeReference } from '../types/code-refs.ts';
-import type { MemoryObject } from '../types/memory-objects.ts';
-import { 
-  fileExistsInRepo, 
-  getCurrentCommit,
-  hasFileChangedSince,
-  isGitRepo,
-} from '../code/git.ts';
+import { fileExistsInRepo, getCurrentCommit, hasFileChangedSince, isGitRepo } from '../code/git.ts';
 import { contentMatches } from '../code/hashing.ts';
 import { MemoryObjectStore } from '../stores/memory-objects.ts';
+import type { CodeReference } from '../types/code-refs.ts';
+import type { MemoryObject } from '../types/memory-objects.ts';
 
 export type StalenessLevel = 'verified' | 'needs_review' | 'stale';
 
@@ -24,7 +19,7 @@ export interface StalenessResult {
   memoryId: string;
   memory: MemoryObject;
   level: StalenessLevel;
-  isStale: boolean;  // Convenience: level !== 'verified'
+  isStale: boolean; // Convenience: level !== 'verified'
   reasons: string[];
   changedRefs: CodeReference[];
   missingRefs: CodeReference[];
@@ -59,7 +54,7 @@ export class StalenessChecker {
     for (const memory of memories) {
       // Skip if recently verified
       if (options.skipRecentlyVerified && memory.lastVerifiedAt) {
-        const hoursSinceVerified = 
+        const hoursSinceVerified =
           (Date.now() - memory.lastVerifiedAt.getTime()) / (1000 * 60 * 60);
         if (hoursSinceVerified < options.skipRecentlyVerified) {
           continue;
@@ -84,9 +79,9 @@ export class StalenessChecker {
    * Check a single memory for staleness
    */
   check(
-    memory: MemoryObject, 
+    memory: MemoryObject,
     projectPath: string = process.cwd(),
-    includeUncommitted: boolean = false
+    includeUncommitted: boolean = false,
   ): StalenessResult {
     const result: StalenessResult = {
       memoryId: memory.id,
@@ -106,7 +101,7 @@ export class StalenessChecker {
 
     for (const ref of memory.codeRefs) {
       const checkResult = this.checkRef(ref, projectPath, inGitRepo, includeUncommitted);
-      
+
       if (checkResult.level === 'stale') {
         result.missingRefs.push(ref);
         result.reasons.push(checkResult.reason);
@@ -130,10 +125,10 @@ export class StalenessChecker {
    * Check a single code reference
    */
   private checkRef(
-    ref: CodeReference, 
+    ref: CodeReference,
     projectPath: string,
     inGitRepo: boolean,
-    includeUncommitted: boolean
+    includeUncommitted: boolean,
   ): { level: StalenessLevel; reason: string } {
     // Check if file exists
     if (!fileExistsInRepo(ref.path, projectPath)) {
@@ -191,7 +186,7 @@ export class StalenessChecker {
     // Update code refs with current commit
     const currentCommit = getCurrentCommit(projectPath);
     if (currentCommit && memory.codeRefs.length > 0) {
-      const updatedRefs = memory.codeRefs.map(ref => ({
+      const updatedRefs = memory.codeRefs.map((ref) => ({
         ...ref,
         verifiedAtCommit: currentCommit,
       }));
@@ -214,14 +209,14 @@ export class StalenessChecker {
 
     for (const memory of memories) {
       const result = this.check(memory, projectPath);
-      
+
       // If verified (no changes), update to current commit
       if (result.level === 'verified') {
-        const updatedRefs = memory.codeRefs.map(ref => ({
+        const updatedRefs = memory.codeRefs.map((ref) => ({
           ...ref,
           verifiedAtCommit: currentCommit,
         }));
-        this.store.update(memory.id, { 
+        this.store.update(memory.id, {
           codeRefs: updatedRefs,
           lastVerifiedAt: new Date(),
         });
@@ -244,7 +239,7 @@ export class StalenessChecker {
   } {
     const memories = this.store.getWithCodeRefs();
     const allResults: StalenessResult[] = [];
-    
+
     let verified = 0;
     let needsReview = 0;
     let stale = 0;
@@ -252,7 +247,7 @@ export class StalenessChecker {
     for (const memory of memories) {
       const result = this.check(memory, projectPath);
       allResults.push(result);
-      
+
       switch (result.level) {
         case 'verified':
           verified++;
@@ -271,7 +266,7 @@ export class StalenessChecker {
       verified,
       needsReview,
       stale,
-      results: allResults.filter(r => r.level !== 'verified'),
+      results: allResults.filter((r) => r.level !== 'verified'),
     };
   }
 }

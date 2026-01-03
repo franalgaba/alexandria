@@ -1,6 +1,46 @@
 # Alexandria Integration for pi-coding-agent
 
-Hooks to integrate Alexandria with [pi-coding-agent](https://github.com/badlogic/pi-coding-agent), automatically capturing your entire conversation for memory extraction.
+Lifecycle-driven memory integration for [pi-coding-agent](https://github.com/badlogic/pi-coding-agent).
+
+## Architecture
+
+Alexandria v2 uses checkpoint-driven curation with progressive disclosure. Both pi-coding-agent and Claude Code integrations follow the same pattern:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              PI CODING AGENT SESSION                     │
+│                                                          │
+│  SessionStart → ToolCall → ToolResult → TurnEnd → End   │
+│       ↓            ↓           ↓           ↓        ↓    │
+│   [inject]     [buffer]    [buffer]    [buffer] [curate]│
+└─────────────────────────────────────────────────────────┘
+         ↓            ↓           ↓           ↓        ↓
+┌─────────────────────────────────────────────────────────┐
+│                  ALEXANDRIA v2                           │
+│                                                          │
+│  Context      Event Buffer (fire-and-forget)    Tiered  │
+│  Pack Gen     ─────────────────────────────→    Curator │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Key Concepts
+
+1. **Progressive Disclosure**: Context packs at 3 levels
+   - `minimal` (~200 tokens): constraints + current goal
+   - `task` (~500 tokens): + relevant memories (default)
+   - `deep` (~1500 tokens): + evidence + history
+
+2. **Checkpoint-Driven Curation**: Events buffered during session, curated at checkpoint
+   - No per-event extraction noise
+   - Tiered curator processes buffered events
+   - Decision stability rules prevent meta-commentary from becoming memories
+
+3. **Fire-and-Forget Capture**: Non-blocking event ingestion
+   - All hooks run fast
+   - Events buffered asynchronously
+   - Doesn't slow down the main session
+
+4. **Graceful Degradation**: If Alexandria fails, pi continues normally
 
 ## Installation
 
@@ -15,105 +55,50 @@ mkdir -p ~/.pi/agent/hooks
 cp integrations/pi/hooks/*.ts ~/.pi/agent/hooks/
 ```
 
-## Available Hooks
+## Hooks
 
-### alexandria.ts
+| Event | Action |
+|-------|--------|
+| `session (start)` | Start session, generate context pack, inject via `pi.send()` |
+| `tool_call` | Buffer event (fire-and-forget) |
+| `tool_result` | Buffer event (fire-and-forget) |
+| `turn_end` | Buffer response (fire-and-forget) |
+| `session (end)` | Trigger checkpoint, run tiered curator, show pending count |
 
-Full conversation capture with **real-time memory extraction** and **automatic context injection**:
+### Context Injection
 
-| Event | What It Captures |
-|-------|------------------|
-| session (start) | Starts session, writes context to `.pi/ALEXANDRIA.md`, checks stale memories |
-| agent_start | User prompts |
-| turn_end | Assistant responses |
-| tool_call | Tool invocations |
-| tool_result | Tool outputs/errors |
-| session (end) | Shows pending memory count |
+On session start:
 
-**Context Injection:**
-On session start, Alexandria writes relevant memories to `.pi/ALEXANDRIA.md` in your project. This file is automatically picked up by pi's context file discovery and included in the system prompt.
+1. Starts Alexandria session (`alex session start`)
+2. Generates context pack at task level (`alex pack --level task`)
+3. Injects via `pi.send()` as a message
+4. Checks for stale memories, notifies if found
 
-Memories are extracted **as events happen**, not at session end. This enables continuous sessions with ground truth capture.
+### Checkpoint Flow
 
-### revalidation.ts
+Checkpoints can be triggered:
+- **Automatically** after N events (default: 10, configure via `ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD`)
+- **On session end** via `alex checkpoint`
+
+When checkpoint runs:
+
+1. Loads events since last checkpoint from database
+2. **Tier 0** (deterministic) runs automatically:
+   - Error→fix patterns
+   - User corrections
+   - Repeated patterns
+3. **Agent-driven extraction**: After auto-checkpoint, the agent is prompted to review the session and extract higher-quality memories using `alex add`
+
+This approach uses the coding agent itself for intelligent extraction - no separate API key needed!
+
+## Hook: revalidation.ts
 
 Interactive memory revalidation at session start.
 
-**Features:**
-- Runs `alex check --json` on session start
-- Shows confirmation dialog if stale memories found
-- Interactive selector for each stale memory:
-  - ✅ Verify - mark as still valid
-  - 🗑️ Retire - remove from active use
-  - ⏭️ Skip - review later
-  - 🚪 Stop - end review session
-
-**Example Flow:**
-
-```
-┌─────────────────────────────────────────────┐
-│ 📚 Alexandria Memory Check                  │
-│                                             │
-│ Found 2 stale memory(ies). Review them now? │
-│                                             │
-│ [Yes]  [No]                                 │
-└─────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────┐
-│ ⚠️ [decision] "Use fetchUser() for API..."  │
-│    Reason: File changed: src/api.ts         │
-│                                             │
-│ > ✅ Verify - still valid                   │
-│   🗑️ Retire - no longer needed              │
-│   ⏭️ Skip - review later                    │
-│   🚪 Stop reviewing                         │
-└─────────────────────────────────────────────┘
-```
-
-### alexandria.ts
-
-Session lifecycle integration for automatic context injection.
-
-**Features:**
-- Starts Alexandria session on pi session start
-- Injects context pack into session
-- Ingests tool results for memory extraction
-- Processes session on end for memory candidates
-
-## Tools
-
-### memory/index.ts
-
-Custom tool for memory management within pi sessions.
-
-**Commands:**
-- `memory search <query>` - Search memories
-- `memory add <content>` - Add a memory
-- `memory pack` - Generate context pack
-
-## Structure
-
-```
-integrations/pi/
-├── hooks/
-│   ├── alexandria.ts      # Session lifecycle integration
-│   └── revalidation.ts    # Interactive revalidation
-├── tools/
-│   └── memory/
-│       └── index.ts       # Memory management tool
-└── README.md
-```
+- Detects stale memories via `alex check`
+- Interactive dialog: Verify, Retire, Skip, Stop
 
 ## Requirements
 
 - Alexandria CLI (`alex`) in PATH
 - pi-coding-agent with hooks support
-
-## API Used
-
-The hooks use pi's Context API:
-- `ctx.ui.confirm()` - confirmation dialog
-- `ctx.ui.select()` - option selector
-- `ctx.ui.notify()` - notifications
-- `ctx.exec()` - run shell commands
-- `ctx.hasUI` - check if interactive UI available

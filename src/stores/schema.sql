@@ -19,7 +19,18 @@ CREATE TABLE IF NOT EXISTS sessions (
     -- Stats
     events_count INTEGER DEFAULT 0,
     objects_created INTEGER DEFAULT 0,
-    objects_accessed INTEGER DEFAULT 0
+    objects_accessed INTEGER DEFAULT 0,
+    
+    -- Checkpoint tracking (for auto-checkpoint on event threshold)
+    last_checkpoint_at TEXT,
+    events_since_checkpoint INTEGER DEFAULT 0,
+
+    -- Progressive disclosure tracking
+    injected_memory_ids TEXT DEFAULT '[]',
+    last_disclosure_at TEXT,
+    error_count INTEGER DEFAULT 0,
+    disclosure_level TEXT DEFAULT 'task',
+    last_topic TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_sessions_started_at ON sessions(started_at);
@@ -43,7 +54,7 @@ CREATE TABLE IF NOT EXISTS events (
     id TEXT PRIMARY KEY,
     session_id TEXT NOT NULL,
     timestamp TEXT NOT NULL,
-    event_type TEXT NOT NULL CHECK (event_type IN ('turn', 'tool_output', 'diff', 'test_summary', 'error')),
+    event_type TEXT NOT NULL CHECK (event_type IN ('turn', 'tool_output', 'tool_call', 'diff', 'test_summary', 'error', 'user_prompt', 'assistant_response')),
     
     -- Content (inline for small, pointer for large)
     content TEXT,
@@ -128,7 +139,12 @@ CREATE TABLE IF NOT EXISTS memory_objects (
     -- Usage tracking
     access_count INTEGER DEFAULT 0,
     last_accessed TEXT,
-    
+
+    -- Memory strength and decay (brain-inspired evolution)
+    strength REAL DEFAULT 1.0,
+    last_reinforced_at TEXT,
+    outcome_score REAL DEFAULT 0.5,
+
     FOREIGN KEY (superseded_by) REFERENCES memory_objects(id)
 );
 
@@ -136,6 +152,24 @@ CREATE INDEX IF NOT EXISTS idx_memory_objects_status ON memory_objects(status);
 CREATE INDEX IF NOT EXISTS idx_memory_objects_object_type ON memory_objects(object_type);
 CREATE INDEX IF NOT EXISTS idx_memory_objects_review_status ON memory_objects(review_status);
 CREATE INDEX IF NOT EXISTS idx_memory_objects_scope ON memory_objects(scope_type, scope_path);
+CREATE INDEX IF NOT EXISTS idx_memory_objects_strength ON memory_objects(strength);
+
+-- ============================================================================
+-- MEMORY OUTCOMES TABLE (for tracking helpfulness)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS memory_outcomes (
+    id TEXT PRIMARY KEY,
+    memory_id TEXT NOT NULL,
+    session_id TEXT NOT NULL,
+    timestamp TEXT NOT NULL,
+    outcome TEXT NOT NULL CHECK (outcome IN ('helpful', 'unhelpful', 'neutral')),
+    context TEXT,
+    FOREIGN KEY (memory_id) REFERENCES memory_objects(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_memory_outcomes_memory_id ON memory_outcomes(memory_id);
+CREATE INDEX IF NOT EXISTS idx_memory_outcomes_session_id ON memory_outcomes(session_id);
 
 -- ============================================================================
 -- TOKEN INDEX (for exact matching)

@@ -2,15 +2,18 @@
  * Event types for the append-only event log
  */
 
-export type EventType = 
-  | 'user_prompt'      // User message to the agent
+export type EventType =
+  | 'user_prompt' // User message to the agent
   | 'assistant_response' // Agent's text response
-  | 'tool_call'        // Tool invocation (input)
-  | 'tool_output'      // Tool result (output)
-  | 'turn'             // Full turn (legacy, for backward compat)
-  | 'diff'             // Code diff
-  | 'test_summary'     // Test results
-  | 'error';           // Error message
+  | 'tool_call' // Tool invocation (input)
+  | 'tool_output' // Tool result (output)
+  | 'turn' // Full turn (legacy, for backward compat)
+  | 'diff' // Code diff
+  | 'test_summary' // Test results
+  | 'error' // Error message
+  | 'context_injection' // Context pack sent to agent
+  | 'context_pack' // Context pack generated
+  | 'memory_injection'; // Memories sent to agent
 
 export interface Event {
   id: string;

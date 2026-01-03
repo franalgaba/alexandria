@@ -2,6 +2,76 @@
 
 Complete reference for Alexandria CLI commands.
 
+## Session Management
+
+### `alex session start`
+
+Start a new Alexandria session.
+
+```bash
+alex session start
+alex session start --json    # JSON output with session ID
+```
+
+### `alex session end`
+
+End the current session.
+
+```bash
+alex session end
+alex session end --summary "Added authentication"
+```
+
+### `alex session current`
+
+Show current session info.
+
+```bash
+alex session current
+alex session current --json
+```
+
+## Event Ingestion
+
+### `alex ingest [content]`
+
+Ingest an event into the current session.
+
+```bash
+# From argument
+alex ingest "Build failed with error X" --type error
+
+# From stdin (used by hooks)
+echo "tool output" | alex ingest --type tool_output --tool bash
+
+# With exit code (for error→fix detection)
+echo "Build succeeded" | alex ingest --type tool_output --tool bash --exit-code 0
+```
+
+**Options:**
+- `--type, -t` - Event type: `user_prompt`, `assistant_response`, `tool_call`, `tool_output`, `error`, `diff`, `test_summary`
+- `--tool` - Tool name (for tool events)
+- `--exit-code` - Exit code (for tool_output, enables error→fix detection)
+- `--skip-embedding` - Skip embedding generation (faster)
+- `--file, -f` - Read content from file
+
+**Auto-checkpoint:** Every 10 events, a checkpoint is automatically triggered to extract memories.
+
+### `alex checkpoint`
+
+Manually trigger memory curation checkpoint.
+
+```bash
+alex checkpoint                           # Current session
+alex checkpoint --reason "Task complete"  # With reason
+alex checkpoint --show-stats              # Show buffer stats first
+```
+
+**Options:**
+- `--session` - Target specific session
+- `--reason` - Reason for checkpoint
+- `--show-stats` - Show buffer statistics
+
 ## Memory Management
 
 ### `alex add <content>`
@@ -34,23 +104,6 @@ alex add-decision "Use SQLite for local storage" \
 - `--alternatives` - Comma-separated alternatives considered
 - `--rationale` - Why this decision was made (required)
 - `--tradeoffs` - Known tradeoffs
-- `--approve, -a` - Auto-approve
-
-### `alex add-contract <name>`
-
-Add an API/interface contract.
-
-```bash
-alex add-contract "UserAPI" \
-  --type api \
-  --definition "GET /users/:id returns { id, name, email }" \
-  --constraints "Must return within 100ms"
-```
-
-**Options:**
-- `--type` - Contract type: `api`, `interface`, `protocol`, `schema`
-- `--definition` - Contract definition (required)
-- `--constraints` - Constraints on the contract
 - `--approve, -a` - Auto-approve
 
 ### `alex list`
@@ -88,10 +141,6 @@ Edit a memory.
 alex edit abc123 --content "Updated content"
 alex edit abc123 --type constraint
 ```
-
-**Options:**
-- `--content, -c` - New content
-- `--type, -t` - New type
 
 ### `alex retire <id...>`
 
@@ -137,21 +186,21 @@ alex search "testing" --type constraint
 Generate a context pack for the current task.
 
 ```bash
-alex pack                              # Default task detection
+alex pack                              # Default task level
 alex pack --task "Add auth"            # Explicit task
 alex pack --level minimal              # Constraints only (~200 tokens)
 alex pack --level task                 # + Relevant (~500 tokens)
 alex pack --level deep                 # + History (~1500 tokens)
-alex pack --auto                       # Auto-detect from git
+alex pack --hot                        # Prioritize frequently accessed memories
 alex pack --format json                # JSON output
 ```
 
 **Options:**
 - `--task, -t` - Task description
 - `--level, -l` - Detail level: `minimal`, `task`, `deep`
-- `--auto` - Auto-detect task from git
 - `--budget, -b` - Token budget
 - `--format, -f` - Output format: `yaml`, `json`, `text`
+- `--hot` - Prioritize frequently accessed memories (heatmap)
 
 ## Code Awareness
 
@@ -223,20 +272,6 @@ Interactive review of stale memories.
 alex revalidate       # Interactive mode
 ```
 
-### `alex conflicts`
-
-Find contradicting memories.
-
-```bash
-alex conflicts                    # Show all conflicts
-alex conflicts --type direct      # Only direct contradictions
-alex conflicts --json
-```
-
-**Options:**
-- `--type, -t` - Conflict type: `direct`, `implicit`, `temporal`
-- `--json` - JSON output
-
 ## Integration
 
 ### `alex install <target>`
@@ -246,25 +281,14 @@ Install agent integrations.
 ```bash
 alex install claude-code    # Claude Code plugin
 alex install pi             # pi-coding-agent hooks
-alex install all            # All integrations
 
-alex install all --force    # Overwrite existing
-alex install all --uninstall  # Remove integrations
+alex install pi --force     # Overwrite existing
+alex install pi --uninstall # Remove integration
 ```
 
 **Options:**
 - `--force, -f` - Overwrite existing
 - `--uninstall, -u` - Uninstall instead
-
-### `alex hooks <action>`
-
-Manage git hooks.
-
-```bash
-alex hooks install      # Install post-commit hook
-alex hooks uninstall    # Remove hook
-alex hooks status       # Check installation
-```
 
 ## Utilities
 
@@ -296,3 +320,82 @@ alex export --import --file backup.json
 **Options:**
 - `--file, -f` - File path
 - `--import` - Import mode
+
+## Context Management
+
+### `alex context`
+
+Check context window usage from Claude Code transcript.
+
+```bash
+alex context --transcript /path/to/transcript.jsonl
+alex context --transcript /path/to/transcript.jsonl --json
+```
+
+**Options:**
+- `--transcript, -t` - Path to Claude Code transcript JSONL file (required)
+- `--json` - JSON output
+
+**Output:**
+```
+Context: [▓▓▓▓▓▓░░░░░░░░░░░░░░] 28.5% (57.0K tokens)
+  Input: 45.0K | Output: 12.0K
+  Cache Read: 0 | Cache Create: 0
+  Recommendation: ✅ Continue
+```
+
+When usage exceeds 50%, recommends checkpoint and clear.
+
+### `alex heatmap`
+
+Show most frequently accessed memories (access heatmap).
+
+```bash
+alex heatmap              # Top 10 hot memories
+alex heatmap --limit 20   # Custom limit
+alex heatmap --json       # JSON output
+```
+
+**Options:**
+- `--limit, -l` - Number of memories to show (default: 10)
+- `--json` - JSON output
+
+**Output:**
+```
+🔥 ACCESS HEATMAP
+
+1. 🔥🔥🔥 (42) Use Bun for TypeScript [src/cli.ts]
+2. 🔥🔥🔥 (38) Never commit .env files [.env]
+3. 🔥🔥  (25) Run tests before commit [test/]
+4. 🔥    (15) Format with Prettier [src/]
+```
+
+### `alex disclose`
+
+Check or perform progressive memory disclosure.
+
+```bash
+alex disclose --check --query "what should I remember?"
+alex disclose --query "remind me about auth" -f text
+```
+
+**Options:**
+- `--check` - Only check if disclosure is needed (returns JSON)
+- `--query, -q` - User query to analyze for triggers
+- `--format, -f` - Output format: `yaml`, `json`, `text`
+
+**Escalation Triggers:**
+- `explicit_query` - User asks "remind me", "what did we decide", etc.
+- `error_burst` - 3+ consecutive errors
+- `topic_shift` - Changed to different file/module
+- `event_threshold` - 15+ events since last disclosure
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD` | `10` | Events before auto-checkpoint |
+| `ALEXANDRIA_DB_PATH` | `~/.alexandria` | Database location |
+| `ALEXANDRIA_CONTEXT_THRESHOLD` | `50` | Context window % before suggesting clear |
+| `ALEXANDRIA_DISCLOSURE_THRESHOLD` | `15` | Events before re-evaluating disclosure |
+| `ALEXANDRIA_ERROR_BURST_THRESHOLD` | `3` | Consecutive errors before escalation |

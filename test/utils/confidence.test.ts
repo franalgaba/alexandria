@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { 
-  calculateConfidenceTier, 
+import {
+  calculateConfidenceTier,
   getConfidenceBoost,
   getConfidenceEmoji,
 } from '../../src/utils/confidence.ts';
@@ -15,12 +15,13 @@ describe('Confidence Tier Calculation', () => {
     expect(tier).toBe('grounded');
   });
 
-  test('grounded: has code refs + approved (no lastVerifiedAt)', () => {
+  test('observed: has code refs but no recent verification', () => {
+    // Code refs without recent verification = observed (not grounded)
     const tier = calculateConfidenceTier({
       codeRefs: [{ type: 'file', path: 'test.ts' }],
       reviewStatus: 'approved',
     });
-    expect(tier).toBe('grounded');
+    expect(tier).toBe('observed');
   });
 
   test('observed: has event evidence', () => {
@@ -52,14 +53,15 @@ describe('Confidence Tier Calculation', () => {
     expect(tier).toBe('hypothesis');
   });
 
-  test('hypothesis: stale memory', () => {
+  test('grounded: has code refs + recent verification (status not considered)', () => {
+    // Status is separate from confidence tier calculation
+    // Confidence tier is about evidence quality, not staleness
     const tier = calculateConfidenceTier({
       codeRefs: [{ type: 'file', path: 'test.ts', verifiedAtCommit: 'abc123' }],
       reviewStatus: 'approved',
       lastVerifiedAt: new Date(),
-      status: 'stale',
     });
-    expect(tier).toBe('hypothesis');
+    expect(tier).toBe('grounded');
   });
 });
 

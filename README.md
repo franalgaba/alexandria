@@ -1,19 +1,22 @@
 # Alexandria
 
-Local-first memory system for coding agents with hybrid retrieval.
+Local-first memory system for coding agents with checkpoint-driven curation.
 
 ## Overview
 
-Alexandria captures agent traces, distills them into curated "memory objects," and retrieves relevant context across sessions using hybrid search (lexical + semantic).
+Alexandria captures agent session events, extracts memories via checkpoint-driven curation, and retrieves relevant context across sessions using hybrid search (lexical + semantic).
 
 ### Key Features
 
+- **Checkpoint-Driven Curation**: Events buffered and curated every 10 events (not noisy real-time extraction)
+- **Tiered Extraction**:
+  - Tier 0: Deterministic patterns (error→fix, user corrections)
+  - Tier 1: Haiku-powered extraction (decisions, conventions, preferences)
+- **Zero API Key Required**: Uses Claude Code's existing OAuth token for Haiku calls
 - **Hybrid Search**: FTS5 (BM25) + vector similarity
-- **Memory Types**: Decisions, conventions, constraints, fixes, and more
+- **Progressive Disclosure**: Context packs at minimal/task/deep levels
 - **Code Awareness**: Link memories to files/symbols, detect staleness via git
-- **Agent Integration**: Plugins for Claude Code and pi-coding-agent
-- **Token Budgeting**: Context packs stay within limits
-- **Review Pipeline**: Approve, verify, retire memories over time
+- **Agent Integration**: Hooks for Claude Code and pi-coding-agent
 
 ## Installation
 
@@ -28,17 +31,47 @@ npm install -g alexandria
 ## Quick Start
 
 ```bash
-# Add a memory
+# Install agent integration
+alex install claude-code   # or: alex install pi
+
+# Now memories are captured automatically during coding sessions!
+# Every 10 events, the agent is prompted to extract valuable learnings.
+
+# Or add memories manually
 alex add "Use jose for JWT validation" --type decision --approve
 
 # Search memories
 alex search "authentication"
 
 # Generate context pack
-alex pack --task "Add login feature"
+alex pack --level task
+```
 
-# Install agent integration
-alex install claude-code   # or: alex install pi
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    SESSION START                                 │
+│  • alex session start                                           │
+│  • alex pack → Inject memories into conversation                │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    DURING SESSION                                │
+│  Event 1...10 → Buffer events (fire-and-forget)                 │
+│                 ↓                                                │
+│  AUTO-CHECKPOINT:                                                │
+│    • Tier 0: Deterministic patterns (error→fix, corrections)    │
+│    • Tier 1: Haiku extraction (decisions, conventions)          │
+│    • Memories created as "pending" for review                   │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    SESSION END                                   │
+│  • Final checkpoint                                              │
+│  • alex session end                                              │
+│  • Memories saved for next session                               │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Documentation
@@ -69,87 +102,67 @@ alex install claude-code
 
 # pi-coding-agent  
 alex install pi
-
-# All integrations
-alex install all
 ```
+
+Both integrations follow the same pattern:
+- **Session Start**: Inject memories via context
+- **During Session**: Buffer events (fire-and-forget)
+- **Every 10 Events**: Auto-checkpoint with Tier 0 + Tier 1 (Haiku) extraction
+- **Session End**: Final checkpoint
 
 See [Integrations](docs/integrations.md) for details.
-
-## Terminal UI
-
-Run the TUI side-by-side with your coding agent:
-
-```bash
-alex tui
-```
-
-Features:
-- Switch between project databases
-- Browse memories with type/status icons
-- View memory details and event trails
-- Verify/retire memories with keyboard shortcuts
 
 ## Core Commands
 
 ```bash
+# Session management
+alex session start              # Start tracking
+alex session end                # End session
+alex checkpoint                 # Manual checkpoint
+
 # Memory management
-alex add "content" --type <type>    # Add memory
-alex list                           # List memories
-alex show <id>                      # Show details
-alex retire <id>                    # Mark obsolete
+alex add "content" --type X     # Add memory
+alex list                       # List memories
+alex retire <id>                # Mark obsolete
 
 # Search & retrieval
-alex search "query"                 # Hybrid search
-alex search "query" --smart         # Intent-aware
-alex pack --task "description"      # Context pack
+alex search "query"             # Hybrid search
+alex pack --level task          # Context pack
 
 # Code awareness
-alex link <id> --file <path>        # Link to code
-alex check                          # Find stale memories
-alex verify <id>                    # Mark as verified
+alex link <id> --file <path>    # Link to code
+alex check                      # Find stale memories
+alex verify <id>                # Mark as verified
 
 # Review
-alex review                         # Review pending
-alex revalidate                     # Review stale
-alex conflicts                      # Find contradictions
-
-# TUI
-alex tui                            # Terminal UI
+alex review                     # Review pending
 ```
 
-## Library Usage
+## Configuration
 
-```typescript
-import { getConnection, MemoryObjectStore, Retriever } from 'alexandria';
-
-const db = getConnection();
-const store = new MemoryObjectStore(db);
-const retriever = new Retriever(db);
-
-// Search
-const results = await retriever.search('authentication');
-
-// Add memory
-store.create({
-  content: 'Use jose for JWT validation',
-  objectType: 'decision',
-});
+```bash
+# Auto-checkpoint threshold (default: 10 events)
+export ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD=10
 ```
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  Agent Integration (Claude Code, pi, git hooks) │
+│  Agent Integration (Claude Code, pi)            │
+│  • Inject context at session start              │
+│  • Buffer events (fire-and-forget)              │
+│  • Checkpoint every 10 events                   │
 └─────────────────────────────────────────────────┘
                         │
 ┌─────────────────────────────────────────────────┐
-│  CLI (alex) / Library API                       │
+│  Checkpoint Curator                             │
+│  • Tier 0: Deterministic patterns               │
+│  • Agent-driven: alex add via prompt            │
 └─────────────────────────────────────────────────┘
                         │
 ┌─────────────────────────────────────────────────┐
-│  Retriever (Hybrid Search + Rerank + Router)    │
+│  Retriever (Hybrid Search + Progressive Pack)   │
 └─────────────────────────────────────────────────┘
                         │
 ┌───────────────────┬───────────────────┐
@@ -158,7 +171,7 @@ store.create({
 └───────────────────┴───────────────────┘
                         │
 ┌─────────────────────────────────────────────────┐
-│  SQLite Database (memory objects, code refs)    │
+│  SQLite Database                                │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -168,10 +181,8 @@ store.create({
 ~/.alexandria/
 └── projects/
     └── <project-hash>/
-        └── alexandria.db    # SQLite (FTS5 + vectors)
+        └── alexandria.db
 ```
-
-Each project gets its own database, identified by git remote or directory path.
 
 ## Development
 
@@ -179,8 +190,8 @@ Each project gets its own database, identified by git remote or directory path.
 git clone https://github.com/your-org/alexandria
 cd alexandria
 bun install
-bun test        # 173 tests
-bun run check   # Lint
+bun test
+bun run check
 ```
 
 ## License

@@ -2,10 +2,10 @@
  * Tests for Checkpoint system
  */
 
+import type Database from 'bun:sqlite';
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import Database from 'bun:sqlite';
-import { getMemoryConnection } from '../../src/stores/connection.ts';
 import { Checkpoint } from '../../src/ingestor/checkpoint.ts';
+import { getMemoryConnection } from '../../src/stores/connection.ts';
 import { EventStore } from '../../src/stores/events.ts';
 import { MemoryObjectStore } from '../../src/stores/memory-objects.ts';
 import { SessionStore } from '../../src/stores/sessions.ts';
@@ -21,7 +21,7 @@ describe('Checkpoint', () => {
   beforeEach(() => {
     db = getMemoryConnection();
     sessionStore = new SessionStore(db);
-    checkpoint = new Checkpoint(db, { 
+    checkpoint = new Checkpoint(db, {
       curatorMode: 'tier0',
       minEventsForCheckpoint: 5,
       toolBurstCount: 10,
@@ -29,7 +29,7 @@ describe('Checkpoint', () => {
     });
     eventStore = new EventStore(db);
     memoryStore = new MemoryObjectStore(db);
-    
+
     // Create test session and get its ID
     const session = sessionStore.start({ workingDirectory: '/test' });
     TEST_SESSION_ID = session.id;
@@ -49,20 +49,20 @@ describe('Checkpoint', () => {
 
     await checkpoint.addEvent(event);
     const stats = checkpoint.getBufferStats();
-    
+
     expect(stats.events).toBe(1);
   });
 
   test('manual checkpoint extracts memories from buffer', async () => {
     // Create events simulating user correction pattern (most reliable)
     const sessionId = TEST_SESSION_ID;
-    
+
     // User correction with clear "don't" pattern
     const correction1 = eventStore.append({
       sessionId,
       timestamp: new Date(),
       eventType: 'turn',
-      content: '[user]: Don\'t use any type, always use specific types',
+      content: "[user]: Don't use any type, always use specific types",
     });
 
     // Add filler events to meet minimum threshold (5 events)
@@ -83,17 +83,17 @@ describe('Checkpoint', () => {
     const result = await checkpoint.executeManual('Test checkpoint');
 
     expect(result.episodeEventCount).toBe(5);
-    
+
     // User correction should be extracted as constraint
     expect(result.candidatesExtracted).toBeGreaterThan(0);
     expect(result.memoriesCreated).toBeGreaterThan(0);
-    
+
     // Check that constraint was created
     const memories = memoryStore.list({ status: ['active'] });
     expect(memories.length).toBeGreaterThan(0);
-    const constraints = memories.filter(m => m.objectType === 'constraint');
+    const constraints = memories.filter((m) => m.objectType === 'constraint');
     expect(constraints.length).toBeGreaterThan(0);
-    
+
     // Buffer should be cleared
     const stats = checkpoint.getBufferStats();
     expect(stats.events).toBe(0);
@@ -101,7 +101,7 @@ describe('Checkpoint', () => {
 
   test('detectTrigger detects tool burst', async () => {
     const sessionId = TEST_SESSION_ID;
-    
+
     // Create 11 tool outputs in quick succession (threshold is 10)
     for (let i = 0; i < 11; i++) {
       const event = eventStore.append({
@@ -112,9 +112,9 @@ describe('Checkpoint', () => {
         toolName: 'bash',
         exitCode: 0,
       });
-      
+
       const trigger = await checkpoint.addEvent(event);
-      
+
       // Should auto-trigger on the 10th event
       if (i === 9) {
         expect(trigger).not.toBeNull();
@@ -125,7 +125,7 @@ describe('Checkpoint', () => {
 
   test('detectTrigger detects task completion', async () => {
     const sessionId = TEST_SESSION_ID;
-    
+
     // Create events leading to task completion
     const events = [
       { content: 'Running tests...', exitCode: undefined },
@@ -144,7 +144,7 @@ describe('Checkpoint', () => {
         toolName: 'test',
         exitCode,
       });
-      
+
       const trigger = await checkpoint.addEvent(event);
       if (trigger) lastTrigger = trigger;
     }
@@ -155,7 +155,7 @@ describe('Checkpoint', () => {
 
   test('manual checkpoint allows small buffers but auto-triggers require minimum', async () => {
     const sessionId = TEST_SESSION_ID;
-    
+
     // Add fewer events than minEventsForCheckpoint (default 5)
     for (let i = 0; i < 3; i++) {
       const event = eventStore.append({
@@ -164,21 +164,21 @@ describe('Checkpoint', () => {
         eventType: 'turn',
         content: `Message ${i}`,
       });
-      
+
       await checkpoint.addEvent(event);
     }
 
     // Manual checkpoint should work even with few events
     const result = await checkpoint.executeManual('Test');
     expect(result.episodeEventCount).toBe(3);
-    
+
     // But it may not extract anything if patterns aren't strong
     expect(result.candidatesExtracted).toBeGreaterThanOrEqual(0);
   });
 
   test('deterministic curator works with manual checkpoint', async () => {
     const sessionId = TEST_SESSION_ID;
-    
+
     // Create simple events that won't trigger auto-checkpoint
     for (let i = 0; i < 5; i++) {
       const event = eventStore.append({
@@ -195,25 +195,25 @@ describe('Checkpoint', () => {
 
     // Execute manual checkpoint
     const result = await checkpoint.executeManual('Test');
-    
+
     expect(result.episodeEventCount).toBe(5);
-    
+
     // The deterministic curator is intentionally conservative
     // It may not extract anything from generic messages
     expect(result.candidatesExtracted).toBeGreaterThanOrEqual(0);
-    
+
     // Buffer should be cleared
     expect(checkpoint.getBufferStats().events).toBe(0);
   });
 
   test('deterministic curator extracts constraint from user correction', async () => {
     const sessionId = TEST_SESSION_ID;
-    
+
     const correctionEvent = eventStore.append({
       sessionId,
       timestamp: new Date(),
       eventType: 'turn',
-      content: '[user]: No, don\'t use inline styles. Always use CSS modules.',
+      content: "[user]: No, don't use inline styles. Always use CSS modules.",
     });
 
     // Need at least 5 events for minimum threshold
@@ -230,18 +230,18 @@ describe('Checkpoint', () => {
     await checkpoint.addEvent(correctionEvent);
 
     const result = await checkpoint.executeManual('Test');
-    
+
     const memories = memoryStore.list({ status: ['active'] });
-    const constraints = memories.filter(m => m.objectType === 'constraint');
+    const constraints = memories.filter((m) => m.objectType === 'constraint');
     expect(constraints.length).toBeGreaterThan(0);
-    
-    const correction = constraints.find(c => c.content.includes('inline styles'));
+
+    const correction = constraints.find((c) => c.content.includes('inline styles'));
     expect(correction).toBeDefined();
   });
 
   test('getBufferStats returns correct statistics', async () => {
     const sessionId = TEST_SESSION_ID;
-    
+
     // Add different types of events
     const toolOutput = eventStore.append({
       sessionId,
@@ -264,7 +264,7 @@ describe('Checkpoint', () => {
     await checkpoint.addEvent(error);
 
     const stats = checkpoint.getBufferStats();
-    
+
     expect(stats.events).toBe(2);
     expect(stats.toolOutputs).toBe(1);
     expect(stats.errors).toBe(1);
@@ -273,7 +273,7 @@ describe('Checkpoint', () => {
 
   test('clearBuffer removes all buffered events', async () => {
     const sessionId = TEST_SESSION_ID;
-    
+
     const event = eventStore.append({
       sessionId,
       timestamp: new Date(),
@@ -282,7 +282,7 @@ describe('Checkpoint', () => {
     });
 
     await checkpoint.addEvent(event);
-    
+
     let stats = checkpoint.getBufferStats();
     expect(stats.events).toBe(1);
 

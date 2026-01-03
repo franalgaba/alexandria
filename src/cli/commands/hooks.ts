@@ -2,9 +2,9 @@
  * Hooks command - manage git hooks for Alexandria
  */
 
-import type { ArgumentsCamelCase, Argv } from 'yargs';
-import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync, chmodSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { ArgumentsCamelCase, Argv } from 'yargs';
 import { getGitRoot } from '../../code/git.ts';
 import { colorize } from '../utils.ts';
 
@@ -16,13 +16,12 @@ export const command = 'hooks <action>';
 export const describe = 'Manage git hooks for automatic memory verification';
 
 export function builder(yargs: Argv): Argv<HooksArgs> {
-  return yargs
-    .positional('action', {
-      type: 'string',
-      choices: ['install', 'uninstall', 'status'] as const,
-      describe: 'Action to perform',
-      demandOption: true,
-    }) as Argv<HooksArgs>;
+  return yargs.positional('action', {
+    type: 'string',
+    choices: ['install', 'uninstall', 'status'] as const,
+    describe: 'Action to perform',
+    demandOption: true,
+  }) as Argv<HooksArgs>;
 }
 
 const POST_COMMIT_HOOK = `#!/bin/bash
@@ -71,15 +70,15 @@ const HOOK_MARKER = '# Alexandria post-commit hook';
 
 export async function handler(argv: ArgumentsCamelCase<HooksArgs>): Promise<void> {
   const gitRoot = getGitRoot();
-  
+
   if (!gitRoot) {
     console.error(colorize('Not in a git repository', 'red'));
     process.exit(1);
   }
-  
+
   const hooksDir = join(gitRoot, '.git', 'hooks');
   const postCommitPath = join(hooksDir, 'post-commit');
-  
+
   switch (argv.action) {
     case 'install':
       installHook(hooksDir, postCommitPath);
@@ -98,16 +97,16 @@ function installHook(hooksDir: string, postCommitPath: string): void {
   if (!existsSync(hooksDir)) {
     mkdirSync(hooksDir, { recursive: true });
   }
-  
+
   // Check if hook already exists
   if (existsSync(postCommitPath)) {
     const existing = readFileSync(postCommitPath, 'utf-8');
-    
+
     if (existing.includes(HOOK_MARKER)) {
       console.log(colorize('✓ Alexandria hook already installed', 'green'));
       return;
     }
-    
+
     // Append to existing hook
     const updated = existing + '\n\n' + POST_COMMIT_HOOK;
     writeFileSync(postCommitPath, updated);
@@ -118,7 +117,7 @@ function installHook(hooksDir: string, postCommitPath: string): void {
     chmodSync(postCommitPath, 0o755);
     console.log(colorize('✓ Installed Alexandria post-commit hook', 'green'));
   }
-  
+
   console.log();
   console.log('The hook will:');
   console.log('  • Run after each commit');
@@ -133,25 +132,28 @@ function uninstallHook(postCommitPath: string): void {
     console.log(colorize('No post-commit hook found', 'dim'));
     return;
   }
-  
+
   const existing = readFileSync(postCommitPath, 'utf-8');
-  
+
   if (!existing.includes(HOOK_MARKER)) {
     console.log(colorize('Alexandria hook not installed', 'dim'));
     return;
   }
-  
+
   // Check if it's only our hook
   const lines = existing.split('\n');
-  const ourHookStart = lines.findIndex(l => l.includes(HOOK_MARKER));
-  
+  const ourHookStart = lines.findIndex((l) => l.includes(HOOK_MARKER));
+
   if (ourHookStart <= 1) {
     // Our hook is the only content (or nearly so)
     unlinkSync(postCommitPath);
     console.log(colorize('✓ Removed Alexandria post-commit hook', 'green'));
   } else {
     // There's other content, just remove our part
-    const beforeOurs = lines.slice(0, ourHookStart - 1).join('\n').trim();
+    const beforeOurs = lines
+      .slice(0, ourHookStart - 1)
+      .join('\n')
+      .trim();
     writeFileSync(postCommitPath, beforeOurs + '\n');
     console.log(colorize('✓ Removed Alexandria hook from post-commit', 'green'));
   }
@@ -160,16 +162,18 @@ function uninstallHook(postCommitPath: string): void {
 function showStatus(postCommitPath: string): void {
   console.log(colorize('Git Hook Status', 'bold'));
   console.log();
-  
+
   if (!existsSync(postCommitPath)) {
     console.log(`  post-commit: ${colorize('not installed', 'dim')}`);
     console.log();
-    console.log(`  Run ${colorize('alex hooks install', 'cyan')} to enable automatic checks after commits.`);
+    console.log(
+      `  Run ${colorize('alex hooks install', 'cyan')} to enable automatic checks after commits.`,
+    );
     return;
   }
-  
+
   const content = readFileSync(postCommitPath, 'utf-8');
-  
+
   if (content.includes(HOOK_MARKER)) {
     console.log(`  post-commit: ${colorize('✓ installed', 'green')}`);
     console.log();
@@ -177,6 +181,8 @@ function showStatus(postCommitPath: string): void {
   } else {
     console.log(`  post-commit: ${colorize('exists (not Alexandria)', 'yellow')}`);
     console.log();
-    console.log(`  Run ${colorize('alex hooks install', 'cyan')} to add Alexandria to your existing hook.`);
+    console.log(
+      `  Run ${colorize('alex hooks install', 'cyan')} to add Alexandria to your existing hook.`,
+    );
   }
 }

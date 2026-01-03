@@ -2,11 +2,44 @@
  * Output formatting utilities
  */
 
+import type { CodeReference } from '../types/code-refs.ts';
 import type { ConfidenceTier, MemoryObject } from '../types/memory-objects.ts';
-import type { ContextPack, SearchResult, ProgressiveContextPack, LegacyContextPack } from '../types/retriever.ts';
-import { isProgressivePack, isLegacyPack } from '../types/retriever.ts';
+import type {
+  ContextPack,
+  LegacyContextPack,
+  ProgressiveContextPack,
+  SearchResult,
+} from '../types/retriever.ts';
+import { isLegacyPack, isProgressivePack } from '../types/retriever.ts';
 import { getConfidenceEmoji } from './confidence.ts';
 import { formatPrompts, formatPromptsYaml } from './revalidation.ts';
+
+/**
+ * Format a code reference for display
+ * Examples: src/foo.ts:42, src/bar.ts#myFunction, src/baz.ts:10-20
+ */
+function formatCodeRef(ref: CodeReference): string {
+  let result = ref.path;
+
+  if (ref.lineRange) {
+    const [start, end] = ref.lineRange;
+    result += start === end ? `:${start}` : `:${start}-${end}`;
+  }
+
+  if (ref.symbol) {
+    result += `#${ref.symbol}`;
+  }
+
+  return result;
+}
+
+/**
+ * Format multiple code refs as a bracketed list
+ */
+function formatCodeRefs(refs: CodeReference[]): string {
+  if (!refs || refs.length === 0) return '';
+  return ` [${refs.map(formatCodeRef).join(', ')}]`;
+}
 
 /**
  * Format a memory object for display
@@ -68,7 +101,7 @@ export function formatContextPack(
         return formatProgressivePackYaml(pack);
     }
   }
-  
+
   // Legacy format
   switch (format) {
     case 'json':
@@ -85,28 +118,31 @@ export function formatContextPack(
  */
 function formatProgressivePackYaml(pack: ProgressiveContextPack): string {
   let output = '# Alexandria Context Pack (Progressive)\n\n';
-  
+
   if (pack.metadata) {
     output += `level: ${pack.metadata.level}\n`;
     output += `tokens: ${pack.metadata.tokensUsed}/${pack.metadata.tokenBudget}\n\n`;
   }
-  
+
   // Group by confidence tier
-  const grounded = pack.objects.filter(o => o.confidenceTier === 'grounded');
-  const observed = pack.objects.filter(o => o.confidenceTier === 'observed');
-  const inferred = pack.objects.filter(o => o.confidenceTier === 'inferred');
-  const hypothesis = pack.objects.filter(o => o.confidenceTier === 'hypothesis');
-  
+  const grounded = pack.objects.filter((o) => o.confidenceTier === 'grounded');
+  const observed = pack.objects.filter((o) => o.confidenceTier === 'observed');
+  const inferred = pack.objects.filter((o) => o.confidenceTier === 'inferred');
+  const hypothesis = pack.objects.filter((o) => o.confidenceTier === 'hypothesis');
+
   if (grounded.length > 0) {
     output += '# ✅ Verified (code-linked)\n';
     output += 'verified:\n';
     for (const obj of grounded) {
       output += `  - type: ${obj.objectType}\n`;
       output += `    content: "${escapeYaml(obj.content)}"\n`;
+      if (obj.codeRefs && obj.codeRefs.length > 0) {
+        output += `    refs: [${obj.codeRefs.map((r) => `"${formatCodeRef(r)}"`).join(', ')}]\n`;
+      }
     }
     output += '\n';
   }
-  
+
   if (observed.length > 0) {
     output += '# 👁️ Observed (approved)\n';
     output += 'observed:\n';
@@ -116,7 +152,7 @@ function formatProgressivePackYaml(pack: ProgressiveContextPack): string {
     }
     output += '\n';
   }
-  
+
   if (inferred.length > 0) {
     output += '# 🔮 Inferred (pending review)\n';
     output += 'unverified:\n';
@@ -126,7 +162,7 @@ function formatProgressivePackYaml(pack: ProgressiveContextPack): string {
     }
     output += '\n';
   }
-  
+
   if (hypothesis.length > 0) {
     output += '# ❓ Hypothesis (low confidence)\n';
     output += 'hypothesis:\n';
@@ -135,7 +171,7 @@ function formatProgressivePackYaml(pack: ProgressiveContextPack): string {
       output += `    content: "${escapeYaml(obj.content)}"\n`;
     }
   }
-  
+
   return output;
 }
 
@@ -144,32 +180,32 @@ function formatProgressivePackYaml(pack: ProgressiveContextPack): string {
  */
 function formatProgressivePackText(pack: ProgressiveContextPack): string {
   let output = '=== ALEXANDRIA CONTEXT ===\n\n';
-  
+
   if (pack.metadata) {
     output += `Level: ${pack.metadata.level} (~${pack.metadata.tokensUsed} tokens)\n\n`;
   }
-  
+
   // Group by type
-  const constraints = pack.objects.filter(o => o.objectType === 'constraint');
-  const others = pack.objects.filter(o => o.objectType !== 'constraint');
-  
+  const constraints = pack.objects.filter((o) => o.objectType === 'constraint');
+  const others = pack.objects.filter((o) => o.objectType !== 'constraint');
+
   if (constraints.length > 0) {
     output += '🚫 CONSTRAINTS:\n';
     for (const c of constraints) {
-      output += `  • ${c.content}\n`;
+      output += `  • ${c.content}${formatCodeRefs(c.codeRefs)}\n`;
     }
     output += '\n';
   }
-  
+
   if (others.length > 0) {
     output += '📝 MEMORIES:\n';
     for (const obj of others) {
       const emoji = getTypeEmoji(obj.objectType);
       const tierEmoji = getConfidenceEmoji(obj.confidenceTier || 'inferred');
-      output += `  ${emoji} ${tierEmoji} ${obj.content}\n`;
+      output += `  ${emoji} ${tierEmoji} ${obj.content}${formatCodeRefs(obj.codeRefs)}\n`;
     }
   }
-  
+
   return output;
 }
 
@@ -178,7 +214,7 @@ function formatContextPackYaml(pack: ContextPack): string {
   if (!isLegacyPack(pack)) {
     return '# Error: Expected legacy context pack format\n';
   }
-  
+
   let output = '# Alexandria Context Pack\n\n';
 
   // Show revalidation prompts first (most important)
@@ -232,7 +268,7 @@ function formatContextPackText(pack: ContextPack): string {
   if (!isLegacyPack(pack)) {
     return '=== Error: Expected legacy context pack format ===\n';
   }
-  
+
   let output = '=== Alexandria Context Pack ===\n\n';
 
   // Show revalidation prompts first (most important)
@@ -263,22 +299,21 @@ function formatContextPackText(pack: ContextPack): string {
 
   if (pack.relevantObjects.length > 0) {
     // Group by confidence tier
-    const grounded = pack.relevantObjects.filter(o => o.confidenceTier === 'grounded');
-    const observed = pack.relevantObjects.filter(o => o.confidenceTier === 'observed');
-    const other = pack.relevantObjects.filter(o => 
-      o.confidenceTier !== 'grounded' && o.confidenceTier !== 'observed'
+    const grounded = pack.relevantObjects.filter((o) => o.confidenceTier === 'grounded');
+    const observed = pack.relevantObjects.filter((o) => o.confidenceTier === 'observed');
+    const other = pack.relevantObjects.filter(
+      (o) => o.confidenceTier !== 'grounded' && o.confidenceTier !== 'observed',
     );
-    
+
     if (grounded.length > 0) {
       output += '✅ Verified (code-linked):\n';
       for (const obj of grounded) {
         const emoji = getTypeEmoji(obj.objectType);
-        const codeRef = obj.codeRefs.length > 0 ? ` - ${obj.codeRefs[0].path}` : '';
-        output += `   ${emoji} [${obj.objectType}] ${obj.content}${codeRef}\n`;
+        output += `   ${emoji} [${obj.objectType}] ${obj.content}${formatCodeRefs(obj.codeRefs)}\n`;
       }
       output += '\n';
     }
-    
+
     if (observed.length > 0) {
       output += '👁️ Observed:\n';
       for (const obj of observed) {
@@ -287,7 +322,7 @@ function formatContextPackText(pack: ContextPack): string {
       }
       output += '\n';
     }
-    
+
     if (other.length > 0) {
       output += '💭 Unverified:\n';
       for (const obj of other) {

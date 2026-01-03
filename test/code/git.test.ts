@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'bun:test';
 import { join } from 'node:path';
-import { 
-  getCurrentCommit, 
-  getGitRoot, 
-  getShortCommit, 
-  isGitRepo,
+import {
   getChangedFilesSince,
+  getCurrentCommit,
+  getGitRoot,
+  getShortCommit,
+  isGitRepo,
 } from '../../src/code/git.ts';
 
 // Get the actual project directory

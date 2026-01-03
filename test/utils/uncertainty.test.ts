@@ -1,39 +1,39 @@
 import { describe, expect, test } from 'bun:test';
 import {
   detectUncertainty,
-  isExploratoryQuery,
-  isComplexQuery,
-  isSimpleQuery,
-  suggestContextLevel,
-  shouldUpgradeContext,
   formatUncertaintyAnalysis,
+  isComplexQuery,
+  isExploratoryQuery,
+  isSimpleQuery,
+  shouldUpgradeContext,
+  suggestContextLevel,
 } from '../../src/utils/uncertainty.ts';
 
 describe('detectUncertainty', () => {
   test('detects "not sure" phrases', () => {
     const result = detectUncertainty("I'm not sure about this");
-    
+
     expect(result.isUncertain).toBe(true);
     expect(result.triggers).toContain('not sure');
   });
 
   test('detects "might be" phrases', () => {
     const result = detectUncertainty('This might be the correct approach');
-    
+
     expect(result.isUncertain).toBe(true);
     expect(result.triggers).toContain('might be');
   });
 
   test('detects "I think" phrases', () => {
     const result = detectUncertainty('I think this is how it works');
-    
+
     expect(result.isUncertain).toBe(true);
     expect(result.triggers).toContain('i think');
   });
 
   test('detects multiple uncertainty signals', () => {
     const result = detectUncertainty("I'm not sure, but I think it might be this");
-    
+
     expect(result.isUncertain).toBe(true);
     expect(result.triggers.length).toBeGreaterThanOrEqual(2);
     expect(result.confidence).toBeGreaterThan(0.3);
@@ -41,7 +41,7 @@ describe('detectUncertainty', () => {
 
   test('returns false for confident text', () => {
     const result = detectUncertainty('The function returns a boolean value');
-    
+
     expect(result.isUncertain).toBe(false);
     expect(result.triggers.length).toBe(0);
   });
@@ -127,7 +127,7 @@ describe('suggestContextLevel', () => {
 describe('shouldUpgradeContext', () => {
   test('suggests upgrade when uncertainty detected', () => {
     const result = shouldUpgradeContext('minimal', "I'm not sure about this");
-    
+
     expect(result.upgrade).toBe(true);
     expect(result.toLevel).toBe('task');
     expect(result.reason).toContain('not sure');
@@ -135,24 +135,24 @@ describe('shouldUpgradeContext', () => {
 
   test('suggests larger upgrade for high uncertainty', () => {
     const result = shouldUpgradeContext(
-      'minimal', 
-      "I'm not sure, I think it might be, but I don't know"
+      'minimal',
+      "I'm not sure, I think it might be, but I don't know",
     );
-    
+
     expect(result.upgrade).toBe(true);
     expect(result.toLevel).toBe('deep');
   });
 
   test('returns no upgrade when already at deep', () => {
     const result = shouldUpgradeContext('deep', "I'm not sure");
-    
+
     expect(result.upgrade).toBe(false);
     expect(result.toLevel).toBe('deep');
   });
 
   test('returns no upgrade when no uncertainty', () => {
     const result = shouldUpgradeContext('minimal', 'This is definitely correct');
-    
+
     expect(result.upgrade).toBe(false);
   });
 });
@@ -161,7 +161,7 @@ describe('formatUncertaintyAnalysis', () => {
   test('formats uncertain analysis', () => {
     const analysis = detectUncertainty("I'm not sure about this");
     const formatted = formatUncertaintyAnalysis(analysis);
-    
+
     expect(formatted).toContain('Uncertainty detected');
     expect(formatted).toContain('not sure');
   });
@@ -169,7 +169,7 @@ describe('formatUncertaintyAnalysis', () => {
   test('formats certain analysis', () => {
     const analysis = detectUncertainty('This is correct');
     const formatted = formatUncertaintyAnalysis(analysis);
-    
+
     expect(formatted).toContain('No uncertainty detected');
   });
 });

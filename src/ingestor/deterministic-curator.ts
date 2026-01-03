@@ -1,15 +1,17 @@
 /**
  * Tier 0 Curator - Deterministic Heuristics
- * 
+ *
  * Zero-cost pattern detection for high-signal memory extraction.
  * Focuses on:
  * - Error → Resolution patterns
  * - User corrections (constraints)
  * - Repeated patterns (conventions)
- * 
+ *
  * Does NOT extract decisions or preferences (too noisy for regex).
  */
 
+import { getCurrentCommit, getGitRoot, getRelativePath } from '../code/git.ts';
+import type { CodeReference } from '../types/code-refs.ts';
 import type { Event } from '../types/events.ts';
 import type { MemoryCandidate, ObjectType } from '../types/memory-objects.ts';
 
@@ -90,7 +92,7 @@ export class DeterministicCurator {
 
     for (let i = 0; i < sequences.length; i++) {
       const errorSeq = sequences[i];
-      
+
       // Skip if not an error
       if (errorSeq.exitCode === undefined || errorSeq.exitCode === 0) {
         continue;
@@ -103,7 +105,7 @@ export class DeterministicCurator {
       // Look for successful resolution within window
       for (let j = i + 1; j < sequences.length; j++) {
         const successSeq = sequences[j];
-        
+
         // Check if it's a success
         if (successSeq.exitCode !== 0) continue;
 
@@ -112,15 +114,11 @@ export class DeterministicCurator {
         if (timeDiff > RESOLUTION_WINDOW_MS) break;
 
         // Extract resolution description
-        const resolution = this.extractResolutionDescription(
-          errorSeq,
-          successSeq,
-          episode.events
-        );
+        const resolution = this.extractResolutionDescription(errorSeq, successSeq, episode.events);
 
         if (resolution) {
-          const errorEvent = episode.events.find(e => e.id === errorSeq.eventId);
-          const successEvent = episode.events.find(e => e.id === successSeq.eventId);
+          const errorEvent = episode.events.find((e) => e.id === errorSeq.eventId);
+          const successEvent = episode.events.find((e) => e.id === successSeq.eventId);
 
           if (errorEvent && successEvent) {
             resolutions.push({
@@ -170,11 +168,11 @@ export class DeterministicCurator {
   private extractResolutionDescription(
     errorSeq: ToolSequence,
     successSeq: ToolSequence,
-    events: Event[]
+    events: Event[],
   ): string | null {
     // Look for events between error and success that describe the fix
-    const errorIdx = events.findIndex(e => e.id === errorSeq.eventId);
-    const successIdx = events.findIndex(e => e.id === successSeq.eventId);
+    const errorIdx = events.findIndex((e) => e.id === errorSeq.eventId);
+    const successIdx = events.findIndex((e) => e.id === successSeq.eventId);
 
     if (errorIdx === -1 || successIdx === -1) return null;
 
@@ -226,7 +224,9 @@ export class DeterministicCurator {
     ];
 
     for (const event of episode.events) {
-      if (!event.content || event.eventType !== 'turn') continue;
+      // Check both 'turn' (legacy) and 'user_prompt' events
+      if (!event.content || (event.eventType !== 'turn' && event.eventType !== 'user_prompt'))
+        continue;
 
       // Check for "no" or correction language
       const isCorrection = /^(?:no|nope|wrong|incorrect|don't|stop)/i.test(event.content.trim());
@@ -306,10 +306,7 @@ export class DeterministicCurator {
   /**
    * Create known_fix candidate from error resolution
    */
-  private createKnownFixCandidate(
-    resolution: ErrorResolution,
-    episode: Episode
-  ): MemoryCandidate {
+  private createKnownFixCandidate(resolution: ErrorResolution, episode: Episode): MemoryCandidate {
     const content = `When encountering "${resolution.errorSignature}", the fix is: ${resolution.resolutionDescription}`;
 
     return {
@@ -324,14 +321,11 @@ export class DeterministicCurator {
   /**
    * Create constraint candidate from user correction
    */
-  private createConstraintCandidate(
-    correction: UserCorrection,
-    episode: Episode
-  ): MemoryCandidate {
+  private createConstraintCandidate(correction: UserCorrection, episode: Episode): MemoryCandidate {
     return {
       content: correction.content.slice(0, 500),
       suggestedType: 'constraint',
-      evidenceEventIds: episode.events.map(e => e.id),
+      evidenceEventIds: episode.events.map((e) => e.id),
       evidenceExcerpt: correction.context,
       confidence: correction.severity === 'must' ? 'high' : 'medium',
     };
@@ -340,16 +334,13 @@ export class DeterministicCurator {
   /**
    * Create convention candidate from repeated pattern
    */
-  private createConventionCandidate(
-    pattern: RepeatedPattern,
-    episode: Episode
-  ): MemoryCandidate {
+  private createConventionCandidate(pattern: RepeatedPattern, episode: Episode): MemoryCandidate {
     const content = `Convention: ${pattern.pattern} (observed ${pattern.occurrences}x)`;
 
     return {
       content: content.slice(0, 500),
       suggestedType: 'convention',
-      evidenceEventIds: episode.events.map(e => e.id),
+      evidenceEventIds: episode.events.map((e) => e.id),
       evidenceExcerpt: `Pattern repeated ${pattern.occurrences} times`,
       confidence: pattern.occurrences >= 5 ? 'high' : 'medium',
     };
@@ -383,5 +374,79 @@ export class DeterministicCurator {
       endTime: events[events.length - 1].timestamp,
       toolSequences,
     };
+  }
+
+  /**
+   * Extract code references from episode events
+   */
+  extractCodeRefs(episode: Episode): CodeReference[] {
+    const refs: CodeReference[] = [];
+    const seenPaths = new Set<string>();
+    const currentCommit = getCurrentCommit() || undefined;
+
+    // Extract file paths from events
+    for (const event of episode.events) {
+      // From event filePath
+      if (event.filePath && !seenPaths.has(event.filePath)) {
+        seenPaths.add(event.filePath);
+        refs.push({
+          type: 'file',
+          path: event.filePath,
+          verifiedAtCommit: currentCommit,
+        });
+      }
+
+      // From content - look for file patterns
+      if (event.content) {
+        const filePaths = this.extractFilePathsFromContent(event.content);
+        for (const path of filePaths) {
+          if (!seenPaths.has(path)) {
+            seenPaths.add(path);
+            refs.push({
+              type: 'file',
+              path,
+              verifiedAtCommit: currentCommit,
+            });
+          }
+        }
+      }
+    }
+
+    return refs;
+  }
+
+  /**
+   * Extract file paths from text content
+   */
+  private extractFilePathsFromContent(content: string): string[] {
+    const paths: string[] = [];
+
+    // Common file path patterns
+    const patterns = [
+      // Explicit file references
+      /(?:file|path):\s*["']?([^\s"']+\.(?:ts|js|tsx|jsx|py|rs|go|java|c|cpp|h|md|json|yaml|yml|toml))/gi,
+      // At file:line references
+      /at\s+([^\s:]+\.(?:ts|js|tsx|jsx|py)):?\d*/gi,
+      // Import/require paths
+      /(?:from|require\s*\()\s*["']\.?\.?\/([^"']+)["']/gi,
+      // src/ or lib/ paths
+      /(?:^|\s)((?:src|lib|test|dist)\/[^\s:]+\.(?:ts|js|tsx|jsx|py))/gim,
+    ];
+
+    for (const pattern of patterns) {
+      let match;
+      while ((match = pattern.exec(content)) !== null) {
+        const path = match[1];
+        if (path && path.length > 2 && path.length < 200) {
+          // Normalize path
+          const normalized = path.replace(/^\.\//, '');
+          if (!paths.includes(normalized)) {
+            paths.push(normalized);
+          }
+        }
+      }
+    }
+
+    return paths;
   }
 }

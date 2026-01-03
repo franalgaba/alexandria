@@ -25,7 +25,7 @@ interface SearchArgs {
 export const command = 'search <query>';
 export const describe = 'Search memory objects (hybrid: lexical + semantic)';
 
-export function builder(yargs: Argv): Argv<SearchArgs> {
+export function builder(yargs: Argv) {
   return yargs
     .positional('query', {
       type: 'string',
@@ -57,13 +57,16 @@ export function builder(yargs: Argv): Argv<SearchArgs> {
       type: 'array',
       default: ['active'],
       describe: 'Filter by status',
+      coerce: (arr: unknown[]): string[] => arr.map(String),
     })
-    .option('lexical-only', {
+    .option('lexicalOnly', {
+      alias: 'lexical-only',
       type: 'boolean',
       default: false,
       describe: 'Use only lexical (FTS) search',
     })
-    .option('vector-only', {
+    .option('vectorOnly', {
+      alias: 'vector-only',
       type: 'boolean',
       default: false,
       describe: 'Use only vector (semantic) search',
@@ -77,7 +80,7 @@ export function builder(yargs: Argv): Argv<SearchArgs> {
       type: 'boolean',
       default: false,
       describe: 'Output as JSON',
-    }) as Argv<SearchArgs>;
+    });
 }
 
 export async function handler(argv: ArgumentsCamelCase<SearchArgs>): Promise<void> {
@@ -86,7 +89,7 @@ export async function handler(argv: ArgumentsCamelCase<SearchArgs>): Promise<voi
 
   try {
     let results: Awaited<ReturnType<typeof retriever.search>>;
-    let searchInfo: { intent?: string; scope?: string } = {};
+    const searchInfo: { intent?: string; scope?: string } = {};
 
     if (argv.smart) {
       // Smart search with intent detection and routing
@@ -94,12 +97,12 @@ export async function handler(argv: ArgumentsCamelCase<SearchArgs>): Promise<voi
       const plan = router.route(argv.query);
       const intent = classifyIntent(argv.query);
       const scope = extractScope(argv.query);
-      
+
       searchInfo.intent = intent;
       if (scope) {
         searchInfo.scope = `${scope.scope.type}:${scope.scope.path}`;
       }
-      
+
       results = await retriever.searchWithPlan(argv.query, plan);
     } else if (argv.lexicalOnly) {
       results = retriever.searchLexical(argv.query, {
@@ -135,7 +138,7 @@ export async function handler(argv: ArgumentsCamelCase<SearchArgs>): Promise<voi
         }
         console.log();
       }
-      
+
       if (results.length === 0) {
         info('No results found.');
       } else {

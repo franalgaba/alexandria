@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test';
-import { 
-  hashContent, 
-  hashFileContent, 
+import {
   contentMatches,
   getFileSnapshot,
+  hashContent,
+  hashFileContent,
 } from '../../src/code/hashing.ts';
 
 describe('Content Hashing', () => {

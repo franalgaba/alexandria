@@ -100,13 +100,14 @@ export async function handler(argv: ArgumentsCamelCase<ListArgs>): Promise<void>
       // Simple table view with confidence tier
       const headers = ['ID', 'Type', 'Content', 'Tier', 'Refs'];
       const rows = objects.map((obj) => {
-        const tierEmoji = {
-          grounded: '✅',
-          observed: '👁️',
-          inferred: '🤖',
-          hypothesis: '💭',
-        }[obj.confidenceTier] || '?';
-        
+        const tierEmoji =
+          {
+            grounded: '✅',
+            observed: '👁️',
+            inferred: '🤖',
+            hypothesis: '💭',
+          }[obj.confidenceTier] || '?';
+
         return [
           obj.id.slice(0, 12),
           obj.objectType,

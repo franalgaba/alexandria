@@ -1,19 +1,19 @@
 /**
  * Symbol extraction from source code
- * 
+ *
  * Uses regex-based extraction for common patterns.
  * Can be enhanced with tree-sitter for more accurate parsing.
  */
 
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { extname } from 'node:path';
 
-export type SymbolKind = 
-  | 'function' 
-  | 'class' 
-  | 'variable' 
-  | 'interface' 
-  | 'type' 
+export type SymbolKind =
+  | 'function'
+  | 'class'
+  | 'variable'
+  | 'interface'
+  | 'type'
   | 'const'
   | 'method'
   | 'property';
@@ -106,7 +106,7 @@ export class SymbolExtractor {
    */
   findSymbol(filePath: string, symbolName: string): Symbol | null {
     const symbols = this.extract(filePath);
-    return symbols.find(s => s.name === symbolName) ?? null;
+    return symbols.find((s) => s.name === symbolName) ?? null;
   }
 
   /**
@@ -135,7 +135,7 @@ export class SymbolExtractor {
       const exported = !!match[2];
       const name = match[4];
       if (!this.options.includePrivate && name.startsWith('_')) continue;
-      
+
       symbols.push({
         name,
         kind: 'function',
@@ -151,7 +151,7 @@ export class SymbolExtractor {
       const exported = !!match[2];
       const name = match[3];
       if (!this.options.includePrivate && name.startsWith('_')) continue;
-      
+
       symbols.push({
         name,
         kind: 'function',
@@ -166,7 +166,7 @@ export class SymbolExtractor {
     while ((match = classRegex.exec(content)) !== null) {
       const exported = !!match[2];
       const name = match[3];
-      
+
       symbols.push({
         name,
         kind: 'class',
@@ -181,7 +181,7 @@ export class SymbolExtractor {
     while ((match = ifaceRegex.exec(content)) !== null) {
       const exported = !!match[2];
       const name = match[3];
-      
+
       symbols.push({
         name,
         kind: 'interface',
@@ -196,7 +196,7 @@ export class SymbolExtractor {
     while ((match = typeRegex.exec(content)) !== null) {
       const exported = !!match[2];
       const name = match[3];
-      
+
       symbols.push({
         name,
         kind: 'type',
@@ -212,13 +212,13 @@ export class SymbolExtractor {
       const exported = !!match[2];
       const kind = match[3]; // const, let, var
       const name = match[4];
-      
+
       // Skip if it's an arrow function (already captured)
       const lineContent = lines[getLineNumber(match.index) - 1];
       if (lineContent.includes('=>') || lineContent.includes('function')) continue;
-      
+
       if (!this.options.includePrivate && name.startsWith('_')) continue;
-      
+
       symbols.push({
         name,
         kind: kind === 'const' ? 'const' : 'variable',
@@ -248,7 +248,7 @@ export class SymbolExtractor {
     while ((match = funcRegex.exec(content)) !== null) {
       const name = match[2];
       if (!this.options.includePrivate && name.startsWith('_')) continue;
-      
+
       symbols.push({
         name,
         kind: 'function',
@@ -262,7 +262,7 @@ export class SymbolExtractor {
     const classRegex = new RegExp(PY_PATTERNS.class.source, 'gm');
     while ((match = classRegex.exec(content)) !== null) {
       const name = match[2];
-      
+
       symbols.push({
         name,
         kind: 'class',
@@ -276,7 +276,7 @@ export class SymbolExtractor {
     const constRegex = new RegExp(PY_PATTERNS.variable.source, 'gm');
     while ((match = constRegex.exec(content)) !== null) {
       const name = match[1];
-      
+
       symbols.push({
         name,
         kind: 'const',

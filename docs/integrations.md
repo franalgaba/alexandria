@@ -1,51 +1,50 @@
 # Agent Integrations
 
-Alexandria integrates with coding agents to automatically capture memories from your sessions.
+Alexandria integrates with coding agents to automatically capture and extract memories from your sessions.
 
-## How It Works
+## Architecture
 
-Alexandria captures the **full conversation in real-time**:
+Both Claude Code and pi-coding-agent integrations follow the same pattern:
 
-1. **User prompts** - What you ask the agent to do
-2. **Assistant responses** - The agent's explanations and reasoning
-3. **Tool calls** - What commands/edits the agent invokes
-4. **Tool results** - Output from commands, file contents, errors
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      CODING AGENT SESSION                        │
+│                                                                  │
+│  SessionStart → ToolCall → ToolResult → TurnEnd → SessionEnd    │
+│       ↓            ↓           ↓           ↓           ↓         │
+│   [inject]     [buffer]    [buffer]    [buffer]    [curate]     │
+└─────────────────────────────────────────────────────────────────┘
+         ↓            ↓           ↓           ↓           ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                      ALEXANDRIA v2                               │
+│                                                                  │
+│  Context      Event Buffer (fire-and-forget)           Tiered   │
+│  Pack Gen     ─────────────────────────────────→       Curator  │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-**Real-time extraction**: As each event is captured, Alexandria immediately analyzes it for memory candidates using pattern matching. Memories are extracted and queued as the conversation happens - no waiting until session end.
+### Key Concepts
 
-This means:
-- **Continuous sessions** - Sessions can run indefinitely
-- **Ground truth** - Knowledge is captured the moment it happens
-- **No lost memories** - Even if you crash, captured events are preserved
-
-At session start, Alexandria:
-1. **Checks for stale memories** (code changed since last verified)
-2. **Prompts for revalidation** so you can verify or retire outdated memories
-3. **Injects context** from relevant memories
+1. **Checkpoint-Driven Curation**: Events are buffered and processed at checkpoints (every 10 events), not extracted in real-time
+2. **Tiered Extraction**: Tier 0 (deterministic patterns) + Tier 1 (Haiku LLM)
+3. **Zero API Key Required**: Uses Claude Code's existing OAuth token for Haiku calls
+4. **Fire-and-Forget Capture**: Event ingestion is non-blocking
+5. **Progressive Disclosure**: Context packs at minimal/task/deep levels, with re-injection on topic shifts/errors
+6. **Context Window Management**: Auto-checkpoint at 50% context, suggest /clear to prevent compaction
+7. **Access Heatmap**: Frequently accessed memories prioritized at session start
+8. **Graceful Degradation**: If Alexandria fails, the agent continues normally
 
 ## Installation
 
 ```bash
-# Install all integrations
-alex install all
-
-# Or install specific ones
+# Install specific integration
 alex install claude-code
 alex install pi
 ```
 
 ## Claude Code
 
-The Claude Code plugin captures the full conversation for memory extraction:
-
-- **SessionStart**: Checks for stale memories, starts Alexandria session
-- **UserPromptSubmit**: Captures your prompts
-- **PreToolUse**: Captures tool invocations
-- **PostToolUse**: Captures tool results
-- **Stop**: Captures when the agent completes
-- **SessionEnd**: Processes session, extracts memories
-- **Slash commands**: `/mem-search`, `/mem-add`, `/mem-pack`, `/mem-review`
-- **Skill**: Memory management guidance
+The Claude Code plugin provides full session lifecycle integration.
 
 ### Installation
 
@@ -55,33 +54,65 @@ alex install claude-code
 
 This installs the plugin to `~/.claude/plugins/alexandria-memory`.
 
-### Real-time Memory Extraction
+### Hooks
 
-Memories are extracted **as the conversation happens**, not at session end. When a pattern is detected (decision, fix, constraint, etc.), it's immediately queued for review.
+| Hook | Action |
+|------|--------|
+| `SessionStart` | Start session, inject hot memories + context pack via `additionalContext` |
+| `UserPromptSubmit` | Buffer prompt, check context usage, detect escalation triggers |
+| `PreToolUse` | Buffer tool call (fire-and-forget) |
+| `PostToolUse` | Buffer tool result, track errors (fire-and-forget) |
+| `Stop` | Buffer response (fire-and-forget) |
+| `SessionEnd` | Trigger checkpoint, prompt agent for extraction |
 
-When your session ends (or anytime), you can review pending memories:
+### Context Injection
 
-```bash
-alex review           # Interactive review
-alex review --list    # See pending count
+At session start, **hot memories** (most frequently accessed) are injected first, followed by relevant context:
+
+```
+# Alexandria Memory Context
+
+🚫 CONSTRAINTS:
+  • Never use any type in TypeScript files [src/utils/]
+  • Always validate user input [src/api/]
+
+📝 MEMORIES:
+  ✅ Using Bun instead of Node for speed [package.json]
+  👁️ All API endpoints return JSON with status field [src/api/routes.ts]
 ```
 
-### Stale Memory Revalidation
+Memory format includes **code refs** for grounding.
 
-When you start a Claude Code session, the hook runs `alex check` to find stale memories. If any are found, it injects context that prompts Claude to ask you about them:
+### Progressive Disclosure
 
-```
-📚 Alexandria Memory Check
+Memories are re-injected during the session when:
 
-I found 2 memory(ies) that may need revalidation:
+| Trigger | Condition | Action |
+|---------|-----------|--------|
+| Explicit query | "remind me", "what did we decide" | Inject deep context |
+| Error burst | 3+ consecutive errors | Inject constraints + known_fixes |
+| Topic shift | Changed file/module | Inject task-level context |
+| Event threshold | 15+ events | Re-evaluate and inject if needed |
 
-- **[decision]** "Use fetchUser() for API calls..." (Reason: File changed)
-- **[convention]** "Always use async/await..." (Reason: File deleted)
+### Context Window Management
 
-Would you like to review these memories now?
-```
+The `UserPromptSubmit` hook monitors context usage:
 
-You can then tell Claude to verify or retire each memory.
+1. Reads `transcript_path` from hook input
+2. Parses JSONL to calculate token usage
+3. If usage > 50%:
+   - Runs `alex checkpoint` to extract learnings
+   - Outputs: "⚠️ Context at X%. Memories extracted. Consider /clear"
+
+This prevents compaction and ensures learnings are preserved before clearing.
+
+### Auto-Checkpoint
+
+Every 10 events, a checkpoint triggers:
+
+1. **Tier 0** runs automatically (deterministic patterns)
+2. **Tier 1** runs if Claude OAuth available (Haiku extraction)
+3. Memories created as "pending" for review
 
 ### Slash Commands
 
@@ -94,10 +125,7 @@ You can then tell Claude to verify or retire each memory.
 
 ### Skill
 
-The Alexandria skill is automatically available in Claude Code. It provides guidance on:
-- When to add memories
-- Memory types and their uses
-- Best practices for memory management
+The Alexandria skill provides guidance on memory management and is auto-loaded.
 
 ### Uninstall
 
@@ -107,7 +135,7 @@ alex install claude-code --uninstall
 
 ## pi-coding-agent
 
-The pi integration provides full session lifecycle management and interactive revalidation.
+The pi integration uses TypeScript hooks for full session lifecycle management.
 
 ### Installation
 
@@ -119,25 +147,37 @@ This installs hooks to `~/.pi/agent/hooks/`.
 
 ### Hooks
 
-#### alexandria-alexandria.ts
+| Event | Action |
+|-------|--------|
+| `session (start)` | Start session, generate context pack, inject via `pi.send()` |
+| `tool_call` | Buffer event (fire-and-forget) |
+| `tool_result` | Buffer event (fire-and-forget) |
+| `turn_end` | Buffer response, check for auto-checkpoint |
+| `session (end)` | Trigger checkpoint, end session |
 
-Full session lifecycle integration that captures the entire conversation:
+### Context Injection
 
-- **Session start**: Starts Alexandria session, injects context pack
-- **Agent start**: Captures user prompts
-- **Turn end**: Captures assistant responses
-- **Tool call**: Captures tool invocations (input)
-- **Tool result**: Captures tool outputs
-- **Session end**: Processes session for memory extraction
+At session start, memories are injected as a message via `pi.send()`:
 
-When a session ends, you'll see:
+```typescript
+pi.send(`# Alexandria Memory Context
+
+${contextPack}
+
+These memories contain past decisions, constraints, known fixes, and conventions.`);
 ```
-📚 3 memories queued for review
-```
 
-#### alexandria-revalidation.ts
+### Auto-Checkpoint
 
-Interactive memory revalidation at session start. Uses pi's TUI components:
+Every 10 events (configurable via `ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD`):
+
+1. **Tier 0** runs automatically (deterministic patterns)
+2. **Tier 1** runs if API key available (Haiku extraction)
+3. Memories created as "pending" for review
+
+### Revalidation Hook
+
+The `revalidation.ts` hook provides interactive stale memory review:
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -147,25 +187,7 @@ Interactive memory revalidation at session start. Uses pi's TUI components:
 │                                             │
 │ [Yes]  [No]                                 │
 └─────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────┐
-│ ⚠️ [decision] "Use fetchUser() for API..."  │
-│    Reason: File changed: src/api.ts         │
-│                                             │
-│ > ✅ Verify - still valid                   │
-│   🗑️ Retire - no longer needed              │
-│   ⏭️ Skip - review later                    │
-│   🚪 Stop reviewing                         │
-└─────────────────────────────────────────────┘
 ```
-
-#### alexandria-alexandria.ts
-
-Session lifecycle integration:
-- Starts Alexandria session on pi session start
-- Injects context pack into session
-- Ingests tool results for memory extraction
-- Processes session on end for memory candidates
 
 ### Uninstall
 
@@ -173,60 +195,52 @@ Session lifecycle integration:
 alex install pi --uninstall
 ```
 
-## Git Hooks
-
-Alexandria can also install git hooks for commit-time notifications:
+## Configuration
 
 ```bash
-# Install post-commit hook
-alex hooks install
+# Auto-checkpoint threshold (default: 10 events)
+export ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD=10
 
-# Check status
-alex hooks status
+# Context window threshold for suggesting clear (default: 50%)
+export ALEXANDRIA_CONTEXT_THRESHOLD=50
 
-# Uninstall
-alex hooks uninstall
+# Events before re-evaluating disclosure (default: 15)
+export ALEXANDRIA_DISCLOSURE_THRESHOLD=15
+
+# Consecutive errors before escalation (default: 3)
+export ALEXANDRIA_ERROR_BURST_THRESHOLD=3
 ```
-
-The post-commit hook runs `alex check` after each commit and notifies you if any memories reference changed files.
 
 ## Manual Integration
 
-If you're using a different coding agent, you can integrate manually:
+For other coding agents, integrate manually:
 
 ### Context Injection
 
-Generate a context pack and inject it into your system prompt:
-
 ```bash
 # Generate context pack
-CONTEXT=$(alex pack --format text)
+CONTEXT=$(alex pack --level task -f text)
 
-# Inject into prompt
-echo "Memory context:\n$CONTEXT" >> system_prompt.txt
+# Inject into your system prompt
 ```
 
 ### Session Tracking
 
-Track agent sessions for memory extraction:
-
 ```bash
 # Start session
-alex session start --task "Add authentication"
+alex session start
 
-# During session, ingest tool outputs
-alex ingest "Command output..." --tool bash
+# Ingest events (fire-and-forget)
+echo "tool output" | alex ingest --type tool_output --tool bash
+
+# Checkpoint (extracts memories)
+alex checkpoint
 
 # End session
-alex session end --summary "Added JWT authentication"
-
-# Process for memory extraction
-alex session process
+alex session end
 ```
 
 ### Programmatic Usage
-
-Use Alexandria as a library:
 
 ```typescript
 import { 
@@ -236,18 +250,12 @@ import {
   ContextPackCompiler 
 } from 'alexandria';
 
-// Get database connection
 const db = getConnection();
-const store = new MemoryObjectStore(db);
-const retriever = new Retriever(db);
-
-// Search memories
-const results = await retriever.search("error handling", { limit: 5 });
+const compiler = new ContextPackCompiler(db);
 
 // Generate context pack
-const compiler = new ContextPackCompiler(db);
 const pack = await compiler.compile({
-  task: "Add authentication",
-  budget: 1500,
+  level: 'task',
+  budget: 500,
 });
 ```

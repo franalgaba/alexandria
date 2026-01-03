@@ -10,9 +10,15 @@ import * as addContractCmd from './cli/commands/add-contract.ts';
 import * as addDecisionCmd from './cli/commands/add-decision.ts';
 import * as checkCmd from './cli/commands/check.ts';
 import * as checkpointCmd from './cli/commands/checkpoint.ts';
+import * as cleanupNoiseCmd from './cli/commands/cleanup-noise.ts';
 import * as conflictsCmd from './cli/commands/conflicts.ts';
+import * as contextCmd from './cli/commands/context.ts';
+import * as costsCmd from './cli/commands/costs.ts';
+import * as discloseCmd from './cli/commands/disclose.ts';
 import * as editCmd from './cli/commands/edit.ts';
 import * as exportCmd from './cli/commands/export.ts';
+import * as feedbackCmd from './cli/commands/feedback.ts';
+import * as heatmapCmd from './cli/commands/heatmap.ts';
 import * as hooksCmd from './cli/commands/hooks.ts';
 import * as ingestCmd from './cli/commands/ingest.ts';
 import * as installCmd from './cli/commands/install.ts';
@@ -39,7 +45,7 @@ yargs(hideBin(process.argv))
   .command(addCmd)
   .command(addDecisionCmd)
   .command(addContractCmd)
-  
+
   .command(listCmd)
   .command(packCmd)
   .command(reviewCmd)
@@ -52,14 +58,20 @@ yargs(hideBin(process.argv))
   .command(editCmd)
   .command(ingestCmd)
   .command(exportCmd)
+  .command(feedbackCmd)
   .command(whereCmd)
   .command(checkCmd)
   .command(checkpointCmd)
+  .command(cleanupNoiseCmd)
   .command(verifyCmd)
   .command(linkCmd)
   .command(hooksCmd)
   .command(installCmd)
   .command(conflictsCmd)
+  .command(contextCmd)
+  .command(costsCmd)
+  .command(discloseCmd)
+  .command(heatmapCmd)
   .command(symbolsCmd)
   .command(tuiCmd)
   .demandCommand(1, 'You need at least one command')

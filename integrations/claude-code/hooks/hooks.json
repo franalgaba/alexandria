@@ -1,9 +1,9 @@
 {
-  "description": "Alexandria memory integration for Claude Code - captures full conversation for memory extraction",
+  "description": "Alexandria v2 memory integration - checkpoint-driven curation with progressive disclosure",
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "*",
+        "matcher": "startup|clear|compact",
         "hooks": [
           {
             "type": "command",

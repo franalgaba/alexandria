@@ -1,13 +1,13 @@
 /**
  * Contradiction Detector - find conflicting memories
- * 
+ *
  * Conflict types:
  * - direct: same topic, opposite statements
  * - implicit: incompatible approaches
  * - temporal: old vs new without supersedes link
  */
 
-import type { MemoryObject, ConfidenceTier } from '../types/memory-objects.ts';
+import type { ConfidenceTier, MemoryObject } from '../types/memory-objects.ts';
 
 export type ConflictType = 'direct' | 'implicit' | 'temporal';
 export type Resolution = 'keep_newer' | 'keep_grounded' | 'merge' | 'ask_user';
@@ -27,8 +27,18 @@ export interface Conflict {
 
 /** Words that indicate negation */
 const NEGATION_WORDS = [
-  'not', 'never', 'dont', "don't", 'avoid', 'stop', 'remove',
-  'disable', 'without', 'no', 'none', 'exclude',
+  'not',
+  'never',
+  'dont',
+  "don't",
+  'avoid',
+  'stop',
+  'remove',
+  'disable',
+  'without',
+  'no',
+  'none',
+  'exclude',
 ];
 
 /** Word pairs that are opposites */
@@ -63,7 +73,7 @@ export class ContradictionDetector {
    */
   findConflicts(memories: MemoryObject[]): Conflict[] {
     const conflicts: Conflict[] = [];
-    
+
     // Compare each pair
     for (let i = 0; i < memories.length; i++) {
       for (let j = i + 1; j < memories.length; j++) {
@@ -73,7 +83,7 @@ export class ContradictionDetector {
         }
       }
     }
-    
+
     // Sort by confidence descending
     return conflicts.sort((a, b) => b.confidence - a.confidence);
   }
@@ -83,14 +93,14 @@ export class ContradictionDetector {
    */
   checkNewMemory(candidate: MemoryObject, existing: MemoryObject[]): Conflict[] {
     const conflicts: Conflict[] = [];
-    
+
     for (const memory of existing) {
       const conflict = this.checkPair(candidate, memory);
       if (conflict) {
         conflicts.push(conflict);
       }
     }
-    
+
     return conflicts.sort((a, b) => b.confidence - a.confidence);
   }
 
@@ -105,24 +115,24 @@ export class ContradictionDetector {
     if (a.supersedes?.includes(b.id) || b.supersedes?.includes(a.id)) {
       return null;
     }
-    
+
     // Skip retired memories
     if (a.status === 'retired' || b.status === 'retired') {
       return null;
     }
-    
+
     // Check for direct contradiction
     const direct = this.checkDirectContradiction(a, b);
     if (direct) return direct;
-    
+
     // Check for implicit contradiction
     const implicit = this.checkImplicitContradiction(a, b);
     if (implicit) return implicit;
-    
+
     // Check for temporal contradiction
     const temporal = this.checkTemporalContradiction(a, b);
     if (temporal) return temporal;
-    
+
     return null;
   }
 
@@ -134,12 +144,12 @@ export class ContradictionDetector {
     const bLower = b.content.toLowerCase();
     const aWords = this.tokenize(aLower);
     const bWords = this.tokenize(bLower);
-    
+
     // Check for negation pattern
     // "Use X" vs "Don't use X" or "Never use X"
-    const aNegated = NEGATION_WORDS.some(n => aLower.includes(n));
-    const bNegated = NEGATION_WORDS.some(n => bLower.includes(n));
-    
+    const aNegated = NEGATION_WORDS.some((n) => aLower.includes(n));
+    const bNegated = NEGATION_WORDS.some((n) => bLower.includes(n));
+
     if (aNegated !== bNegated) {
       // One is negated, one isn't - check if they're about the same thing
       const similarity = this.wordOverlap(aWords, bWords);
@@ -153,21 +163,21 @@ export class ContradictionDetector {
         };
       }
     }
-    
+
     // Check for antonym pairs
     for (const [word1, word2] of ANTONYM_PAIRS) {
       const aHas1 = aWords.includes(word1);
       const aHas2 = aWords.includes(word2);
       const bHas1 = bWords.includes(word1);
       const bHas2 = bWords.includes(word2);
-      
+
       if ((aHas1 && bHas2) || (aHas2 && bHas1)) {
         // Check if they're about the same topic
         const similarity = this.wordOverlap(
-          aWords.filter(w => w !== word1 && w !== word2),
-          bWords.filter(w => w !== word1 && w !== word2)
+          aWords.filter((w) => w !== word1 && w !== word2),
+          bWords.filter((w) => w !== word1 && w !== word2),
         );
-        
+
         if (similarity > 0.3) {
           return {
             memories: [a, b],
@@ -179,7 +189,7 @@ export class ContradictionDetector {
         }
       }
     }
-    
+
     return null;
   }
 
@@ -189,21 +199,22 @@ export class ContradictionDetector {
   private checkImplicitContradiction(a: MemoryObject, b: MemoryObject): Conflict | null {
     const aLower = a.content.toLowerCase();
     const bLower = b.content.toLowerCase();
-    
+
     for (const choices of EXCLUSIVE_CHOICES) {
-      const aChoices = choices.filter(c => aLower.includes(c));
-      const bChoices = choices.filter(c => bLower.includes(c));
-      
+      const aChoices = choices.filter((c) => aLower.includes(c));
+      const bChoices = choices.filter((c) => bLower.includes(c));
+
       // Both memories mention different items from same exclusive group
       if (aChoices.length > 0 && bChoices.length > 0) {
-        const different = aChoices.some(ac => !bChoices.includes(ac)) ||
-                         bChoices.some(bc => !aChoices.includes(bc));
-        
+        const different =
+          aChoices.some((ac) => !bChoices.includes(ac)) ||
+          bChoices.some((bc) => !aChoices.includes(bc));
+
         if (different) {
           // Check context - are they both recommending/deciding?
           const aRecommends = /use|prefer|choose|decision|always/i.test(aLower);
           const bRecommends = /use|prefer|choose|decision|always/i.test(bLower);
-          
+
           if (aRecommends && bRecommends) {
             return {
               memories: [a, b],
@@ -216,7 +227,7 @@ export class ContradictionDetector {
         }
       }
     }
-    
+
     return null;
   }
 
@@ -229,25 +240,25 @@ export class ContradictionDetector {
     if (!relevantTypes.includes(a.objectType) || !relevantTypes.includes(b.objectType)) {
       return null;
     }
-    
+
     // Check if they're about the same topic
     const aWords = this.tokenize(a.content.toLowerCase());
     const bWords = this.tokenize(b.content.toLowerCase());
     const similarity = this.wordOverlap(aWords, bWords);
-    
+
     if (similarity < 0.5) {
       return null; // Not similar enough
     }
-    
+
     // Check if they have different creation times (>1 day apart)
     const aTime = new Date(a.createdAt).getTime();
     const bTime = new Date(b.createdAt).getTime();
     const dayMs = 24 * 60 * 60 * 1000;
-    
+
     if (Math.abs(aTime - bTime) < dayMs) {
       return null; // Created at similar times
     }
-    
+
     // They're similar, created at different times, no supersedes link
     return {
       memories: [a, b],
@@ -266,19 +277,19 @@ export class ContradictionDetector {
     const tierOrder: ConfidenceTier[] = ['grounded', 'observed', 'inferred', 'hypothesis'];
     const aTier = tierOrder.indexOf(a.confidenceTier || 'inferred');
     const bTier = tierOrder.indexOf(b.confidenceTier || 'inferred');
-    
+
     if (aTier !== bTier) {
       return 'keep_grounded';
     }
-    
+
     // If same tier, prefer newer
     const aTime = new Date(a.createdAt).getTime();
     const bTime = new Date(b.createdAt).getTime();
-    
+
     if (Math.abs(aTime - bTime) > 24 * 60 * 60 * 1000) {
       return 'keep_newer';
     }
-    
+
     // Otherwise ask user
     return 'ask_user';
   }
@@ -288,12 +299,12 @@ export class ContradictionDetector {
    */
   private wordOverlap(a: string[], b: string[]): number {
     if (a.length === 0 || b.length === 0) return 0;
-    
+
     const setA = new Set(a);
     const setB = new Set(b);
-    const intersection = [...setA].filter(w => setB.has(w));
+    const intersection = [...setA].filter((w) => setB.has(w));
     const union = new Set([...a, ...b]);
-    
+
     return intersection.length / union.size;
   }
 
@@ -305,7 +316,7 @@ export class ContradictionDetector {
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, ' ')
       .split(/\s+/)
-      .filter(w => w.length > 2);
+      .filter((w) => w.length > 2);
   }
 
   /**

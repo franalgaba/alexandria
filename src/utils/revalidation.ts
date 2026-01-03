@@ -2,8 +2,8 @@
  * Revalidation Prompts - identify memories that need verification
  */
 
-import type { MemoryObject } from '../types/memory-objects.ts';
 import type { StalenessResult } from '../reviewer/staleness.ts';
+import type { MemoryObject } from '../types/memory-objects.ts';
 
 export interface RevalidationPrompt {
   /** Memory that needs revalidation */
@@ -21,13 +21,13 @@ export interface RevalidationPrompt {
  */
 export function generatePrompts(
   memories: MemoryObject[],
-  stalenessResults: Map<string, StalenessResult>
+  stalenessResults: Map<string, StalenessResult>,
 ): RevalidationPrompt[] {
   const prompts: RevalidationPrompt[] = [];
 
   for (const memory of memories) {
     const staleness = stalenessResults.get(memory.id);
-    
+
     if (!staleness?.isStale) {
       continue;
     }
@@ -54,9 +54,9 @@ function createPrompt(memory: MemoryObject, staleness: StalenessResult): Revalid
   let priority = 1;
 
   // Determine suggested action based on reasons
-  const hasDeletedFile = staleness.reasons.some(r => r.includes('deleted'));
-  const hasChangedFile = staleness.reasons.some(r => r.includes('changed'));
-  const hasOldVerification = staleness.reasons.some(r => r.includes('Never verified'));
+  const hasDeletedFile = staleness.reasons.some((r) => r.includes('deleted'));
+  const hasChangedFile = staleness.reasons.some((r) => r.includes('changed'));
+  const hasOldVerification = staleness.reasons.some((r) => r.includes('Never verified'));
 
   if (hasDeletedFile) {
     suggestedAction = 'retire';
@@ -92,10 +92,7 @@ export function formatPrompts(prompts: RevalidationPrompt[]): string {
     return '';
   }
 
-  const lines: string[] = [
-    '⚠️  NEEDS REVALIDATION:',
-    '',
-  ];
+  const lines: string[] = ['⚠️  NEEDS REVALIDATION:', ''];
 
   for (const prompt of prompts) {
     const actionIcon = {
@@ -105,16 +102,17 @@ export function formatPrompts(prompts: RevalidationPrompt[]): string {
     }[prompt.suggestedAction];
 
     const shortId = prompt.memory.id.substring(0, 8);
-    const content = prompt.memory.content.length > 50 
-      ? prompt.memory.content.substring(0, 47) + '...'
-      : prompt.memory.content;
+    const content =
+      prompt.memory.content.length > 50
+        ? prompt.memory.content.substring(0, 47) + '...'
+        : prompt.memory.content;
 
     lines.push(`  ${actionIcon} "${content}"`);
-    
+
     for (const reason of prompt.reasons) {
       lines.push(`     Reason: ${reason}`);
     }
-    
+
     lines.push(`     Action: alex ${prompt.suggestedAction} ${shortId}`);
     lines.push('');
   }
@@ -130,10 +128,7 @@ export function formatPromptsYaml(prompts: RevalidationPrompt[]): string {
     return '';
   }
 
-  const lines: string[] = [
-    '# ⚠️ Memories needing revalidation',
-    'needs_revalidation:',
-  ];
+  const lines: string[] = ['# ⚠️ Memories needing revalidation', 'needs_revalidation:'];
 
   for (const prompt of prompts) {
     const shortId = prompt.memory.id.substring(0, 8);

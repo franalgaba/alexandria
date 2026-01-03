@@ -105,6 +105,22 @@ export class EventStore {
   }
 
   /**
+   * Get events by session ID since a specific timestamp
+   * Used to get only events that haven't been checkpointed yet
+   */
+  getBySessionSince(sessionId: string, since: Date): Event[] {
+    const rows = this.db
+      .query(`
+      SELECT * FROM events 
+      WHERE session_id = $sessionId AND timestamp > $since 
+      ORDER BY timestamp
+    `)
+      .all({ $sessionId: sessionId, $since: since.toISOString() }) as EventRow[];
+
+    return rows.map((row) => this.rowToEvent(row));
+  }
+
+  /**
    * Get recent events across all sessions
    */
   getRecent(limit = 50): Event[] {

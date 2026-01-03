@@ -3,8 +3,10 @@
  */
 
 import type { Database } from 'bun:sqlite';
+import type { CodeReference } from '../types/code-refs.ts';
 import type { Event, EventRow } from '../types/events.ts';
 import type { MemoryObject, MemoryObjectRow, Status } from '../types/memory-objects.ts';
+import { calculateConfidenceTier } from '../utils/confidence.ts';
 
 export interface FTSEventResult {
   event: Event;
@@ -136,24 +138,53 @@ export class FTSIndex {
   }
 
   /**
-   * Escape FTS5 query to prevent syntax errors
+   * Escape FTS5 query to prevent syntax errors and improve recall
    */
   private escapeQuery(query: string): string {
     // Remove FTS5 special characters and normalize whitespace
-    // FTS5 operators: AND, OR, NOT, NEAR, and special chars: * : ^ ~ " ( ) { } [ ] - '
+    // FTS5 operators: AND, OR, NOT, NEAR
+    // FTS5 special chars: * : ^ ~ " ( ) { } [ ] - ' + | < > = % @ # $
     // Also remove periods and other punctuation that can cause issues
     const escaped = query
-      .replace(/[":*^~(){}[\].!?;,\-/\\'`]/g, ' ')
+      .replace(/[":*^~(){}[\].!?;,\-/\\'`+|<>=@#$%&]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
 
-    // Remove reserved words that might be interpreted as operators
+    // Common stop words to filter out (they don't add search value)
+    const stopWords = new Set([
+      'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+      'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+      'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare',
+      'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'as',
+      'into', 'through', 'during', 'before', 'after', 'above', 'below',
+      'between', 'under', 'again', 'further', 'then', 'once', 'here',
+      'there', 'when', 'where', 'why', 'how', 'all', 'each', 'few',
+      'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'only',
+      'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'just',
+      'don', 'now', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours',
+      'you', 'your', 'yours', 'he', 'him', 'his', 'she', 'her', 'hers',
+      'it', 'its', 'they', 'them', 'their', 'what', 'which', 'who',
+      'this', 'that', 'these', 'those', 'am', 'about', 'get',
+    ]);
+
+    // Remove reserved words and stop words
     const words = escaped.split(' ').filter((word) => {
+      const lower = word.toLowerCase();
       const upper = word.toUpperCase();
-      return upper !== 'AND' && upper !== 'OR' && upper !== 'NOT' && upper !== 'NEAR';
+      return (
+        word.length >= 2 &&
+        !stopWords.has(lower) &&
+        upper !== 'AND' && upper !== 'OR' && upper !== 'NOT' && upper !== 'NEAR'
+      );
     });
 
-    return words.join(' ');
+    if (words.length === 0) {
+      return '';
+    }
+
+    // Use OR to improve recall - match any of the terms
+    // This is better for natural language queries
+    return words.join(' OR ');
   }
 
   private rowToEvent(row: EventRow & { score: number; highlight: string }): Event {
@@ -173,6 +204,19 @@ export class FTSIndex {
   }
 
   private rowToMemoryObject(row: MemoryObjectRow): MemoryObject {
+    const codeRefs = JSON.parse(row.code_refs || '[]') as CodeReference[];
+    const evidenceEventIds = JSON.parse(row.evidence_event_ids || '[]');
+    const lastVerifiedAt = row.last_verified_at ? new Date(row.last_verified_at) : undefined;
+    const reviewStatus = row.review_status as MemoryObject['reviewStatus'];
+    const status = row.status as Status;
+
+    const confidenceTier = calculateConfidenceTier({
+      codeRefs,
+      evidenceEventIds,
+      reviewStatus,
+      lastVerifiedAt,
+    });
+
     return {
       id: row.id,
       content: row.content,
@@ -181,17 +225,24 @@ export class FTSIndex {
         type: row.scope_type as MemoryObject['scope']['type'],
         path: row.scope_path ?? undefined,
       },
-      status: row.status as MemoryObject['status'],
+      status,
       supersededBy: row.superseded_by ?? undefined,
       confidence: row.confidence as MemoryObject['confidence'],
-      evidenceEventIds: JSON.parse(row.evidence_event_ids || '[]'),
+      confidenceTier,
+      evidenceEventIds,
       evidenceExcerpt: row.evidence_excerpt ?? undefined,
-      reviewStatus: row.review_status as MemoryObject['reviewStatus'],
+      reviewStatus,
       reviewedAt: row.reviewed_at ? new Date(row.reviewed_at) : undefined,
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
       accessCount: row.access_count,
       lastAccessed: row.last_accessed ? new Date(row.last_accessed) : undefined,
+      codeRefs,
+      lastVerifiedAt,
+      supersedes: row.supersedes ? JSON.parse(row.supersedes) : undefined,
+      strength: row.strength ?? 1.0,
+      lastReinforcedAt: row.last_reinforced_at ? new Date(row.last_reinforced_at) : undefined,
+      outcomeScore: row.outcome_score ?? 0.5,
     };
   }
 }

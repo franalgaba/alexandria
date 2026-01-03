@@ -1,6 +1,6 @@
 /**
  * Revalidate command - interactive review of stale memories
- * 
+ *
  * Shows each stale memory with options:
  * [v] verify - mark as still valid
  * [u] update - edit the content
@@ -9,13 +9,13 @@
  * [q] quit - exit review
  */
 
-import type { ArgumentsCamelCase, Argv } from 'yargs';
 import * as readline from 'node:readline';
-import { MemoryObjectStore } from '../../stores/memory-objects.ts';
-import { closeConnection, getConnection } from '../../stores/connection.ts';
+import type { ArgumentsCamelCase, Argv } from 'yargs';
 import { StalenessChecker } from '../../reviewer/staleness.ts';
+import { closeConnection, getConnection } from '../../stores/connection.ts';
+import { MemoryObjectStore } from '../../stores/memory-objects.ts';
 import { generatePrompts, type RevalidationPrompt } from '../../utils/revalidation.ts';
-import { colorize, success, warn, info } from '../utils.ts';
+import { colorize, info, success, warn } from '../utils.ts';
 
 interface RevalidateArgs {
   all: boolean;
@@ -49,55 +49,53 @@ export async function handler(argv: ArgumentsCamelCase<RevalidateArgs>): Promise
   try {
     // Get memories to review
     const memories = store.list({ status: ['active'] });
-    
+
     // Check staleness
-    const stalenessResults = new Map(
-      memories.map(m => [m.id, checker.check(m)])
-    );
-    
+    const stalenessResults = new Map(memories.map((m) => [m.id, checker.check(m)]));
+
     // Generate prompts for stale ones
     let prompts = generatePrompts(memories, stalenessResults);
-    
+
     if (!argv.all) {
-      prompts = prompts.filter(p => p.reasons.length > 0);
+      prompts = prompts.filter((p) => p.reasons.length > 0);
     }
-    
+
     if (prompts.length === 0) {
       success('No memories need revalidation!');
       return;
     }
-    
+
     // Limit
     prompts = prompts.slice(0, argv.limit);
-    
+
     console.log();
     console.log(colorize(`Found ${prompts.length} memory(ies) to review`, 'cyan'));
     console.log(colorize('─'.repeat(60), 'dim'));
     console.log();
-    
+
     // Interactive review
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
     });
-    
+
     let reviewed = 0;
     let verified = 0;
     let retired = 0;
     let skipped = 0;
-    
+
     for (let i = 0; i < prompts.length; i++) {
       const prompt = prompts[i];
       const memory = prompt.memory;
-      
+
       console.log(colorize(`[${i + 1}/${prompts.length}]`, 'dim'));
       console.log();
-      
+
       // Show memory details
       const typeEmoji = getTypeEmoji(memory.objectType);
       console.log(`${typeEmoji} ${colorize(`[${memory.objectType}]`, 'cyan')} ${memory.content}`);
       console.log();
-      
+
       // Show reasons
       if (prompt.reasons.length > 0) {
         console.log(colorize('⚠️  Reasons:', 'yellow'));
@@ -106,7 +104,7 @@ export async function handler(argv: ArgumentsCamelCase<RevalidateArgs>): Promise
         }
         console.log();
       }
-      
+
       // Show code refs
       if (memory.codeRefs.length > 0) {
         console.log(colorize('📄 Code refs:', 'dim'));
@@ -115,7 +113,7 @@ export async function handler(argv: ArgumentsCamelCase<RevalidateArgs>): Promise
         }
         console.log();
       }
-      
+
       // Show suggested action
       const actionEmoji = {
         verify: '🔍',
@@ -124,7 +122,7 @@ export async function handler(argv: ArgumentsCamelCase<RevalidateArgs>): Promise
       }[prompt.suggestedAction];
       console.log(`${actionEmoji} Suggested: ${colorize(prompt.suggestedAction, 'cyan')}`);
       console.log();
-      
+
       // Show options
       console.log(colorize('Options:', 'bold'));
       console.log('  [v] verify  - mark as still valid');
@@ -132,9 +130,9 @@ export async function handler(argv: ArgumentsCamelCase<RevalidateArgs>): Promise
       console.log('  [s] skip    - review later');
       console.log('  [q] quit    - exit review');
       console.log();
-      
+
       const answer = await askQuestion(rl, 'Choice: ');
-      
+
       switch (answer.toLowerCase()) {
         case 'v':
         case 'verify':
@@ -143,7 +141,7 @@ export async function handler(argv: ArgumentsCamelCase<RevalidateArgs>): Promise
           verified++;
           reviewed++;
           break;
-          
+
         case 'r':
         case 'retire':
           store.retire(memory.id);
@@ -151,33 +149,32 @@ export async function handler(argv: ArgumentsCamelCase<RevalidateArgs>): Promise
           retired++;
           reviewed++;
           break;
-          
+
         case 's':
         case 'skip':
           info('Skipped');
           skipped++;
           break;
-          
+
         case 'q':
         case 'quit':
           info('Exiting review');
           rl.close();
           showSummary(reviewed, verified, retired, skipped);
           return;
-          
+
         default:
           warn('Unknown option, skipping');
           skipped++;
       }
-      
+
       console.log();
       console.log(colorize('─'.repeat(60), 'dim'));
       console.log();
     }
-    
+
     rl.close();
     showSummary(reviewed, verified, retired, skipped);
-    
   } finally {
     closeConnection();
   }
@@ -201,13 +198,15 @@ function showSummary(reviewed: number, verified: number, retired: number, skippe
 }
 
 function getTypeEmoji(type: string): string {
-  return {
-    decision: '🎯',
-    constraint: '🚫',
-    convention: '📏',
-    known_fix: '✅',
-    failed_attempt: '❌',
-    preference: '⭐',
-    environment: '⚙️',
-  }[type] || '📝';
+  return (
+    {
+      decision: '🎯',
+      constraint: '🚫',
+      convention: '📏',
+      known_fix: '✅',
+      failed_attempt: '❌',
+      preference: '⭐',
+      environment: '⚙️',
+    }[type] || '📝'
+  );
 }

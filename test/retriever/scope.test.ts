@@ -1,9 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { 
-  extractScope, 
-  scoreScopeMatch, 
-  codeRefsMatchScope 
-} from '../../src/retriever/scope.ts';
+import { codeRefsMatchScope, extractScope, scoreScopeMatch } from '../../src/retriever/scope.ts';
 
 describe('Scope Extraction', () => {
   describe('file path extraction', () => {
@@ -69,7 +65,7 @@ describe('Scope Matching', () => {
   test('exact match scores 1.0', () => {
     const score = scoreScopeMatch(
       { type: 'file', path: 'src/api.ts' },
-      { type: 'file', path: 'src/api.ts' }
+      { type: 'file', path: 'src/api.ts' },
     );
     expect(score).toBe(1.0);
   });
@@ -77,23 +73,20 @@ describe('Scope Matching', () => {
   test('file in module scores 0.8', () => {
     const score = scoreScopeMatch(
       { type: 'file', path: 'src/auth/login.ts' },
-      { type: 'module', path: 'auth' }
+      { type: 'module', path: 'auth' },
     );
     expect(score).toBe(0.8);
   });
 
   test('global scope scores low', () => {
-    const score = scoreScopeMatch(
-      { type: 'global' },
-      { type: 'file', path: 'src/api.ts' }
-    );
+    const score = scoreScopeMatch({ type: 'global' }, { type: 'file', path: 'src/api.ts' });
     expect(score).toBe(0.1);
   });
 
   test('no match scores 0', () => {
     const score = scoreScopeMatch(
       { type: 'module', path: 'auth' },
-      { type: 'module', path: 'database' }
+      { type: 'module', path: 'database' },
     );
     expect(score).toBe(0);
   });
@@ -101,26 +94,20 @@ describe('Scope Matching', () => {
 
 describe('Code Refs Scope Matching', () => {
   test('exact file match scores 1.0', () => {
-    const score = codeRefsMatchScope(
-      ['src/api.ts', 'src/utils.ts'],
-      { type: 'file', path: 'src/api.ts' }
-    );
+    const score = codeRefsMatchScope(['src/api.ts', 'src/utils.ts'], {
+      type: 'file',
+      path: 'src/api.ts',
+    });
     expect(score).toBe(1.0);
   });
 
   test('file in module scores 0.8', () => {
-    const score = codeRefsMatchScope(
-      ['src/auth/login.ts'],
-      { type: 'module', path: 'auth' }
-    );
+    const score = codeRefsMatchScope(['src/auth/login.ts'], { type: 'module', path: 'auth' });
     expect(score).toBe(0.8);
   });
 
   test('no refs scores 0', () => {
-    const score = codeRefsMatchScope(
-      [],
-      { type: 'file', path: 'src/api.ts' }
-    );
+    const score = codeRefsMatchScope([], { type: 'file', path: 'src/api.ts' });
     expect(score).toBe(0);
   });
 });

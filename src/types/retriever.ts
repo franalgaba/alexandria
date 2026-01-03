@@ -2,10 +2,9 @@
  * Types for the retrieval system
  */
 
+import type { RevalidationPrompt } from '../utils/revalidation.ts';
 import type { MemoryObject } from './memory-objects.ts';
 import type { PreviousSessionContext } from './sessions.ts';
-
-import type { RevalidationPrompt } from '../utils/revalidation.ts';
 
 /** Legacy context pack format */
 export interface LegacyContextPack {

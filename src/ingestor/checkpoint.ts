@@ -20,10 +20,10 @@ import { MemoryObjectStore } from '../stores/memory-objects.ts';
 import { SessionStore } from '../stores/sessions.ts';
 import type { Event } from '../types/events.ts';
 import type { MemoryCandidate } from '../types/memory-objects.ts';
-import { DeterministicCurator, type Episode } from './deterministic-curator.ts';
-import { IntelligentExtractor, ClaudeProvider, type LLMProvider } from './intelligent-extractor.ts';
-import { ConflictDetector, type Conflict } from './conflict-detector.ts';
 import { getAnthropicApiKey } from '../utils/claude-auth.ts';
+import { type Conflict, ConflictDetector } from './conflict-detector.ts';
+import { DeterministicCurator, type Episode } from './deterministic-curator.ts';
+import { ClaudeProvider, IntelligentExtractor, type LLMProvider } from './intelligent-extractor.ts';
 
 /**
  * Create LLM provider from available credentials
@@ -64,17 +64,17 @@ export interface CheckpointResult {
 export interface CheckpointConfig {
   // Window pressure threshold (0-1, as fraction of typical max)
   windowPressureThreshold: number;
-  
+
   // Tool burst: number of tool outputs in time window
   toolBurstCount: number;
   toolBurstWindowMs: number;
-  
+
   // Minimum events before checkpoint (avoid checkpointing too early)
   minEventsForCheckpoint: number;
-  
+
   // Curator mode
   curatorMode: 'tier0' | 'tier1' | 'tier2';
-  
+
   // LLM provider for tier1/tier2
   llmProvider?: LLMProvider;
 }
@@ -153,7 +153,7 @@ export class Checkpoint {
    * If sinceCheckpoint is provided, only loads events after that timestamp
    */
   loadSessionEvents(sessionId: string, sinceCheckpoint?: Date): number {
-    const events = sinceCheckpoint 
+    const events = sinceCheckpoint
       ? this.eventStore.getBySessionSince(sessionId, sinceCheckpoint)
       : this.eventStore.getBySession(sessionId);
     this.buffer = events;
@@ -214,7 +214,10 @@ export class Checkpoint {
     const candidates = await this.curate(episode);
 
     // 4. Apply extractions (create/update memory objects, detect conflicts in tier2)
-    const { created, updated, conflictsDetected, conflictsPending } = await this.applyExtractions(candidates, episode);
+    const { created, updated, conflictsDetected, conflictsPending } = await this.applyExtractions(
+      candidates,
+      episode,
+    );
 
     // 5. Clear buffer and update checkpoint time
     const episodeEventCount = this.buffer.length;
@@ -222,11 +225,15 @@ export class Checkpoint {
     this.lastCheckpointTime = new Date();
 
     const duration = Date.now() - startTime;
-    console.debug(`Checkpoint completed in ${duration}ms: ${created} created, ${updated} updated, ${conflictsDetected} conflicts`);
+    console.debug(
+      `Checkpoint completed in ${duration}ms: ${created} created, ${updated} updated, ${conflictsDetected} conflicts`,
+    );
 
     // Notify user about pending conflicts
     if (conflictsPending > 0) {
-      console.log(`\n⚠️  ${conflictsPending} conflict(s) need human review. Run: alex conflicts --interactive\n`);
+      console.log(
+        `\n⚠️  ${conflictsPending} conflict(s) need human review. Run: alex conflicts --interactive\n`,
+      );
     }
 
     return {
@@ -288,7 +295,7 @@ export class Checkpoint {
     const windowStart = now - this.config.toolBurstWindowMs;
 
     const recentToolOutputs = this.buffer.filter(
-      e => e.eventType === 'tool_output' && e.timestamp.getTime() >= windowStart
+      (e) => e.eventType === 'tool_output' && e.timestamp.getTime() >= windowStart,
     );
 
     if (recentToolOutputs.length >= this.config.toolBurstCount) {
@@ -307,7 +314,7 @@ export class Checkpoint {
   private detectTaskCompletion(): { signal: string } | null {
     // Look for explicit completion signals in recent events
     const recentEvents = this.buffer.slice(-5); // Last 5 events
-    
+
     const completionPatterns = [
       /(?:tests?\s+(?:are\s+)?(?:passing|passed|pass))/i,
       /(?:done|finished|complete|ready)/i,
@@ -357,8 +364,8 @@ export class Checkpoint {
     const recentPaths = getFilePaths(recentEvents);
 
     // Check for significant shift
-    const overlap = new Set([...oldPaths].filter(p => recentPaths.has(p)));
-    
+    const overlap = new Set([...oldPaths].filter((p) => recentPaths.has(p)));
+
     if (oldPaths.size > 0 && recentPaths.size > 0 && overlap.size === 0) {
       const from = Array.from(oldPaths)[0];
       const to = Array.from(recentPaths)[0];
@@ -377,7 +384,7 @@ export class Checkpoint {
    */
   private async curate(episode: Episode): Promise<MemoryCandidate[]> {
     let candidates: MemoryCandidate[];
-    
+
     switch (this.config.curatorMode) {
       case 'tier0':
         // Deterministic only
@@ -499,8 +506,13 @@ export class Checkpoint {
    */
   private async applyExtractions(
     candidates: MemoryCandidate[],
-    episode: Episode
-  ): Promise<{ created: number; updated: number; conflictsDetected: number; conflictsPending: number }> {
+    episode: Episode,
+  ): Promise<{
+    created: number;
+    updated: number;
+    conflictsDetected: number;
+    conflictsPending: number;
+  }> {
     let created = 0;
     let updated = 0;
     let conflictsDetected = 0;
@@ -514,18 +526,18 @@ export class Checkpoint {
       // In tier2, check for conflicts first
       if (conflictDetector) {
         const conflicts = conflictDetector.detectConflicts(candidate);
-        
+
         if (conflicts.length > 0) {
           conflictsDetected += conflicts.length;
-          
+
           // High-severity conflicts need human review
-          const highSeverity = conflicts.filter(c => c.severity === 'high');
+          const highSeverity = conflicts.filter((c) => c.severity === 'high');
           if (highSeverity.length > 0) {
             conflictsPending += highSeverity.length;
             // Don't auto-create memory - wait for human review
             continue;
           }
-          
+
           // Auto-resolve low/medium severity
           for (const conflict of conflicts) {
             conflictDetector.resolveConflict(conflict.id, {
@@ -542,10 +554,9 @@ export class Checkpoint {
 
       if (similar) {
         // Update existing memory (merge evidence)
-        const updatedEventIds = Array.from(new Set([
-          ...similar.evidenceEventIds,
-          ...candidate.evidenceEventIds,
-        ]));
+        const updatedEventIds = Array.from(
+          new Set([...similar.evidenceEventIds, ...candidate.evidenceEventIds]),
+        );
 
         this.memoryStore.update(similar.id, {
           evidenceEventIds: updatedEventIds,
@@ -577,14 +588,14 @@ export class Checkpoint {
   private async findSimilarMemory(candidate: MemoryCandidate) {
     // Simple approach: look for exact type + similar content
     const allMemories = this.memoryStore.list({ status: ['active'] });
-    
+
     const candidateKey = this.getCandidateKey(candidate);
-    
+
     for (const memory of allMemories) {
       if (memory.objectType !== candidate.suggestedType) continue;
-      
+
       const memoryKey = memory.content.toLowerCase().slice(0, 100).replace(/\s+/g, ' ').trim();
-      
+
       // Simple similarity: same prefix
       if (candidateKey === memoryKey) {
         return memory;
@@ -598,8 +609,8 @@ export class Checkpoint {
    * Get buffer statistics
    */
   getBufferStats() {
-    const toolOutputs = this.buffer.filter(e => e.eventType === 'tool_output').length;
-    const errors = this.buffer.filter(e => e.eventType === 'error').length;
+    const toolOutputs = this.buffer.filter((e) => e.eventType === 'tool_output').length;
+    const errors = this.buffer.filter((e) => e.eventType === 'error').length;
     const age = Date.now() - this.lastCheckpointTime.getTime();
 
     return {

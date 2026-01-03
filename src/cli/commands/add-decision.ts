@@ -3,11 +3,11 @@
  */
 
 import type { ArgumentsCamelCase, Argv } from 'yargs';
-import { MemoryObjectStore } from '../../stores/memory-objects.ts';
 import { closeConnection, getConnection } from '../../stores/connection.ts';
+import { MemoryObjectStore } from '../../stores/memory-objects.ts';
 import type { DecisionStructured } from '../../types/structured.ts';
-import { colorize, success } from '../utils.ts';
 import { formatMemoryObject } from '../../utils/format.ts';
+import { colorize, success } from '../utils.ts';
 
 interface AddDecisionArgs {
   decision: string;
@@ -67,13 +67,13 @@ export async function handler(argv: ArgumentsCamelCase<AddDecisionArgs>): Promis
     };
 
     if (argv.alternatives) {
-      structured.alternatives = argv.alternatives.split(',').map(s => s.trim());
+      structured.alternatives = argv.alternatives.split(',').map((s) => s.trim());
     }
     if (argv.rationale) {
       structured.rationale = argv.rationale;
     }
     if (argv.tradeoffs) {
-      structured.tradeoffs = argv.tradeoffs.split(',').map(s => s.trim());
+      structured.tradeoffs = argv.tradeoffs.split(',').map((s) => s.trim());
     }
     if (argv.decidedBy) {
       structured.decidedBy = argv.decidedBy as 'team' | 'user' | 'inferred';

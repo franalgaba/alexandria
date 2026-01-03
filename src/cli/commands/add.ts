@@ -2,13 +2,13 @@
  * Add command - add a memory object
  */
 
-import type { ArgumentsCamelCase, Argv } from 'yargs';
 import { existsSync } from 'node:fs';
+import type { ArgumentsCamelCase, Argv } from 'yargs';
+import { getCurrentCommit, getGitRoot, getRelativePath } from '../../code/git.ts';
+import { hashFileContent, hashLineRange } from '../../code/hashing.ts';
 import { ReviewPipeline } from '../../reviewer/index.ts';
 import { closeConnection, getConnection } from '../../stores/connection.ts';
-import { hashFileContent, hashLineRange } from '../../code/hashing.ts';
-import { getCurrentCommit, getGitRoot, getRelativePath } from '../../code/git.ts';
-import { fileRef, lineRangeRef, symbolRef, type CodeReference } from '../../types/code-refs.ts';
+import { type CodeReference, fileRef, lineRangeRef, symbolRef } from '../../types/code-refs.ts';
 import type { ScopeType } from '../../types/common.ts';
 import type { Confidence, ObjectType } from '../../types/memory-objects.ts';
 import { error, getTypeEmoji, success } from '../utils.ts';
@@ -101,20 +101,20 @@ export async function handler(argv: ArgumentsCamelCase<AddArgs>): Promise<void> 
   const pipeline = new ReviewPipeline(db);
 
   // Build code refs if --file is provided
-  let codeRefs: CodeReference[] = [];
-  
+  const codeRefs: CodeReference[] = [];
+
   if (argv.file) {
     const gitRoot = getGitRoot() ?? process.cwd();
     const fullPath = argv.file.startsWith('/') ? argv.file : `${gitRoot}/${argv.file}`;
-    
+
     if (!existsSync(fullPath)) {
       error(`File not found: ${argv.file}`);
       process.exit(1);
     }
-    
+
     const relativePath = getRelativePath(fullPath) ?? argv.file;
     const commitHash = getCurrentCommit() ?? undefined;
-    
+
     if (argv.lines) {
       const [start, end] = argv.lines.split('-').map(Number);
       if (isNaN(start) || isNaN(end)) {

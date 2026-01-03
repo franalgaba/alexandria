@@ -1,9 +1,9 @@
-import { describe, expect, test, beforeEach } from 'bun:test';
+import type { Database } from 'bun:sqlite';
+import { beforeEach, describe, expect, test } from 'bun:test';
+import { getCurrentCommit } from '../../src/code/git.ts';
+import { StalenessChecker } from '../../src/reviewer/staleness.ts';
 import { getMemoryConnection } from '../../src/stores/connection.ts';
 import { MemoryObjectStore } from '../../src/stores/memory-objects.ts';
-import { StalenessChecker } from '../../src/reviewer/staleness.ts';
-import { getCurrentCommit } from '../../src/code/git.ts';
-import type { Database } from 'bun:sqlite';
 
 describe('StalenessChecker', () => {
   let db: Database;
@@ -49,7 +49,7 @@ describe('StalenessChecker', () => {
   test('check validates with current commit', () => {
     // Create memory verified at current commit
     const currentCommit = getCurrentCommit();
-    
+
     const memory = store.create({
       content: 'Package.json config',
       objectType: 'decision',
@@ -90,12 +90,14 @@ describe('StalenessChecker', () => {
 
   test('checkAll returns only non-verified memories', () => {
     const currentCommit = getCurrentCommit();
-    
+
     // Create one valid memory (verified at current commit)
     store.create({
       content: 'Valid memory',
       objectType: 'decision',
-      codeRefs: [{ type: 'file', path: 'package.json', verifiedAtCommit: currentCommit ?? undefined }],
+      codeRefs: [
+        { type: 'file', path: 'package.json', verifiedAtCommit: currentCommit ?? undefined },
+      ],
     });
 
     // Create one stale memory (file doesn't exist)
@@ -125,12 +127,14 @@ describe('StalenessChecker', () => {
 
   test('getSummary returns correct counts', () => {
     const currentCommit = getCurrentCommit();
-    
+
     // Create verified memory
     store.create({
       content: 'Valid memory',
       objectType: 'decision',
-      codeRefs: [{ type: 'file', path: 'package.json', verifiedAtCommit: currentCommit ?? undefined }],
+      codeRefs: [
+        { type: 'file', path: 'package.json', verifiedAtCommit: currentCommit ?? undefined },
+      ],
     });
 
     // Create stale memory (file doesn't exist)

@@ -40,6 +40,7 @@ export interface SupersessionCandidate {
 export class Superseder {
   private store: MemoryObjectStore;
   private fts: FTSIndex;
+  private vector: VectorIndex;
 
   constructor(db: Database) {
     this.store = new MemoryObjectStore(db);
@@ -142,7 +143,9 @@ export class Superseder {
 
       if (newVersions.length > 0 && oldVersions.length > 0) {
         // Simple version comparison
-        if (newVersions[0] > oldVersions[0]) {
+        const newVersion = newVersions[0];
+        const oldVersion = oldVersions[0];
+        if (newVersion && oldVersion && newVersion > oldVersion) {
           shouldSupersede = true;
           reason = 'Newer version information';
           confidence = similarity;

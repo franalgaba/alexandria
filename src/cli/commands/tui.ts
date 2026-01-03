@@ -4,7 +4,7 @@
 
 import type { ArgumentsCamelCase, Argv } from 'yargs';
 
-interface TuiArgs {}
+type TuiArgs = {};
 
 export const command = 'tui';
 export const describe = 'Launch the Alexandria terminal UI';

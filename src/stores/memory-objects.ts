@@ -3,8 +3,8 @@
  */
 
 import type { Database } from 'bun:sqlite';
-import type { Scope, ScopeType } from '../types/common.ts';
 import type { CodeReference } from '../types/code-refs.ts';
+import type { Scope, ScopeType } from '../types/common.ts';
 import type {
   ConfidenceTier,
   CreateMemoryObjectInput,
@@ -16,6 +16,7 @@ import type {
 } from '../types/memory-objects.ts';
 import { parseStructured, serializeStructured } from '../types/structured.ts';
 import { calculateConfidenceTier } from '../utils/confidence.ts';
+import { calculateDecayedStrength, calculateReinforcedStrength } from '../utils/decay.ts';
 import { generateId } from '../utils/id.ts';
 import { extractTokens } from '../utils/tokens.ts';
 
@@ -45,7 +46,7 @@ export class MemoryObjectStore {
     const codeRefs = input.codeRefs ?? [];
     const lastVerifiedAt = codeRefs.length > 0 ? now : null;
     const reviewStatus = input.reviewStatus ?? 'pending';
-    
+
     // Calculate confidence tier based on evidence
     const confidenceTier = calculateConfidenceTier({
       codeRefs,
@@ -59,12 +60,14 @@ export class MemoryObjectStore {
       INSERT INTO memory_objects (
         id, content, object_type, scope_type, scope_path,
         confidence, evidence_event_ids, evidence_excerpt,
-        review_status, created_at, updated_at, code_refs, last_verified_at, structured
+        review_status, created_at, updated_at, code_refs, last_verified_at, structured,
+        strength, outcome_score
       )
       VALUES (
         $id, $content, $objectType, $scopeType, $scopePath,
         $confidence, $evidenceEventIds, $evidenceExcerpt,
-        $reviewStatus, $createdAt, $updatedAt, $codeRefs, $lastVerifiedAt, $structured
+        $reviewStatus, $createdAt, $updatedAt, $codeRefs, $lastVerifiedAt, $structured,
+        $strength, $outcomeScore
       )
     `)
       .run({
@@ -82,6 +85,8 @@ export class MemoryObjectStore {
         $codeRefs: JSON.stringify(codeRefs),
         $lastVerifiedAt: lastVerifiedAt?.toISOString() ?? null,
         $structured: serializeStructured(input.structured),
+        $strength: 1.0,
+        $outcomeScore: 0.5,
       });
 
     // Index tokens for exact matching
@@ -104,6 +109,8 @@ export class MemoryObjectStore {
       codeRefs,
       lastVerifiedAt: lastVerifiedAt ?? undefined,
       structured: input.structured,
+      strength: 1.0,
+      outcomeScore: 0.5,
     };
   }
 
@@ -174,12 +181,24 @@ export class MemoryObjectStore {
       updates.push('structured = $structured');
       params.$structured = serializeStructured(input.structured);
     }
+    if (input.evidenceEventIds !== undefined) {
+      updates.push('evidence_event_ids = $evidenceEventIds');
+      params.$evidenceEventIds = JSON.stringify(input.evidenceEventIds);
+    }
+    if (input.strength !== undefined) {
+      updates.push('strength = $strength');
+      params.$strength = Math.max(0, Math.min(1, input.strength));
+    }
+    if (input.outcomeScore !== undefined) {
+      updates.push('outcome_score = $outcomeScore');
+      params.$outcomeScore = Math.max(0, Math.min(1, input.outcomeScore));
+    }
 
     this.db
       .query(`
       UPDATE memory_objects SET ${updates.join(', ')} WHERE id = $id
     `)
-      .run(params);
+      .run(params as Record<string, string | number | null>);
 
     return this.get(id);
   }
@@ -258,7 +277,7 @@ export class MemoryObjectStore {
     if (!existing) return null;
 
     const allRefs = [...existing.codeRefs, ...refs];
-    return this.update(id, { 
+    return this.update(id, {
       codeRefs: allRefs,
       lastVerifiedAt: new Date(),
     });
@@ -268,9 +287,9 @@ export class MemoryObjectStore {
    * Mark a memory as verified (still accurate)
    */
   verify(id: string): MemoryObject | null {
-    return this.update(id, { 
+    return this.update(id, {
       lastVerifiedAt: new Date(),
-      status: 'active',  // Reset to active if it was stale
+      status: 'active', // Reset to active if it was stale
     });
   }
 
@@ -295,11 +314,73 @@ export class MemoryObjectStore {
   recordAccess(id: string): void {
     this.db
       .query(`
-      UPDATE memory_objects 
+      UPDATE memory_objects
       SET access_count = access_count + 1, last_accessed = $now
       WHERE id = $id
     `)
       .run({ $id: id, $now: new Date().toISOString() });
+  }
+
+  /**
+   * Reinforce a memory (boost strength on access)
+   * This implements the brain-inspired reconsolidation mechanism.
+   */
+  reinforceMemory(id: string): MemoryObject | null {
+    const existing = this.get(id);
+    if (!existing) return null;
+
+    const now = new Date();
+    const newStrength = calculateReinforcedStrength(existing.strength);
+
+    this.db
+      .query(`
+      UPDATE memory_objects
+      SET strength = $strength, last_reinforced_at = $now, last_accessed = $now,
+          access_count = access_count + 1
+      WHERE id = $id
+    `)
+      .run({
+        $id: id,
+        $strength: newStrength,
+        $now: now.toISOString(),
+      });
+
+    return this.get(id);
+  }
+
+  /**
+   * Update outcome score for a memory
+   */
+  updateOutcomeScore(id: string, newScore: number): boolean {
+    const result = this.db
+      .query(`
+      UPDATE memory_objects
+      SET outcome_score = $outcomeScore, updated_at = $now
+      WHERE id = $id
+    `)
+      .run({
+        $id: id,
+        $outcomeScore: Math.max(0, Math.min(1, newScore)),
+        $now: new Date().toISOString(),
+      });
+
+    return result.changes > 0;
+  }
+
+  /**
+   * Get memories sorted by effective score (strength * outcome)
+   */
+  getByEffectiveScore(limit = 20): MemoryObject[] {
+    const rows = this.db
+      .query(`
+      SELECT * FROM memory_objects
+      WHERE status = 'active'
+      ORDER BY (COALESCE(strength, 1.0) * (0.5 + COALESCE(outcome_score, 0.5))) DESC
+      LIMIT $limit
+    `)
+      .all({ $limit: limit }) as MemoryObjectRow[];
+
+    return rows.map((row) => this.rowToMemoryObject(row));
   }
 
   /**
@@ -346,12 +427,12 @@ export class MemoryObjectStore {
 
     const rows = this.db
       .query(`
-      SELECT * FROM memory_objects 
+      SELECT * FROM memory_objects
       ${whereClause}
       ORDER BY created_at DESC
       LIMIT $limit OFFSET $offset
     `)
-      .all(params) as MemoryObjectRow[];
+      .all(params as Record<string, string | number | null>) as MemoryObjectRow[];
 
     return rows.map((row) => this.rowToMemoryObject(row));
   }
@@ -435,16 +516,24 @@ export class MemoryObjectStore {
     const lastVerifiedAt = row.last_verified_at ? new Date(row.last_verified_at) : undefined;
     const reviewStatus = row.review_status as MemoryObject['reviewStatus'];
     const status = row.status as Status;
-    
+    const createdAt = new Date(row.created_at);
+    const lastAccessed = row.last_accessed ? new Date(row.last_accessed) : undefined;
+    const lastReinforcedAt = row.last_reinforced_at
+      ? new Date(row.last_reinforced_at)
+      : undefined;
+
     // Calculate confidence tier based on current evidence
     const confidenceTier = calculateConfidenceTier({
       codeRefs,
       evidenceEventIds,
       reviewStatus,
       lastVerifiedAt,
-      status,
     });
-    
+
+    // Calculate current strength with decay
+    const baseStrength = row.strength ?? 1.0;
+    const strength = calculateDecayedStrength(baseStrength, lastAccessed, createdAt);
+
     return {
       id: row.id,
       content: row.content,
@@ -461,14 +550,17 @@ export class MemoryObjectStore {
       evidenceExcerpt: row.evidence_excerpt ?? undefined,
       reviewStatus,
       reviewedAt: row.reviewed_at ? new Date(row.reviewed_at) : undefined,
-      createdAt: new Date(row.created_at),
+      createdAt,
       updatedAt: new Date(row.updated_at),
       accessCount: row.access_count,
-      lastAccessed: row.last_accessed ? new Date(row.last_accessed) : undefined,
+      lastAccessed,
       codeRefs,
       lastVerifiedAt,
       supersedes: row.supersedes ? JSON.parse(row.supersedes) : undefined,
       structured: parseStructured(row.structured),
+      strength,
+      lastReinforcedAt,
+      outcomeScore: row.outcome_score ?? 0.5,
     };
   }
 }

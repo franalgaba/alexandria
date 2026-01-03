@@ -35,9 +35,7 @@ export interface ContractStructured {
 /**
  * Union of all structured types
  */
-export type StructuredData = 
-  | DecisionStructured 
-  | ContractStructured;
+export type StructuredData = DecisionStructured | ContractStructured;
 
 /**
  * Type guard for DecisionStructured
@@ -63,8 +61,6 @@ export function isContractStructured(data: unknown): data is ContractStructured 
     typeof (data as ContractStructured).name === 'string'
   );
 }
-
-
 
 /**
  * Parse structured data from JSON string
@@ -92,23 +88,23 @@ export function serializeStructured(data: StructuredData | undefined): string | 
 export function formatDecision(data: DecisionStructured): string {
   const lines: string[] = [];
   lines.push(`Decision: ${data.decision}`);
-  
+
   if (data.alternatives && data.alternatives.length > 0) {
     lines.push(`Alternatives: ${data.alternatives.join(', ')}`);
   }
-  
+
   if (data.rationale) {
     lines.push(`Rationale: ${data.rationale}`);
   }
-  
+
   if (data.tradeoffs && data.tradeoffs.length > 0) {
     lines.push(`Tradeoffs: ${data.tradeoffs.join(', ')}`);
   }
-  
+
   if (data.decidedBy) {
     lines.push(`Decided by: ${data.decidedBy}`);
   }
-  
+
   return lines.join('\n');
 }
 
@@ -119,15 +115,15 @@ export function formatContract(data: ContractStructured): string {
   const lines: string[] = [];
   lines.push(`Contract: ${data.name}`);
   lines.push(`Type: ${data.contractType}`);
-  
+
   if (data.version) {
     lines.push(`Version: ${data.version}`);
   }
-  
+
   if (data.definition) {
     lines.push(`Definition:\n${data.definition}`);
   }
-  
+
   return lines.join('\n');
 }
 

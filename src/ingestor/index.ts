@@ -7,11 +7,11 @@ import { FTSIndex } from '../indexes/fts.ts';
 import { VectorIndex } from '../indexes/vector.ts';
 import { EventStore } from '../stores/events.ts';
 import type { Event, EventType } from '../types/events.ts';
+import { Checkpoint, type CheckpointConfig, type CheckpointTrigger } from './checkpoint.ts';
 import { classifyEventType } from './event-types.ts';
+import { IntelligentExtractor, type LLMProvider } from './intelligent-extractor.ts';
 import { extractFilePaths, sanitizeContent } from './parsers.ts';
 import { RealtimeExtractor } from './realtime-extractor.ts';
-import { IntelligentExtractor, type LLMProvider } from './intelligent-extractor.ts';
-import { Checkpoint, type CheckpointConfig, type CheckpointTrigger } from './checkpoint.ts';
 
 export interface IngestOptions {
   /** Skip embedding generation (faster, but no vector search) */
@@ -64,20 +64,18 @@ export class Ingestor {
     return new Ingestor(db, options, checkpoint);
   }
 
-  constructor(
-    db: Database,
-    options?: IngestorOptions,
-    checkpoint?: Checkpoint
-  ) {
+  constructor(db: Database, options?: IngestorOptions, checkpoint?: Checkpoint) {
     this.eventStore = new EventStore(db);
     this.ftsIndex = new FTSIndex(db);
     this.vectorIndex = new VectorIndex(db);
     this.realtimeExtractor = new RealtimeExtractor(db);
     this.intelligentExtractor = new IntelligentExtractor(db, options?.llmProvider);
-    this.checkpoint = checkpoint ?? new Checkpoint(db, {
-      llmProvider: options?.llmProvider,
-      ...options?.checkpointConfig,
-    });
+    this.checkpoint =
+      checkpoint ??
+      new Checkpoint(db, {
+        llmProvider: options?.llmProvider,
+        ...options?.checkpointConfig,
+      });
     this.useIntelligent = options?.useIntelligent ?? false;
     this.useCheckpoints = options?.useCheckpoints ?? true; // Default to checkpoint mode (v2.0)
   }
@@ -137,7 +135,7 @@ export class Ingestor {
     // Memory extraction strategy
     let memoriesExtracted = 0;
     const useCheckpoints = options.useCheckpoints ?? this.useCheckpoints;
-    
+
     if (!options.skipExtraction && finalContent) {
       if (useCheckpoints) {
         // Checkpoint-based: add to buffer, auto-checkpoint on triggers
@@ -153,7 +151,7 @@ export class Ingestor {
         // Legacy: real-time extraction
         try {
           const useIntelligent = options.useIntelligentExtraction ?? this.useIntelligent;
-          
+
           if (useIntelligent) {
             const extracted = await this.intelligentExtractor.processEvent(event, finalContent);
             memoriesExtracted = extracted.length;
@@ -173,7 +171,7 @@ export class Ingestor {
   /**
    * Manually trigger a checkpoint
    */
-  async checkpoint(reason?: string) {
+  async triggerCheckpoint(reason?: string) {
     return this.checkpoint.executeManual(reason);
   }
 
@@ -346,19 +344,19 @@ export class Ingestor {
   }
 }
 
-// Re-export
-export { RealtimeExtractor } from './realtime-extractor.ts';
-export { 
-  IntelligentExtractor, 
-  type LLMProvider,
-  OllamaProvider,
-  ClaudeProvider,
-  OpenAIProvider,
-} from './intelligent-extractor.ts';
-export { 
-  Checkpoint, 
-  type CheckpointConfig, 
-  type CheckpointTrigger,
+export {
+  Checkpoint,
+  type CheckpointConfig,
   type CheckpointResult,
+  type CheckpointTrigger,
 } from './checkpoint.ts';
 export { DeterministicCurator } from './deterministic-curator.ts';
+export {
+  ClaudeProvider,
+  IntelligentExtractor,
+  type LLMProvider,
+  OllamaProvider,
+  OpenAIProvider,
+} from './intelligent-extractor.ts';
+// Re-export
+export { RealtimeExtractor } from './realtime-extractor.ts';

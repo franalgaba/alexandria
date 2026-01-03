@@ -1,6 +1,6 @@
 # Getting Started with Alexandria
 
-Alexandria is a local-first memory system for coding agents. It automatically captures agent traces, extracts memories, and retrieves relevant context across sessions.
+Alexandria is a local-first memory system for coding agents. It captures session events, extracts memories via checkpoint-driven curation, and retrieves relevant context across sessions.
 
 ## Installation
 
@@ -35,32 +35,45 @@ alex install claude-code
 
 # For pi-coding-agent
 alex install pi
-
-# Or install all
-alex install all
 ```
 
 This enables **automatic memory capture** from your coding sessions.
 
-### 2. Real-time Memory Extraction
+### 2. How It Works
 
-When integrated, Alexandria captures **everything in real-time**:
+When integrated, Alexandria:
 
-1. **User prompts** - What you ask
-2. **Assistant responses** - Agent's reasoning
-3. **Tool calls** - Commands and edits
-4. **Tool results** - Output and errors
+1. **Injects memories at session start** - Relevant context loaded automatically
+2. **Captures events during session** - Tool calls, results, responses (fire-and-forget)
+3. **Auto-checkpoints every 10 events** - Triggers memory extraction
+4. **Agent-driven extraction** - The coding agent itself reviews and extracts memories
 
-As each event is captured, memories are **extracted immediately** using pattern matching. No waiting until session end - knowledge is captured the moment it happens.
-
-Check pending memories anytime:
-
-```bash
-alex review --list    # See pending count
-alex review           # Interactive review
+```
+Session Start → Memories Injected
+     ↓
+Event 1...10 → Auto-Checkpoint → Agent extracts memories
+     ↓
+Event 11...20 → Auto-Checkpoint → Agent extracts memories
+     ↓
+Session End → Final checkpoint
 ```
 
-### 3. Manual Memory Addition
+### 3. Memory Extraction
+
+Memories are extracted via tiered curation:
+
+**Tier 0 (Deterministic):**
+- Error → Fix patterns detected automatically
+- User corrections ("don't", "never", "must always")
+- Repeated patterns (3+ occurrences)
+
+**Tier 1 (Haiku LLM):**
+- Background extraction using Claude Haiku
+- Extracts decisions, conventions, preferences
+- Uses Claude Code's OAuth token (no separate API key needed!)
+- Memories created as "pending" for review
+
+### 4. Manual Memory Addition
 
 You can also add memories manually:
 
@@ -74,7 +87,7 @@ alex add-decision "Use SQLite for storage" \
   --alternatives "PostgreSQL, JSON files"
 ```
 
-### 4. Search & Retrieve
+### 5. Search & Retrieve
 
 ```bash
 # Hybrid search (lexical + semantic)
@@ -84,16 +97,13 @@ alex search "error handling"
 alex search "how do we handle errors" --smart
 ```
 
-### 5. Generate Context Pack
+### 6. Generate Context Pack
 
 Get relevant memories for your current task:
 
 ```bash
-# Auto-detect task from recent git activity
-alex pack --auto
-
-# Specify task explicitly
-alex pack --task "Add authentication"
+# Default task level (~500 tokens)
+alex pack
 
 # Different detail levels
 alex pack --level minimal   # ~200 tokens, constraints only
@@ -103,19 +113,15 @@ alex pack --level deep      # ~1500 tokens, + history
 
 ## Core Concepts
 
-### How Automatic Extraction Works
+### Checkpoint-Driven Curation
 
-Alexandria's extractor looks for patterns in agent tool outputs:
+Unlike real-time extraction (which captures noise), Alexandria uses **checkpoint-driven curation**:
 
-| Pattern | Extracted As |
-|---------|--------------|
-| "error", "failed", "doesn't work" | `failed_attempt` |
-| "chose", "decided", "using X instead of Y" | `decision` |
-| "must", "always", "never", "required" | `constraint` |
-| "fixed by", "solution:", "workaround:" | `known_fix` |
-| "convention", "pattern", "we use" | `convention` |
-
-Extracted memories are queued as **pending** for your review.
+1. Events are buffered during the session
+2. Every 10 events, a checkpoint triggers
+3. **Tier 0**: Deterministic patterns extracted automatically
+4. **Tier 1**: Haiku extracts decisions, conventions, preferences (if OAuth available)
+5. Memories created as "pending" for review
 
 ### Memory Types
 
@@ -131,11 +137,21 @@ Extracted memories are queued as **pending** for your review.
 
 ### Memory Lifecycle
 
-1. **Capture** - Auto-extracted from agent sessions (or manually added)
+1. **Capture** - Extracted at checkpoints or manually added
 2. **Review** - Approve, edit, or reject pending memories
 3. **Link** - Connect to code files/symbols for staleness tracking
 4. **Verify** - Reconfirm after code changes
 5. **Retire** - Mark as no longer applicable
+
+### Progressive Disclosure
+
+Context packs use progressive disclosure to minimize token usage:
+
+| Level | Tokens | Contents |
+|-------|--------|----------|
+| `minimal` | ~200 | Constraints only |
+| `task` | ~500 | + Relevant decisions, conventions, fixes |
+| `deep` | ~1500 | + Full history and evidence |
 
 ### Code Awareness
 
@@ -150,6 +166,13 @@ alex link abc123 --file src/api.ts --symbol fetchUser
 ```
 
 When linked files change (detected via git commits), Alexandria flags the memory for revalidation.
+
+## Configuration
+
+```bash
+# Auto-checkpoint threshold (default: 10 events)
+export ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD=10
+```
 
 ## Next Steps
 

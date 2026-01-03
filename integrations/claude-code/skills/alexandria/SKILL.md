@@ -56,6 +56,30 @@ alex add "Never use any type in TypeScript files" \
     --type constraint --approve
 ```
 
+## 📚 Session End: Extract Memories
+
+**Before ending a session**, review what was learned and store valuable memories:
+
+1. **Decisions made**: What technical choices were made and why?
+2. **Fixes discovered**: What problems were solved and how?
+3. **Constraints learned**: What should always/never be done?
+4. **Conventions used**: What patterns or standards were followed?
+
+For each memory worth keeping:
+```bash
+alex add "<memory content>" --type <decision|known_fix|constraint|convention> --approve
+```
+
+**Good memories are:**
+- Actionable - can be applied in future sessions
+- Specific - includes context and reasoning
+- Grounded - based on actual experience
+
+**Skip:**
+- Trivial or one-time things
+- Meta-commentary ("I will try X")
+- Generic/obvious statements
+
 ## Memory Types Quick Reference
 
 | Type | Use For |
@@ -75,17 +99,9 @@ alex pack                    # Get context (DO THIS FIRST!)
 alex search "query"          # Search memories
 alex add "..." --type X      # Store memory
 alex list                    # List all memories
-alex where                   # Show database location
-alex init                    # Initialize project-local database
-```
-
-## Project Isolation
-
-Each project can have its own database:
-
-```bash
-alex init                    # Creates .alexandria/ in project
-alex where                   # Shows which database is active
+alex check                   # Find stale memories
+alex review                  # Review pending memories
+alex checkpoint              # Curate buffered events into memories
 ```
 
 ## Example Session Flow
@@ -104,4 +120,7 @@ alex add "ImageMagick convert fails on HEIC files" --type failed_attempt --appro
 
 # 5. STORE: When you find a fix
 alex add "Use libheif for HEIC conversion" --type known_fix --approve
+
+# 6. END: Review session for valuable learnings
+# What decisions were made? What patterns emerged?
 ```

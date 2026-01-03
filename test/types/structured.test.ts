@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'bun:test';
 import {
-  isDecisionStructured,
+  type ContractStructured,
+  type DecisionStructured,
+  formatContract,
+  formatDecision,
   isContractStructured,
+  isDecisionStructured,
   parseStructured,
   serializeStructured,
-  formatDecision,
-  formatContract,
-  type DecisionStructured,
-  type ContractStructured,
 } from '../../src/types/structured.ts';
 
 describe('Type Guards', () => {
@@ -22,8 +22,6 @@ describe('Type Guards', () => {
     expect(isContractStructured({ decision: 'test' })).toBe(false);
     expect(isContractStructured(null)).toBe(false);
   });
-
-  
 });
 
 describe('Serialization', () => {
@@ -89,6 +87,4 @@ describe('Formatting', () => {
     expect(result).toContain('Definition:');
     expect(result).toContain('GET /users');
   });
-
-  
 });

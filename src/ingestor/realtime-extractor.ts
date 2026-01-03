@@ -1,6 +1,6 @@
 /**
  * Real-time memory extractor - extracts memories as events are ingested
- * 
+ *
  * IMPORTANT: This extractor is intentionally conservative to avoid noise.
  * It focuses on high-signal patterns and requires multiple pattern matches.
  * For better extraction, use session-end summarization with LLM.
@@ -68,23 +68,23 @@ const EXTRACTION_PATTERNS: Record<ObjectType, RegExp[]> = {
 
 // Patterns that indicate content should be EXCLUDED
 const EXCLUDE_PATTERNS: RegExp[] = [
-  /^```/,                                    // Code block start
-  /^[\s]*[{}()\[\];,][\s]*$/,               // Single punctuation
-  /^[\s]*\/\//,                              // Comment line
-  /^[\s]*#(?!\s)/,                           // Comment (but not markdown headers)
-  /^\d+\.\s+/,                               // Numbered list items
-  /^[-*]\s+/,                                // Bullet points (likely examples)
-  /^(?:let\s+me|now\s+I|first|then|next)/i,  // Meta-commentary
-  /^(?:here's|here\s+is)/i,                  // Introduction phrases
+  /^```/, // Code block start
+  /^[\s]*[{}()[\];,][\s]*$/, // Single punctuation
+  /^[\s]*\/\//, // Comment line
+  /^[\s]*#(?!\s)/, // Comment (but not markdown headers)
+  /^\d+\.\s+/, // Numbered list items
+  /^[-*]\s+/, // Bullet points (likely examples)
+  /^(?:let\s+me|now\s+I|first|then|next)/i, // Meta-commentary
+  /^(?:here's|here\s+is)/i, // Introduction phrases
   /^(?:the\s+)?(?:output|result)\s+(?:is|was|shows)/i, // Output descriptions
-  /(?:error|exception|traceback)\s*:/i,      // Error labels
-  /at\s+[\w./<>]+:\d+/,                      // Stack trace lines
-  /^\s*\|/,                                  // Table rows
-  /https?:\/\/\S+/,                          // URLs
-  /^\/[\w/.-]+$/,                            // File paths alone
-  /^\s*import\s+/,                           // Import statements
-  /^\s*(?:const|let|var|function)\s+/,       // Variable declarations
-  /\(\s*\d+\s*(?:bytes?|KB|MB|ms|s)\s*\)/,   // Size/time measurements
+  /(?:error|exception|traceback)\s*:/i, // Error labels
+  /at\s+[\w./<>]+:\d+/, // Stack trace lines
+  /^\s*\|/, // Table rows
+  /https?:\/\/\S+/, // URLs
+  /^\/[\w/.-]+$/, // File paths alone
+  /^\s*import\s+/, // Import statements
+  /^\s*(?:const|let|var|function)\s+/, // Variable declarations
+  /\(\s*\d+\s*(?:bytes?|KB|MB|ms|s)\s*\)/, // Size/time measurements
 ];
 
 // Minimum content length to consider for extraction
@@ -185,20 +185,24 @@ export class RealtimeExtractor {
     }
 
     // Check minimum word count
-    const words = content.split(/\s+/).filter(w => w.length > 1);
+    const words = content.split(/\s+/).filter((w) => w.length > 1);
     if (words.length < MIN_WORD_COUNT) {
       return true;
     }
 
     // Exclude if mostly code-like (high ratio of special characters)
-    const specialChars = (content.match(/[{}()\[\];:=<>]/g) || []).length;
+    const specialChars = (content.match(/[{}()[\];:=<>]/g) || []).length;
     const alphaChars = (content.match(/[a-zA-Z]/g) || []).length;
     if (alphaChars > 0 && specialChars / alphaChars > 0.3) {
       return true;
     }
 
     // Exclude if it looks like a command or path
-    if (/^[a-z]+\s+[a-z-]+\s*/.test(content) && !content.includes(' because') && !content.includes(' to ')) {
+    if (
+      /^[a-z]+\s+[a-z-]+\s*/.test(content) &&
+      !content.includes(' because') &&
+      !content.includes(' to ')
+    ) {
       return true;
     }
 
@@ -219,7 +223,10 @@ export class RealtimeExtractor {
       matchCount: number;
     } | null = null;
 
-    for (const [type, patterns] of Object.entries(EXTRACTION_PATTERNS) as [ObjectType, RegExp[]][]) {
+    for (const [type, patterns] of Object.entries(EXTRACTION_PATTERNS) as [
+      ObjectType,
+      RegExp[],
+    ][]) {
       let matchCount = 0;
       for (const pattern of patterns) {
         if (pattern.test(content)) {
@@ -239,7 +246,10 @@ export class RealtimeExtractor {
     const confidence: Confidence = bestMatch.matchCount >= 2 ? 'high' : 'medium';
 
     // Skip for noisy event types unless high confidence
-    if (confidence !== 'high' && (event.eventType === 'tool_output' || event.eventType === 'tool_call')) {
+    if (
+      confidence !== 'high' &&
+      (event.eventType === 'tool_output' || event.eventType === 'tool_call')
+    ) {
       return null;
     }
 
@@ -268,8 +278,8 @@ export class RealtimeExtractor {
       /\b(instead\s+of|rather\s+than|works?\s+when)\b/i,
       /\b(the\s+(?:fix|solution|issue|problem)\s+(?:is|was))\b/i,
     ];
-    
-    return actionablePatterns.some(p => p.test(content));
+
+    return actionablePatterns.some((p) => p.test(content));
   }
 
   /**
@@ -289,8 +299,8 @@ export class RealtimeExtractor {
   private splitIntoSentences(content: string): string[] {
     const sentences = content
       .split(/(?<=[.!?])\s+|\n+/)
-      .map(s => s.trim())
-      .filter(s => s.length >= MIN_CONTENT_LENGTH);
+      .map((s) => s.trim())
+      .filter((s) => s.length >= MIN_CONTENT_LENGTH);
 
     return sentences;
   }
@@ -300,8 +310,9 @@ export class RealtimeExtractor {
    */
   private async checkDuplicate(content: string): Promise<boolean> {
     try {
-      const results = await this.vector.searchObjects(content, 1);
-      if (results.length > 0 && results[0].score > 0.9) {
+      const results = await this.vector.searchSimilarObjects(content, 1);
+      // Low distance means high similarity (distance < 0.1 means very similar)
+      if (results.length > 0 && results[0].distance < 0.1) {
         return true;
       }
     } catch {

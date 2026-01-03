@@ -9,6 +9,7 @@ import { MemoryObjectStore } from '../stores/memory-objects.ts';
 import type { SearchOptions } from '../types/common.ts';
 import type { MemoryObject, Status } from '../types/memory-objects.ts';
 import type { SearchResult } from '../types/retriever.ts';
+import { calculateEffectiveScore } from '../utils/decay.ts';
 import type { RetrievalPlan } from './router.ts';
 import { codeRefsMatchScope, extractScope } from './scope.ts';
 
@@ -30,7 +31,13 @@ export class HybridSearch {
    * Perform hybrid search
    */
   async search(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
-    const { limit = 20, status = ['active'], alpha = 0.5 } = options;
+    const {
+      limit = 20,
+      status = ['active'],
+      alpha = 0.5,
+      skipStrengthScoring = false,
+      skipReinforcement = false,
+    } = options;
 
     // 1. Lexical search (FTS5 + BM25)
     const ftsResults = this.fts.searchObjects(query, status as Status[], limit * 2);
@@ -57,8 +64,36 @@ export class HybridSearch {
       results = fused.filter((r) => r.object.objectType === options.objectType);
     }
 
-    // 5. Return top results
+    // 5. Apply strength and outcome scoring (brain-inspired reranking)
+    if (!skipStrengthScoring) {
+      results = this.applyStrengthScoring(results);
+    }
+
+    // 6. Reinforce accessed memories
+    if (!skipReinforcement) {
+      for (const result of results.slice(0, limit)) {
+        this.store.reinforceMemory(result.object.id);
+      }
+    }
+
+    // 7. Return top results
     return results.slice(0, limit);
+  }
+
+  /**
+   * Apply strength and outcome scoring to results
+   */
+  private applyStrengthScoring(results: SearchResult[]): SearchResult[] {
+    return results
+      .map((result) => ({
+        ...result,
+        score: calculateEffectiveScore(
+          result.score,
+          result.object.strength,
+          result.object.outcomeScore,
+        ),
+      }))
+      .sort((a, b) => b.score - a.score);
   }
 
   /**
@@ -66,31 +101,31 @@ export class HybridSearch {
    */
   async searchWithPlan(query: string, plan: RetrievalPlan): Promise<SearchResult[]> {
     const status: Status[] = plan.includeStale ? ['active', 'stale'] : ['active'];
-    
+
     // Base search
     let results = await this.search(query, {
       limit: 50, // Get more, we'll filter
       status,
     });
-    
+
     // Filter by type if specified
     if (plan.typeFilters.length > 0) {
-      results = results.filter(r => plan.typeFilters.includes(r.object.objectType));
+      results = results.filter((r) => plan.typeFilters.includes(r.object.objectType));
     }
-    
+
     // Filter by minimum confidence
     if (plan.minConfidence) {
       const tierOrder = ['grounded', 'observed', 'inferred', 'hypothesis'];
       const minIndex = tierOrder.indexOf(plan.minConfidence);
-      results = results.filter(r => tierOrder.indexOf(r.object.confidenceTier) <= minIndex);
+      results = results.filter((r) => tierOrder.indexOf(r.object.confidenceTier) <= minIndex);
     }
-    
+
     // Apply plan-specific boosts
     results = this.applyPlanBoosts(results, query, plan);
-    
+
     // Sort by boosted score
     results.sort((a, b) => b.score - a.score);
-    
+
     // Limit to token budget (rough estimate: 30 tokens per result)
     const maxResults = Math.floor(plan.tokenBudget / 30);
     return results.slice(0, maxResults);
@@ -102,47 +137,48 @@ export class HybridSearch {
   private applyPlanBoosts(
     results: SearchResult[],
     query: string,
-    plan: RetrievalPlan
+    plan: RetrievalPlan,
   ): SearchResult[] {
     // Extract scope from query for scope matching
     const extractedScope = extractScope(query);
-    
-    return results.map(result => {
+
+    return results.map((result) => {
       let boostedScore = result.score;
       const obj = result.object;
-      
+
       // Grounded boost
       if (plan.boosts.grounded && obj.confidenceTier === 'grounded') {
         boostedScore *= plan.boosts.grounded;
       }
-      
+
       // Has code refs boost
       if (plan.boosts.hasCodeRefs && obj.codeRefs.length > 0) {
         boostedScore *= plan.boosts.hasCodeRefs;
       }
-      
+
       // Recently verified boost
       if (plan.boosts.recentlyVerified && obj.lastVerifiedAt) {
-        const daysSinceVerified = (Date.now() - obj.lastVerifiedAt.getTime()) / (1000 * 60 * 60 * 24);
+        const daysSinceVerified =
+          (Date.now() - obj.lastVerifiedAt.getTime()) / (1000 * 60 * 60 * 24);
         if (daysSinceVerified < 7) {
           boostedScore *= plan.boosts.recentlyVerified;
         }
       }
-      
+
       // Type-specific boosts
       if (plan.boosts.typeBoosts?.[obj.objectType]) {
         boostedScore += plan.boosts.typeBoosts[obj.objectType]! / 100;
       }
-      
+
       // Scope matching boost
       if (extractedScope) {
-        const codeRefPaths = (obj.codeRefs || []).map(r => r.path);
+        const codeRefPaths = (obj.codeRefs || []).map((r) => r.path);
         const scopeScore = codeRefsMatchScope(codeRefPaths, extractedScope.scope);
         if (scopeScore > 0) {
-          boostedScore *= (1 + scopeScore * 0.5); // Up to 50% boost for scope match
+          boostedScore *= 1 + scopeScore * 0.5; // Up to 50% boost for scope match
         }
       }
-      
+
       return {
         ...result,
         score: boostedScore,

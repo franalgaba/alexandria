@@ -2,8 +2,8 @@
  * Memory object types for curated knowledge storage
  */
 
-import type { Scope } from './common.ts';
 import type { CodeReference } from './code-refs.ts';
+import type { Scope } from './common.ts';
 import type { StructuredData } from './structured.ts';
 
 export type ObjectType =
@@ -58,6 +58,12 @@ export interface MemoryObject {
   supersedes?: string[];
   /** Structured data for enhanced memory types */
   structured?: StructuredData;
+  /** Memory strength (0.0 - 1.0), decays over time without access */
+  strength: number;
+  /** When memory was last reinforced (accessed and boosted) */
+  lastReinforcedAt?: Date;
+  /** Outcome score (0.0 - 1.0) based on helpfulness feedback */
+  outcomeScore: number;
 }
 
 export interface MemoryObjectRow {
@@ -81,6 +87,9 @@ export interface MemoryObjectRow {
   last_verified_at: string | null;
   supersedes: string | null;
   structured: string | null;
+  strength: number | null;
+  last_reinforced_at: string | null;
+  outcome_score: number | null;
 }
 
 export interface CreateMemoryObjectInput {
@@ -105,6 +114,11 @@ export interface UpdateMemoryObjectInput {
   codeRefs?: CodeReference[];
   lastVerifiedAt?: Date;
   structured?: StructuredData;
+  evidenceEventIds?: string[];
+  /** Override strength (for testing/migration) */
+  strength?: number;
+  /** Override outcome score (for testing/migration) */
+  outcomeScore?: number;
 }
 
 export interface MemoryCandidate {

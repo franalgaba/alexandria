@@ -20,16 +20,16 @@ export function hashContent(content: string): string {
  */
 export function hashFileContent(
   filePath: string,
-  projectPath: string = process.cwd()
+  projectPath: string = process.cwd(),
 ): string | null {
   try {
     const gitRoot = getGitRoot(projectPath) ?? projectPath;
     const fullPath = filePath.startsWith('/') ? filePath : join(gitRoot, filePath);
-    
+
     if (!existsSync(fullPath)) {
       return null;
     }
-    
+
     const content = readFileSync(fullPath, 'utf-8');
     return hashContent(content);
   } catch {
@@ -44,19 +44,19 @@ export function hashLineRange(
   filePath: string,
   startLine: number,
   endLine: number,
-  projectPath: string = process.cwd()
+  projectPath: string = process.cwd(),
 ): string | null {
   try {
     const gitRoot = getGitRoot(projectPath) ?? projectPath;
     const fullPath = filePath.startsWith('/') ? filePath : join(gitRoot, filePath);
-    
+
     if (!existsSync(fullPath)) {
       return null;
     }
-    
+
     const content = readFileSync(fullPath, 'utf-8');
     const lines = content.split('\n');
-    
+
     // Lines are 1-indexed
     const selectedLines = lines.slice(startLine - 1, endLine);
     return hashContent(selectedLines.join('\n'));
@@ -71,7 +71,7 @@ export function hashLineRange(
 export function contentMatches(
   filePath: string,
   expectedHash: string,
-  projectPath: string = process.cwd()
+  projectPath: string = process.cwd(),
 ): boolean {
   const currentHash = hashFileContent(filePath, projectPath);
   return currentHash === expectedHash;
@@ -85,7 +85,7 @@ export function lineRangeMatches(
   startLine: number,
   endLine: number,
   expectedHash: string,
-  projectPath: string = process.cwd()
+  projectPath: string = process.cwd(),
 ): boolean {
   const currentHash = hashLineRange(filePath, startLine, endLine, projectPath);
   return currentHash === expectedHash;
@@ -96,16 +96,16 @@ export function lineRangeMatches(
  */
 export function getFileSnapshot(
   filePath: string,
-  projectPath: string = process.cwd()
+  projectPath: string = process.cwd(),
 ): { hash: string; size: number; lines: number } | null {
   try {
     const gitRoot = getGitRoot(projectPath) ?? projectPath;
     const fullPath = filePath.startsWith('/') ? filePath : join(gitRoot, filePath);
-    
+
     if (!existsSync(fullPath)) {
       return null;
     }
-    
+
     const content = readFileSync(fullPath, 'utf-8');
     return {
       hash: hashContent(content),
