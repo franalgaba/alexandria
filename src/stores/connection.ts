@@ -322,21 +322,52 @@ CREATE TABLE IF NOT EXISTS memory_objects (
     last_accessed TEXT,
     code_refs TEXT DEFAULT '[]',
     last_verified_at TEXT,
+    supersedes TEXT,
+    structured TEXT,
+    strength REAL DEFAULT 1.0,
+    last_reinforced_at TEXT,
+    outcome_score REAL DEFAULT 0.5,
     FOREIGN KEY (superseded_by) REFERENCES memory_objects(id)
 );
 CREATE INDEX IF NOT EXISTS idx_memory_objects_status ON memory_objects(status);
 CREATE INDEX IF NOT EXISTS idx_memory_objects_object_type ON memory_objects(object_type);
 CREATE INDEX IF NOT EXISTS idx_memory_objects_review_status ON memory_objects(review_status);
+CREATE INDEX IF NOT EXISTS idx_memory_objects_scope ON memory_objects(scope_type, scope_path);
+CREATE INDEX IF NOT EXISTS idx_memory_objects_strength ON memory_objects(strength);
+
+-- Memory code references (normalized)
+CREATE TABLE IF NOT EXISTS memory_code_refs (
+    id TEXT PRIMARY KEY,
+    memory_id TEXT NOT NULL,
+    path TEXT NOT NULL,
+    ref_type TEXT NOT NULL CHECK (ref_type IN ('file', 'symbol', 'line_range')),
+    symbol TEXT,
+    line_start INTEGER,
+    line_end INTEGER,
+    verified_at_commit TEXT,
+    content_hash TEXT,
+    FOREIGN KEY (memory_id) REFERENCES memory_objects(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_memory_code_refs_memory_id ON memory_code_refs(memory_id);
+CREATE INDEX IF NOT EXISTS idx_memory_code_refs_path ON memory_code_refs(path);
 
 -- Token index
 CREATE TABLE IF NOT EXISTS object_tokens (
     object_id TEXT NOT NULL,
     token TEXT NOT NULL,
-    token_type TEXT,
+    token_type TEXT CHECK (token_type IN (
+      'identifier',
+      'path',
+      'command',
+      'version',
+      'error_code',
+      'flag'
+    )),
     PRIMARY KEY (object_id, token),
     FOREIGN KEY (object_id) REFERENCES memory_objects(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_tokens ON object_tokens(token);
+CREATE INDEX IF NOT EXISTS idx_tokens_type ON object_tokens(token_type);
 
 -- Fallback embedding tables
 CREATE TABLE IF NOT EXISTS event_embeddings_fallback (
@@ -347,6 +378,19 @@ CREATE TABLE IF NOT EXISTS object_embeddings_fallback (
     id TEXT PRIMARY KEY,
     embedding BLOB NOT NULL
 );
+
+-- Memory outcomes table for tracking helpfulness
+CREATE TABLE IF NOT EXISTS memory_outcomes (
+    id TEXT PRIMARY KEY,
+    memory_id TEXT NOT NULL,
+    session_id TEXT NOT NULL,
+    timestamp TEXT NOT NULL,
+    outcome TEXT NOT NULL CHECK (outcome IN ('helpful', 'unhelpful', 'neutral')),
+    context TEXT,
+    FOREIGN KEY (memory_id) REFERENCES memory_objects(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_memory_outcomes_memory_id ON memory_outcomes(memory_id);
+CREATE INDEX IF NOT EXISTS idx_memory_outcomes_session_id ON memory_outcomes(session_id);
 `;
 
   db.exec(schema);
@@ -375,6 +419,10 @@ function runColumnMigrations(db: Database): void {
     db.exec('ALTER TABLE memory_objects ADD COLUMN structured TEXT');
   }
 
+  if (!columnNames.includes('supersedes')) {
+    db.exec('ALTER TABLE memory_objects ADD COLUMN supersedes TEXT');
+  }
+
   // Memory strength and decay (brain-inspired evolution)
   if (!columnNames.includes('strength')) {
     db.exec('ALTER TABLE memory_objects ADD COLUMN strength REAL DEFAULT 1.0');
@@ -393,6 +441,12 @@ function runColumnMigrations(db: Database): void {
 
   // Memory outcomes table for tracking helpfulness
   tryCreateOutcomesTable(db);
+
+  // Normalized code reference table
+  tryCreateCodeRefsTable(db);
+
+  // Ensure supporting indexes exist
+  ensureIndexes(db);
 }
 
 /**
@@ -451,6 +505,47 @@ function tryCreateOutcomesTable(db: Database): void {
     `);
   } catch {
     // Table may already exist
+  }
+}
+
+/**
+ * Create normalized code references table
+ */
+function tryCreateCodeRefsTable(db: Database): void {
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS memory_code_refs (
+        id TEXT PRIMARY KEY,
+        memory_id TEXT NOT NULL,
+        path TEXT NOT NULL,
+        ref_type TEXT NOT NULL CHECK (ref_type IN ('file', 'symbol', 'line_range')),
+        symbol TEXT,
+        line_start INTEGER,
+        line_end INTEGER,
+        verified_at_commit TEXT,
+        content_hash TEXT,
+        FOREIGN KEY (memory_id) REFERENCES memory_objects(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_memory_code_refs_memory_id ON memory_code_refs(memory_id);
+      CREATE INDEX IF NOT EXISTS idx_memory_code_refs_path ON memory_code_refs(path);
+    `);
+  } catch {
+    // Table may already exist
+  }
+}
+
+/**
+ * Ensure core indexes exist for older databases
+ */
+function ensureIndexes(db: Database): void {
+  try {
+    db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_memory_objects_scope ON memory_objects(scope_type, scope_path);
+      CREATE INDEX IF NOT EXISTS idx_memory_objects_strength ON memory_objects(strength);
+      CREATE INDEX IF NOT EXISTS idx_tokens_type ON object_tokens(token_type);
+    `);
+  } catch {
+    // Indexes may already exist
   }
 }
 

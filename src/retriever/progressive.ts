@@ -390,7 +390,10 @@ export class ProgressiveRetriever {
       id: row.id,
       content: row.content,
       objectType: row.object_type,
-      scope: JSON.parse(row.scope || '{"type":"project"}'),
+      scope: {
+        type: row.scope_type || 'project',
+        path: row.scope_path ?? undefined,
+      },
       status: row.status,
       confidence: row.confidence,
       confidenceTier: row.confidence_tier || 'inferred',

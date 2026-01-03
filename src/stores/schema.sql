@@ -140,6 +140,16 @@ CREATE TABLE IF NOT EXISTS memory_objects (
     access_count INTEGER DEFAULT 0,
     last_accessed TEXT,
 
+    -- Code references and verification
+    code_refs TEXT DEFAULT '[]', -- JSON array
+    last_verified_at TEXT,
+
+    -- Supersession tracking
+    supersedes TEXT, -- JSON array
+
+    -- Structured data for enhanced memory types
+    structured TEXT,
+
     -- Memory strength and decay (brain-inspired evolution)
     strength REAL DEFAULT 1.0,
     last_reinforced_at TEXT,
@@ -153,6 +163,26 @@ CREATE INDEX IF NOT EXISTS idx_memory_objects_object_type ON memory_objects(obje
 CREATE INDEX IF NOT EXISTS idx_memory_objects_review_status ON memory_objects(review_status);
 CREATE INDEX IF NOT EXISTS idx_memory_objects_scope ON memory_objects(scope_type, scope_path);
 CREATE INDEX IF NOT EXISTS idx_memory_objects_strength ON memory_objects(strength);
+
+-- ============================================================================
+-- MEMORY CODE REFERENCES (normalized)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS memory_code_refs (
+    id TEXT PRIMARY KEY,
+    memory_id TEXT NOT NULL,
+    path TEXT NOT NULL,
+    ref_type TEXT NOT NULL CHECK (ref_type IN ('file', 'symbol', 'line_range')),
+    symbol TEXT,
+    line_start INTEGER,
+    line_end INTEGER,
+    verified_at_commit TEXT,
+    content_hash TEXT,
+    FOREIGN KEY (memory_id) REFERENCES memory_objects(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_memory_code_refs_memory_id ON memory_code_refs(memory_id);
+CREATE INDEX IF NOT EXISTS idx_memory_code_refs_path ON memory_code_refs(path);
 
 -- ============================================================================
 -- MEMORY OUTCOMES TABLE (for tracking helpfulness)
