@@ -71,6 +71,7 @@ alex checkpoint --show-stats              # Show buffer stats first
 - `--session` - Target specific session
 - `--reason` - Reason for checkpoint
 - `--show-stats` - Show buffer statistics
+- `--curator` - Override curator mode: `tier0`, `tier1`, `tier2`
 
 ## Memory Management
 
