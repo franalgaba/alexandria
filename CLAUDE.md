@@ -12,10 +12,22 @@ alex session end            # End session
 
 # Memory management
 alex add "content" --type decision --approve
+alex add-decision "choice" --rationale "why"
+alex add-contract API --type api --definition "spec"
 alex search "query"
 alex pack --level task
 alex list
 alex check                  # Find stale memories
+
+# Review & feedback
+alex review                 # Interactive review
+alex feedback <id> --helpful
+alex cleanup-noise          # Retire noisy memories
+
+# Utilities
+alex tui                    # Terminal UI
+alex heatmap                # Access heatmap
+alex stats                  # Database stats
 
 # Install integrations
 alex install claude-code
@@ -55,6 +67,22 @@ docs/dev/             # Development documentation
 - `preference` - Style preferences
 - `environment` - Configs, versions
 
+### Structured Memory Commands
+
+```bash
+# Structured decision with alternatives and tradeoffs
+alex add-decision "Use SQLite" \
+  --rationale "Simple deployment" \
+  --alternatives "PostgreSQL, JSON" \
+  --tradeoffs "Limited concurrent writes"
+
+# API/interface contract
+alex add-contract "UserAPI" \
+  --type api \
+  --definition "GET /users, POST /users" \
+  --contract-version "1.0"
+```
+
 ## Memory Extraction
 
 Alexandria uses **checkpoint-driven curation** with tiered extraction:
@@ -78,6 +106,41 @@ Haiku extracts:
 - Known fixes
 
 Memories are created as "pending" for review via `alex list` or `alex review`.
+
+## Memory Feedback & Cleanup
+
+### Feedback System
+
+Track which memories are actually helpful:
+
+```bash
+alex feedback abc123 --helpful --reason "Saved debugging time"
+alex feedback def456 --unhelpful --reason "Outdated information"
+alex feedback ghi789 --neutral
+```
+
+Feedback influences memory ranking and outcome scores.
+
+### Noise Cleanup
+
+Remove noisy or duplicate memories:
+
+```bash
+alex cleanup-noise              # Dry run (preview)
+alex cleanup-noise --no-dry-run # Execute cleanup
+alex cleanup-noise --verbose    # Show details
+alex cleanup-noise --pattern "TODO"  # Custom pattern
+```
+
+Detects: stream-of-consciousness text, raw console statements, duplicates.
+
+### Terminal UI
+
+Launch interactive memory management:
+
+```bash
+alex tui    # Browse, search, review memories interactively
+```
 
 ## When to Add Memories
 
@@ -117,4 +180,16 @@ alex add "Never commit .env files - contains production secrets" --type constrai
 ```bash
 # Auto-checkpoint threshold (default: 10 events)
 export ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD=10
+
+# Database location (default: ~/.alexandria)
+export ALEXANDRIA_DB_PATH=~/.alexandria
+
+# Context window threshold for suggesting /clear (default: 50%)
+export ALEXANDRIA_CONTEXT_THRESHOLD=50
+
+# Events before re-evaluating disclosure (default: 15)
+export ALEXANDRIA_DISCLOSURE_THRESHOLD=15
+
+# Consecutive errors before escalation (default: 3)
+export ALEXANDRIA_ERROR_BURST_THRESHOLD=3
 ```

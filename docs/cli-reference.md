@@ -106,6 +106,25 @@ alex add-decision "Use SQLite for local storage" \
 - `--tradeoffs` - Known tradeoffs
 - `--approve, -a` - Auto-approve
 
+### `alex add-contract <name>`
+
+Add an API or interface contract.
+
+```bash
+alex add-contract "UserAPI" \
+  --type api \
+  --definition "GET /users, POST /users" \
+  --contract-version "1.0" \
+  --file src/api/users.ts
+```
+
+**Options:**
+- `--type, -t` - Contract type: `api`, `schema`, `interface`, `protocol` (default: `api`)
+- `--definition, -d` - The contract definition
+- `--contract-version` - Version of the contract
+- `--file, -f` - File where the contract is defined
+- `--approve` - Auto-approve
+
 ### `alex list`
 
 List memories.
@@ -272,6 +291,54 @@ Interactive review of stale memories.
 alex revalidate       # Interactive mode
 ```
 
+## Feedback & Cleanup
+
+### `alex feedback <id>`
+
+Mark a memory as helpful or unhelpful to track effectiveness.
+
+```bash
+alex feedback abc123 --helpful
+alex feedback abc123 --unhelpful --reason "Outdated info"
+alex feedback abc123 --neutral
+alex feedback abc123 --helpful --json
+```
+
+**Options:**
+- `--helpful` - Mark memory as helpful
+- `--unhelpful` - Mark memory as unhelpful
+- `--neutral` - Mark memory as neutral
+- `--reason` - Reason for the feedback
+- `--json` - JSON output
+
+Feedback influences memory ranking via outcome scores.
+
+### `alex cleanup-noise`
+
+Retire noisy or duplicate memories from the database.
+
+```bash
+alex cleanup-noise                    # Dry run (preview)
+alex cleanup-noise --no-dry-run       # Execute cleanup
+alex cleanup-noise --verbose          # Show details
+alex cleanup-noise --pattern "TODO"   # Custom regex pattern
+alex cleanup-noise --type convention  # Only check specific type
+```
+
+**Options:**
+- `--dry-run` - Preview without changes (default: true)
+- `--pattern` - Additional regex pattern to match noise
+- `--type` - Only check memories of this type
+- `--duplicates` - Also detect and retire duplicates (default: true)
+- `--verbose` - Show details of each noisy memory
+
+**Detected Noise Patterns:**
+- Stream of consciousness ("let me check", "now let's")
+- Raw console statements
+- ASCII art/table fragments
+- Raw edit parameters
+- Tentative statements ("I will try")
+
 ## Integration
 
 ### `alex install <target>`
@@ -292,12 +359,23 @@ alex install pi --uninstall # Remove integration
 
 ## Utilities
 
+### `alex tui`
+
+Launch the Alexandria terminal UI for interactive memory management.
+
+```bash
+alex tui
+```
+
+Provides a full-screen interface for browsing, searching, and reviewing memories.
+
 ### `alex stats`
 
 Show database statistics.
 
 ```bash
 alex stats
+alex stats --json
 ```
 
 ### `alex where`

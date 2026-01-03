@@ -32,11 +32,20 @@ Actions:
 - search: Find relevant memories (hybrid lexical + semantic search)
 - add: Store a new memory object
 - pack: Get context pack for current task
-- list: List recent memory objects`,
+- list: List recent memory objects
+- feedback: Mark a memory as helpful or unhelpful
+- heatmap: Show most frequently accessed memories`,
 
   parameters: Type.Object({
     action: Type.Union(
-      [Type.Literal('search'), Type.Literal('add'), Type.Literal('pack'), Type.Literal('list')],
+      [
+        Type.Literal('search'),
+        Type.Literal('add'),
+        Type.Literal('pack'),
+        Type.Literal('list'),
+        Type.Literal('feedback'),
+        Type.Literal('heatmap'),
+      ],
       { description: 'Action to perform' },
     ),
     query: Type.Optional(
@@ -77,6 +86,21 @@ Actions:
     task: Type.Optional(
       Type.String({
         description: 'Task description (for pack action)',
+      }),
+    ),
+    memoryId: Type.Optional(
+      Type.String({
+        description: 'Memory ID (for feedback action)',
+      }),
+    ),
+    helpful: Type.Optional(
+      Type.Boolean({
+        description: 'Mark as helpful (for feedback action)',
+      }),
+    ),
+    reason: Type.Optional(
+      Type.String({
+        description: 'Reason for feedback (for feedback action)',
       }),
     ),
   }),
@@ -198,6 +222,54 @@ Actions:
           return {
             content: [{ type: 'text', text: formatted }],
             details: { objects },
+          };
+        }
+
+        case 'feedback': {
+          if (!params.memoryId) {
+            return {
+              content: [{ type: 'text', text: 'Error: memoryId is required for feedback' }],
+            };
+          }
+
+          const args = ['feedback', params.memoryId];
+          if (params.helpful === true) {
+            args.push('--helpful');
+          } else if (params.helpful === false) {
+            args.push('--unhelpful');
+          } else {
+            args.push('--neutral');
+          }
+          if (params.reason) {
+            args.push('--reason', params.reason);
+          }
+
+          const output = await runAlex(args);
+          const result = JSON.parse(output);
+
+          const emoji = params.helpful === true ? '👍' : params.helpful === false ? '👎' : '😐';
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `${emoji} Recorded feedback for ${params.memoryId}\nOutcome score: ${result.memory?.outcomeScore?.toFixed(2) || 'N/A'}`,
+              },
+            ],
+            details: result,
+          };
+        }
+
+        case 'heatmap': {
+          const proc = spawn(['alex', 'heatmap', '--limit', '10'], {
+            stdout: 'pipe',
+            stderr: 'pipe',
+          });
+
+          const output = await new Response(proc.stdout).text();
+          await proc.exited;
+
+          return {
+            content: [{ type: 'text', text: output || 'No heatmap data available.' }],
           };
         }
 

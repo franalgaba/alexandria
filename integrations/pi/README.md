@@ -10,11 +10,11 @@ Alexandria v2 uses checkpoint-driven curation with progressive disclosure. Both 
 ┌─────────────────────────────────────────────────────────┐
 │              PI CODING AGENT SESSION                     │
 │                                                          │
-│  SessionStart → ToolCall → ToolResult → TurnEnd → End   │
-│       ↓            ↓           ↓           ↓        ↓    │
-│   [inject]     [buffer]    [buffer]    [buffer] [curate]│
+│  SessionStart → Prompt → ToolCall → ToolResult → End    │
+│       ↓           ↓          ↓           ↓         ↓     │
+│   [inject]    [buffer]   [buffer]    [buffer]  [curate] │
 └─────────────────────────────────────────────────────────┘
-         ↓            ↓           ↓           ↓        ↓
+         ↓           ↓          ↓           ↓         ↓
 ┌─────────────────────────────────────────────────────────┐
 │                  ALEXANDRIA v2                           │
 │                                                          │
@@ -40,7 +40,20 @@ Alexandria v2 uses checkpoint-driven curation with progressive disclosure. Both 
    - Events buffered asynchronously
    - Doesn't slow down the main session
 
-4. **Graceful Degradation**: If Alexandria fails, pi continues normally
+4. **Access Heatmap**: Frequently accessed memories prioritized
+   - Tracks which memories are actually used
+   - Hot memories injected first at session start
+   - Outcome feedback influences ranking
+
+5. **Error Burst Detection**: Auto re-inject context on consecutive errors
+   - Tracks consecutive tool errors
+   - After 3+ errors, injects relevant constraints and known fixes
+
+6. **Topic Shift Detection**: Re-inject context when switching files/modules
+   - Monitors file paths in tool calls
+   - Injects relevant memories when changing directories
+
+7. **Graceful Degradation**: If Alexandria fails, pi continues normally
 
 ## Installation
 
@@ -59,20 +72,33 @@ cp integrations/pi/hooks/*.ts ~/.pi/agent/hooks/
 
 | Event | Action |
 |-------|--------|
-| `session (start)` | Start session, generate context pack, inject via `pi.send()` |
-| `tool_call` | Buffer event (fire-and-forget) |
-| `tool_result` | Buffer event (fire-and-forget) |
-| `turn_end` | Buffer response (fire-and-forget) |
-| `session (end)` | Trigger checkpoint, run tiered curator, show pending count |
+| `session_start` | Start session, generate context pack with hot memories, inject via `pi.sendMessage()` |
+| `before_agent_start` | Buffer user prompt, check for explicit memory queries, inject disclosure context |
+| `tool_call` | Buffer event (fire-and-forget), detect topic shifts |
+| `tool_result` | Buffer event with exit code, detect error bursts |
+| `turn_end` | Buffer response, check auto-checkpoint threshold |
+| `session_before_switch` | Trigger checkpoint before switching sessions |
+| `session_shutdown` | Trigger final checkpoint, show session stats |
 
 ### Context Injection
 
 On session start:
 
 1. Starts Alexandria session (`alex session start`)
-2. Generates context pack at task level (`alex pack --level task`)
-3. Injects via `pi.send()` as a message
+2. Generates context pack with hot memories (`alex pack --level task --hot`)
+3. Injects via `pi.sendMessage()` - persisted to session, visible in TUI, sent to LLM
 4. Checks for stale memories, notifies if found
+
+### Progressive Disclosure
+
+Memories are re-injected during the session when:
+
+| Trigger | Condition | Action |
+|---------|-----------|--------|
+| Explicit query | "remind me", "what did we decide" | Inject deep context via `alex disclose` |
+| Error burst | 3+ consecutive errors | Inject constraints + known_fixes |
+| Topic shift | Changed to different directory | Inject task-level context for new file |
+| Event threshold | 15+ events since last disclosure | Re-evaluate and inject if needed |
 
 ### Checkpoint Flow
 
@@ -87,9 +113,10 @@ When checkpoint runs:
    - Error→fix patterns
    - User corrections
    - Repeated patterns
-3. **Agent-driven extraction**: After auto-checkpoint, the agent is prompted to review the session and extract higher-quality memories using `alex add`
-
-This approach uses the coding agent itself for intelligent extraction - no separate API key needed!
+3. **Tier 1** (Haiku) runs if Claude OAuth available:
+   - Extracts decisions, conventions, preferences
+   - Uses Claude Code's existing OAuth token (no separate API key needed!)
+4. Memories created as "pending" for review
 
 ## Hook: revalidation.ts
 
@@ -97,6 +124,42 @@ Interactive memory revalidation at session start.
 
 - Detects stale memories via `alex check`
 - Interactive dialog: Verify, Retire, Skip, Stop
+
+## CLI Commands During Session
+
+```bash
+# Memory management
+alex add "content" --type decision --approve
+alex add-decision "choice" --rationale "why"
+alex add-contract "API" --type api
+
+# Search and retrieval
+alex search "query"
+alex pack --level task
+
+# Review and feedback
+alex review                      # Interactive review
+alex feedback <id> --helpful     # Mark memory as helpful
+alex cleanup-noise               # Retire noisy memories
+
+# Utilities
+alex tui                         # Terminal UI
+alex heatmap                     # Access heatmap
+alex stats                       # Database stats
+```
+
+## Configuration
+
+```bash
+# Auto-checkpoint threshold (default: 10 events)
+export ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD=10
+
+# Consecutive errors before context re-injection (default: 3)
+export ALEXANDRIA_ERROR_BURST_THRESHOLD=3
+
+# Events before re-evaluating disclosure (default: 15)
+export ALEXANDRIA_DISCLOSURE_THRESHOLD=15
+```
 
 ## Requirements
 

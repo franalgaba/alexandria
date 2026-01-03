@@ -95,13 +95,29 @@ alex add "<memory content>" --type <decision|known_fix|constraint|convention> --
 ## Commands
 
 ```bash
+# Context & Search
 alex pack                    # Get context (DO THIS FIRST!)
 alex search "query"          # Search memories
+
+# Add Memories
 alex add "..." --type X      # Store memory
+alex add-decision "..." --rationale "why"  # Structured decision
+alex add-contract "API" --type api         # API contract
+
+# Management
 alex list                    # List all memories
 alex check                   # Find stale memories
 alex review                  # Review pending memories
 alex checkpoint              # Curate buffered events into memories
+
+# Feedback & Cleanup
+alex feedback <id> --helpful # Mark memory as helpful
+alex cleanup-noise           # Retire noisy memories
+
+# Utilities
+alex tui                     # Terminal UI
+alex heatmap                 # Access heatmap
+alex stats                   # Database stats
 ```
 
 ## Example Session Flow

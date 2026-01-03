@@ -32,7 +32,9 @@ Both Claude Code and pi-coding-agent integrations follow the same pattern:
 5. **Progressive Disclosure**: Context packs at minimal/task/deep levels, with re-injection on topic shifts/errors
 6. **Context Window Management**: Auto-checkpoint at 50% context, suggest /clear to prevent compaction
 7. **Access Heatmap**: Frequently accessed memories prioritized at session start
-8. **Graceful Degradation**: If Alexandria fails, the agent continues normally
+8. **Outcome Feedback**: Track memory effectiveness with `alex feedback --helpful/--unhelpful`
+9. **Noise Cleanup**: Retire noisy memories with `alex cleanup-noise`
+10. **Graceful Degradation**: If Alexandria fails, the agent continues normally
 
 ## Installation
 
@@ -122,6 +124,24 @@ Every 10 events, a checkpoint triggers:
 | `/mem-add` | Add a new memory |
 | `/mem-pack` | Generate context pack |
 | `/mem-review` | Review pending memories |
+
+### CLI Commands During Session
+
+```bash
+# Memory management
+alex add "content" --type decision --approve
+alex add-decision "choice" --rationale "why"
+alex add-contract "API" --type api
+
+# Review and feedback
+alex review                      # Interactive review
+alex feedback <id> --helpful     # Mark memory as helpful
+alex cleanup-noise               # Retire noisy memories
+
+# Utilities
+alex tui                         # Terminal UI
+alex heatmap                     # Access heatmap
+```
 
 ### Skill
 

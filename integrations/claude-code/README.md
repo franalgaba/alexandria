@@ -40,7 +40,17 @@ Alexandria v2 uses checkpoint-driven curation with progressive disclosure. Both 
    - Events buffered asynchronously
    - Doesn't slow down the main session
 
-4. **Graceful Degradation**: If Alexandria fails, Claude Code continues normally
+4. **Context Window Management**: Auto-checkpoint at 50% context usage
+   - Monitors transcript for token consumption
+   - Extracts memories before suggesting `/clear`
+   - Prevents losing valuable learnings to compaction
+
+5. **Access Heatmap**: Frequently accessed memories prioritized
+   - Tracks which memories are actually used
+   - Hot memories injected first at session start
+   - Outcome feedback influences ranking
+
+6. **Graceful Degradation**: If Alexandria fails, Claude Code continues normally
 
 ## Installation
 
@@ -104,6 +114,29 @@ Use `/mem-checkpoint` to manually trigger memory extraction and review pending m
 | `/mem-add` | Add a new memory |
 | `/mem-pack` | Generate context pack |
 | `/mem-review` | Review pending memories |
+
+## CLI Commands Available During Session
+
+```bash
+# Memory management
+alex add "content" --type decision --approve
+alex add-decision "choice" --rationale "why"
+alex add-contract "API" --type api
+
+# Search and retrieval
+alex search "query"
+alex pack --level task
+
+# Review and feedback
+alex review                      # Interactive review
+alex feedback <id> --helpful     # Mark memory as helpful
+alex cleanup-noise               # Retire noisy memories
+
+# Utilities
+alex tui                         # Terminal UI
+alex heatmap                     # Access heatmap
+alex stats                       # Database stats
+```
 
 ## Requirements
 

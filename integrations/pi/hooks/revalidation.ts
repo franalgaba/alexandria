@@ -15,7 +15,7 @@
  *   pi --hook ./integrations/pi/hooks/revalidation.ts
  */
 
-import type { HookAPI } from '@mariozechner/pi-coding-agent/hooks';
+import type { HookAPI } from '@mariozechner/pi-coding-agent';
 
 interface StaleMemory {
   id: string;
@@ -31,19 +31,16 @@ interface CheckResult {
 }
 
 export default function (pi: HookAPI) {
-  pi.on('session', async (event, ctx) => {
-    // Only run on session start
-    if (event.reason !== 'start') return;
-
+  pi.on('session_start', async (_event, ctx) => {
     // Check if alex is available
-    const { code: whichCode } = await ctx.exec('which', ['alex']);
+    const { code: whichCode } = await pi.exec('which', ['alex']);
     if (whichCode !== 0) {
       // Alexandria not installed or not in PATH
       return;
     }
 
     // Get stale memories
-    const { stdout, code: checkCode } = await ctx.exec('alex', ['check', '--json']);
+    const { stdout, code: checkCode } = await pi.exec('alex', ['check', '--json']);
     if (checkCode !== 0 || !stdout.trim()) {
       return;
     }
@@ -104,14 +101,14 @@ export default function (pi: HookAPI) {
       }
 
       if (choice.includes('Verify')) {
-        const { code } = await ctx.exec('alex', ['verify', shortId]);
+        const { code } = await pi.exec('alex', ['verify', shortId]);
         if (code === 0) {
           ctx.ui.notify(`✓ Verified: ${shortId}`, 'info');
         } else {
           ctx.ui.notify(`Failed to verify: ${shortId}`, 'error');
         }
       } else if (choice.includes('Retire')) {
-        const { code } = await ctx.exec('alex', ['retire', shortId]);
+        const { code } = await pi.exec('alex', ['retire', shortId]);
         if (code === 0) {
           ctx.ui.notify(`✓ Retired: ${shortId}`, 'info');
         } else {
