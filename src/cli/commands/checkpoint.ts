@@ -18,7 +18,7 @@ interface CheckpointArgs {
 export const command = 'checkpoint';
 export const describe = 'Manually trigger a checkpoint to curate buffered events into memories';
 
-export function builder(yargs: Argv) {
+export function builder(yargs: Argv): Argv<CheckpointArgs> {
   return yargs
     .option('session', {
       type: 'string',
@@ -37,9 +37,9 @@ export function builder(yargs: Argv) {
     })
     .option('curator', {
       type: 'string',
-      choices: ['tier0', 'tier1', 'tier2'],
+      choices: ['tier0', 'tier1', 'tier2'] as const,
       description: 'Override curator mode (tier2 enables conflict detection)',
-    });
+    }) as Argv<CheckpointArgs>;
 }
 
 export async function handler(args: ArgumentsCamelCase<CheckpointArgs>) {

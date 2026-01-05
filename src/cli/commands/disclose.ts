@@ -13,7 +13,6 @@ import {
 import { closeConnection, getConnection } from '../../stores/connection.ts';
 import { SessionStore } from '../../stores/sessions.ts';
 import { MemoryObjectStore } from '../../stores/memory-objects.ts';
-import { formatProgressivePackText } from './pack.ts';
 import { colorize } from '../utils.ts';
 
 interface DiscloseArgs {

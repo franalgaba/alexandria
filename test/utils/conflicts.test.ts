@@ -33,6 +33,8 @@ function createMemory(
     reviewStatus: 'approved',
     accessCount: 0,
     codeRefs: [],
+    strength: 1,
+    outcomeScore: 0.5,
     ...rest,
     createdAt,
     updatedAt,

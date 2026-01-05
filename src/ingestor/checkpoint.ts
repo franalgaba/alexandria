@@ -618,7 +618,7 @@ export class Checkpoint {
    */
   private shouldAutoApprove(candidate: MemoryCandidate): boolean {
     const hasEvidence = candidate.evidenceEventIds.length > 0;
-    const hasCodeRefs = candidate.codeRefs && candidate.codeRefs.length > 0;
+    const hasCodeRefs = !!(candidate.codeRefs && candidate.codeRefs.length > 0);
     const isHighConfidence = candidate.confidence === 'high' || candidate.confidence === 'certain';
     return isHighConfidence && (hasEvidence || hasCodeRefs);
   }

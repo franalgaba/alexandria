@@ -58,7 +58,7 @@ export class AccessHeatmap {
     query += ` ORDER BY access_count DESC LIMIT $limit`;
     params.$limit = limit * 2; // Get extra to sort by heat score
 
-    const rows = this.db.query(query).all(params) as Array<{
+    const rows = this.db.query(query).all(params as Record<string, string | number>) as Array<{
       id: string;
       content: string;
       object_type: string;

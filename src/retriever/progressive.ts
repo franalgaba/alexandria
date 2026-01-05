@@ -484,7 +484,7 @@ export class ProgressiveRetriever {
     let scopeType = row.scope_type ?? 'project';
     let scopePath = row.scope_path ?? undefined;
     if (!row.scope_type && row.scope) {
-      const parsedScope = safeJsonParse(row.scope, {});
+      const parsedScope = safeJsonParse(row.scope, {}) as { type?: string; path?: string } | null;
       if (parsedScope && typeof parsedScope === 'object') {
         scopeType = parsedScope.type ?? scopeType;
         scopePath = parsedScope.path ?? scopePath;

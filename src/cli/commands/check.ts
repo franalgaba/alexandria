@@ -22,12 +22,14 @@ export function builder(yargs: Argv): Argv<CheckArgs> {
     default: false,
     describe: 'Output as JSON',
   })
-    .option('auto-verify-unchanged', {
+    .option('autoVerifyUnchanged', {
+      alias: 'auto-verify-unchanged',
       type: 'boolean',
       default: false,
       describe: 'Auto-verify memories whose files have not changed since last commit',
     })
-    .option('include-uncommitted', {
+    .option('includeUncommitted', {
+      alias: 'include-uncommitted',
       type: 'boolean',
       default: false,
       describe: 'Include uncommitted file changes in staleness checks',

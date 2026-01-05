@@ -1,0 +1,2011 @@
+=== Alexandria Memorybench Runner ===
+
+Loading LoCoMo dataset...
+Loaded LoCoMo: 272 sessions, 1986 questions
+[Alexandria] Initialized (features: none)
+
+Ingesting 272 sessions...
+[Alexandria] Ingested 272 sessions, 5882 messages
+[Alexandria] Indexing complete for bench_locomo_1767529039100
+Ingest completed in 169ms
+
+Evaluating 1986 questions...
+[Alexandria] Cleared container bench_locomo_1767529039100
+
+=== Alexandria Memorybench Results ===
+Benchmark: locomo
+Questions: 1986
+
+Retrieval Metrics:
+  Avg Retrieval Score: 80.9%
+  Haystack Hit Rate: 85.7%
+  Avg Latency: 2.5ms
+
+Per-Question Results:
+  ✓ conv-26_q0: "When did Caroline go to the LGBTQ s..." - Retrieval: 100%
+  ✓ conv-26_q1: "When did Melanie paint a sunrise?..." - Retrieval: 100%
+  ✗ conv-26_q2: "What fields would Caroline be likel..." - Retrieval: 0%
+  ✓ conv-26_q3: "What did Caroline research?..." - Retrieval: 100%
+  ✗ conv-26_q4: "What is Caroline's identity?..." - Retrieval: 0%
+  ✓ conv-26_q5: "When did Melanie run a charity race..." - Retrieval: 100%
+  ✓ conv-26_q6: "When is Melanie planning on going c..." - Retrieval: 100%
+  ✗ conv-26_q7: "What is Caroline's relationship sta..." - Retrieval: 0%
+  ✓ conv-26_q8: "When did Caroline give a speech at ..." - Retrieval: 100%
+  ✓ conv-26_q9: "When did Caroline meet up with her ..." - Retrieval: 100%
+  ✗ conv-26_q10: "How long has Caroline had her curre..." - Retrieval: 0%
+  ✓ conv-26_q11: "Where did Caroline move from 4 year..." - Retrieval: 50%
+  ✓ conv-26_q12: "How long ago was Caroline's 18th bi..." - Retrieval: 100%
+  ✓ conv-26_q13: "What career path has Caroline decid..." - Retrieval: 100%
+  ✓ conv-26_q14: "Would Caroline still want to pursue..." - Retrieval: 50%
+  ✓ conv-26_q15: "What activities does Melanie partak..." - Retrieval: 33%
+  ✓ conv-26_q16: "When did Melanie sign up for a pott..." - Retrieval: 100%
+  ✓ conv-26_q17: "When is Caroline going to the trans..." - Retrieval: 100%
+  ✓ conv-26_q18: "Where has Melanie camped?..." - Retrieval: 33%
+  ✓ conv-26_q19: "What do Melanie's kids like?..." - Retrieval: 50%
+  ✓ conv-26_q20: "When did Melanie go to the museum?..." - Retrieval: 100%
+  ✓ conv-26_q21: "When did Caroline have a picnic?..." - Retrieval: 100%
+  ✗ conv-26_q22: "Would Caroline likely have Dr. Seus..." - Retrieval: 0%
+  ✗ conv-26_q23: "What books has Melanie read?..." - Retrieval: 0%
+  ✓ conv-26_q24: "What does Melanie do to destress?..." - Retrieval: 50%
+  ✗ conv-26_q25: "When did Caroline go to the LGBTQ c..." - Retrieval: 0%
+  ✗ conv-26_q26: "When did Melanie read the book "not..." - Retrieval: 0%
+  ✓ conv-26_q27: "Would Caroline pursue writing as a ..." - Retrieval: 100%
+  ✓ conv-26_q28: "When did Caroline go to the adoptio..." - Retrieval: 100%
+  ✓ conv-26_q29: "When did Melanie go to the pottery ..." - Retrieval: 100%
+  ✗ conv-26_q30: "Would Melanie be considered a membe..." - Retrieval: 0%
+  ✓ conv-26_q31: "When did Melanie go camping in June..." - Retrieval: 100%
+  ✓ conv-26_q32: "What LGBTQ+ events has Caroline par..." - Retrieval: 50%
+  ✓ conv-26_q33: "When did Caroline go to a pride par..." - Retrieval: 100%
+  ✗ conv-26_q34: "What events has Caroline participat..." - Retrieval: 0%
+  ✗ conv-26_q35: "When did Melanie go camping in July..." - Retrieval: 0%
+  ✓ conv-26_q36: "When did Caroline join a mentorship..." - Retrieval: 100%
+  ✗ conv-26_q37: "What did Melanie paint recently?..." - Retrieval: 0%
+  ✓ conv-26_q38: "What activities has Melanie done wi..." - Retrieval: 40%
+  ✓ conv-26_q39: "In what ways is Caroline participat..." - Retrieval: 67%
+  ✓ conv-26_q40: "How many times has Melanie gone to ..." - Retrieval: 50%
+  ✓ conv-26_q41: "When did Caroline join a new activi..." - Retrieval: 100%
+  ✗ conv-26_q42: "Would Melanie be more interested in..." - Retrieval: 0%
+  ✓ conv-26_q43: "What kind of art does Caroline make..." - Retrieval: 100%
+  ✓ conv-26_q44: "When is Melanie's daughter's birthd..." - Retrieval: 100%
+  ✓ conv-26_q45: "When did Caroline attend a pride pa..." - Retrieval: 100%
+  ✗ conv-26_q46: "Would Melanie be considered an ally..." - Retrieval: 0%
+  ✗ conv-26_q47: "Who supports Caroline when she has ..." - Retrieval: 0%
+  ✓ conv-26_q48: "What types of pottery have Melanie ..." - Retrieval: 100%
+  ✗ conv-26_q49: "When did Caroline and Melanie go to..." - Retrieval: 0%
+  ✗ conv-26_q50: "What would Caroline's political lea..." - Retrieval: 0%
+  ✓ conv-26_q51: "What has Melanie painted?..." - Retrieval: 67%
+  ✓ conv-26_q52: "What are Melanie's pets' names?..." - Retrieval: 50%
+  ✓ conv-26_q53: "When did Caroline apply to adoption..." - Retrieval: 100%
+  ✓ conv-26_q54: "When did Caroline draw a self-portr..." - Retrieval: 100%
+  ✓ conv-26_q55: "What subject have Caroline and Mela..." - Retrieval: 50%
+  ✓ conv-26_q56: "What symbols are important to Carol..." - Retrieval: 50%
+  ✗ conv-26_q57: "When did Caroline encounter people ..." - Retrieval: 0%
+  ✓ conv-26_q58: "When did Melanie make a plate in po..." - Retrieval: 100%
+  ✓ conv-26_q59: "Would Caroline be considered religi..." - Retrieval: 100%
+  ✓ conv-26_q60: "What instruments does Melanie play?..." - Retrieval: 50%
+  ✓ conv-26_q61: "What musical artists/bands has Mela..." - Retrieval: 50%
+  ✗ conv-26_q62: "When did Melanie go to the park?..." - Retrieval: 0%
+  ✓ conv-26_q63: "When is Caroline's youth center put..." - Retrieval: 100%
+  ✗ conv-26_q64: "Would Melanie likely enjoy the song..." - Retrieval: 0%
+  ✓ conv-26_q65: "What are some changes Caroline has ..." - Retrieval: 50%
+  ✓ conv-26_q66: "What does Melanie do with her famil..." - Retrieval: 50%
+  ✗ conv-26_q67: "When did Caroline go biking with fr..." - Retrieval: 0%
+  ✓ conv-26_q68: "How long has Melanie been practicin..." - Retrieval: 100%
+  ✓ conv-26_q69: "What personality traits might Melan..." - Retrieval: 33%
+  ✓ conv-26_q70: "What transgender-specific events ha..." - Retrieval: 100%
+  ✓ conv-26_q71: "What book did Melanie read from Car..." - Retrieval: 50%
+  ✓ conv-26_q72: "When did Melanie's friend adopt a c..." - Retrieval: 100%
+  ✗ conv-26_q73: "When did Melanie get hurt?..." - Retrieval: 0%
+  ✓ conv-26_q74: "When did Melanie's family go on a r..." - Retrieval: 100%
+  ✗ conv-26_q75: "How many children does Melanie have..." - Retrieval: 0%
+  ✗ conv-26_q76: "When did Melanie go on a hike after..." - Retrieval: 0%
+  ✗ conv-26_q77: "Would Melanie go on another roadtri..." - Retrieval: 0%
+  ✓ conv-26_q78: "What items has Melanie bought?..." - Retrieval: 50%
+  ✓ conv-26_q79: "When did Caroline pass the adoption..." - Retrieval: 100%
+  ✓ conv-26_q80: "When did Melanie buy the figurines?..." - Retrieval: 100%
+  ✓ conv-26_q81: "Would Caroline want to move back to..." - Retrieval: 100%
+  ✓ conv-26_q82: "What did the charity race raise awa..." - Retrieval: 100%
+  ✓ conv-26_q83: "What did Melanie realize after the ..." - Retrieval: 100%
+  ✓ conv-26_q84: "How does Melanie prioritize self-ca..." - Retrieval: 100%
+  ✓ conv-26_q85: "What are Caroline's plans for the s..." - Retrieval: 100%
+  ✓ conv-26_q86: "What type of individuals does the a..." - Retrieval: 100%
+  ✓ conv-26_q87: "Why did Caroline choose the adoptio..." - Retrieval: 100%
+  ✓ conv-26_q88: "What is Caroline excited about in t..." - Retrieval: 100%
+  ✓ conv-26_q89: "What does Melanie think about Carol..." - Retrieval: 100%
+  ✓ conv-26_q90: "How long have Mel and her husband b..." - Retrieval: 100%
+  ✓ conv-26_q91: "What does Caroline's necklace symbo..." - Retrieval: 100%
+  ✓ conv-26_q92: "What country is Caroline's grandma ..." - Retrieval: 100%
+  ✓ conv-26_q93: "What was grandma's gift to Caroline..." - Retrieval: 100%
+  ✓ conv-26_q94: "What is Melanie's hand-painted bowl..." - Retrieval: 100%
+  ✓ conv-26_q95: "What did Melanie and her family do ..." - Retrieval: 100%
+  ✓ conv-26_q96: "What kind of counseling and mental ..." - Retrieval: 100%
+  ✗ conv-26_q97: "What workshop did Caroline attend r..." - Retrieval: 0%
+  ✓ conv-26_q98: "What was discussed in the LGBTQ+ co..." - Retrieval: 100%
+  ✓ conv-26_q99: "What motivated Caroline to pursue c..." - Retrieval: 100%
+  ✓ conv-26_q100: "What kind of place does Caroline wa..." - Retrieval: 100%
+  ✓ conv-26_q101: "Did Melanie make the black and whit..." - Retrieval: 100%
+  ✓ conv-26_q102: "What kind of books does Caroline ha..." - Retrieval: 100%
+  ✓ conv-26_q103: "What was Melanie's favorite book fr..." - Retrieval: 100%
+  ✓ conv-26_q104: "What book did Caroline recommend to..." - Retrieval: 100%
+  ✓ conv-26_q105: "What did Caroline take away from th..." - Retrieval: 100%
+  ✓ conv-26_q106: "What are the new shoes that Melanie..." - Retrieval: 100%
+  ✓ conv-26_q107: "What is Melanie's reason for gettin..." - Retrieval: 100%
+  ✓ conv-26_q108: "What does Melanie say running has b..." - Retrieval: 100%
+  ✓ conv-26_q109: "What did Mel and her kids make duri..." - Retrieval: 100%
+  ✓ conv-26_q110: "What kind of pot did Mel and her ki..." - Retrieval: 100%
+  ✓ conv-26_q111: "What creative project do Mel and he..." - Retrieval: 100%
+  ✓ conv-26_q112: "What did Mel and her kids paint in ..." - Retrieval: 100%
+  ✓ conv-26_q113: "What did Caroline see at the counci..." - Retrieval: 100%
+  ✓ conv-26_q114: "What do sunflowers represent accord..." - Retrieval: 100%
+  ✓ conv-26_q115: "Why are flowers important to Melani..." - Retrieval: 100%
+  ✓ conv-26_q116: "What inspired Caroline's painting f..." - Retrieval: 100%
+  ✓ conv-26_q117: "How often does Melanie go to the be..." - Retrieval: 100%
+  ✓ conv-26_q118: "What did Melanie and her family see..." - Retrieval: 100%
+  ✓ conv-26_q119: "How did Melanie feel while watching..." - Retrieval: 100%
+  ✓ conv-26_q120: "Whose birthday did Melanie celebrat..." - Retrieval: 100%
+  ✓ conv-26_q121: "Who performed at the concert at Mel..." - Retrieval: 100%
+  ✓ conv-26_q122: "Why did Melanie choose to use color..." - Retrieval: 100%
+  ✓ conv-26_q123: "What pet does Caroline have?..." - Retrieval: 100%
+  ✓ conv-26_q124: "What pets does Melanie have?..." - Retrieval: 100%
+  ✓ conv-26_q125: "Where did Oliver hide his bone once..." - Retrieval: 100%
+  ✓ conv-26_q126: "What activity did Caroline used to ..." - Retrieval: 100%
+  ✓ conv-26_q127: "What did Caroline make for a local ..." - Retrieval: 100%
+  ✓ conv-26_q128: "What did Caroline find in her neigh..." - Retrieval: 100%
+  ✓ conv-26_q129: "Which song motivates Caroline to be..." - Retrieval: 100%
+  ✗ conv-26_q130: "Which  classical musicians does Mel..." - Retrieval: 0%
+  ✓ conv-26_q131: "Who is Melanie a fan of in terms of..." - Retrieval: 100%
+  ✓ conv-26_q132: "How long has Melanie been creating ..." - Retrieval: 100%
+  ✓ conv-26_q133: "What precautionary sign did Melanie..." - Retrieval: 100%
+  ✓ conv-26_q134: "What advice does Caroline give for ..." - Retrieval: 100%
+  ✗ conv-26_q135: "What setback did Melanie face in Oc..." - Retrieval: 0%
+  ✓ conv-26_q136: "What does Melanie do to keep hersel..." - Retrieval: 100%
+  ✓ conv-26_q137: "What painting did Melanie show to C..." - Retrieval: 100%
+  ✓ conv-26_q138: "What kind of painting did Caroline ..." - Retrieval: 100%
+  ✓ conv-26_q139: "What was the poetry reading that Ca..." - Retrieval: 100%
+  ✓ conv-26_q140: "What did the posters at the poetry ..." - Retrieval: 100%
+  ✗ conv-26_q141: "What does Caroline's drawing symbol..." - Retrieval: 0%
+  ✓ conv-26_q142: "How do Melanie and Caroline describ..." - Retrieval: 100%
+  ✓ conv-26_q143: "What happened to Melanie's son on t..." - Retrieval: 100%
+  ✓ conv-26_q144: "How did Melanie's son handle the ac..." - Retrieval: 100%
+  ✓ conv-26_q145: "How did Melanie feel about her fami..." - Retrieval: 100%
+  ✓ conv-26_q146: "How did Melanie's children handle t..." - Retrieval: 100%
+  ✓ conv-26_q147: "How did Melanie feel after the acci..." - Retrieval: 100%
+  ✓ conv-26_q148: "What was Melanie's reaction to her ..." - Retrieval: 100%
+  ✓ conv-26_q149: "What do Melanie's family give her?..." - Retrieval: 100%
+  ✓ conv-26_q150: "How did Melanie feel about her fami..." - Retrieval: 100%
+  ✓ conv-26_q151: "What did Melanie do after the road ..." - Retrieval: 100%
+  ✓ conv-26_q152: "What did Caroline realize after her..." - Retrieval: 100%
+  ✓ conv-26_q153: "What are Melanie's plans for the su..." - Retrieval: 100%
+  ✓ conv-26_q154: "What type of individuals does the a..." - Retrieval: 100%
+  ✓ conv-26_q155: "Why did Melanie choose the adoption..." - Retrieval: 100%
+  ✓ conv-26_q156: "What is Melanie excited about in he..." - Retrieval: 100%
+  ✓ conv-26_q157: "What does Melanie's necklace symbol..." - Retrieval: 100%
+  ✓ conv-26_q158: "What country is Melanie's grandma f..." - Retrieval: 100%
+  ✓ conv-26_q159: "What was grandma's gift to Melanie?..." - Retrieval: 100%
+  ✗ conv-26_q160: "What was grandpa's gift to Caroline..." - Retrieval: 0%
+  ✓ conv-26_q161: "What is Caroline's hand-painted bow..." - Retrieval: 100%
+  ✓ conv-26_q162: "What did Caroline and her family do..." - Retrieval: 100%
+  ✓ conv-26_q163: "What kind of counseling and mental ..." - Retrieval: 100%
+  ✓ conv-26_q164: "What kind of counseling workshop di..." - Retrieval: 100%
+  ✓ conv-26_q165: "What motivated Melanie to pursue co..." - Retrieval: 100%
+  ✓ conv-26_q166: "What kind of place does Melanie wan..." - Retrieval: 100%
+  ✓ conv-26_q167: "Did Caroline make the black and whi..." - Retrieval: 100%
+  ✓ conv-26_q168: "What are the new shoes that Carolin..." - Retrieval: 100%
+  ✓ conv-26_q169: "What is Caroline's reason for getti..." - Retrieval: 100%
+  ✓ conv-26_q170: "What does Caroline say running has ..." - Retrieval: 100%
+  ✓ conv-26_q171: "What did Melanie see at the council..." - Retrieval: 100%
+  ✓ conv-26_q172: "What inspired Melanie's painting fo..." - Retrieval: 100%
+  ✓ conv-26_q173: "What inspired Caroline's sculpture ..." - Retrieval: 100%
+  ✓ conv-26_q174: "How often does Caroline go to the b..." - Retrieval: 100%
+  ✓ conv-26_q175: "What did Caroline and her family se..." - Retrieval: 100%
+  ✓ conv-26_q176: "How did Caroline feel while watchin..." - Retrieval: 100%
+  ✓ conv-26_q177: "Why did Caroline choose to use colo..." - Retrieval: 100%
+  ✓ conv-26_q178: "Is Oscar Melanie's pet?..." - Retrieval: 100%
+  ✓ conv-26_q179: "Where did Oscar hide his bone once?..." - Retrieval: 100%
+  ✓ conv-26_q180: "What activity did Melanie used to d..." - Retrieval: 100%
+  ✓ conv-26_q181: "What did Melanie make for a local c..." - Retrieval: 100%
+  ✓ conv-26_q182: "What did Melanie find in her neighb..." - Retrieval: 100%
+  ✓ conv-26_q183: "Which song motivates Melanie to be ..." - Retrieval: 100%
+  ✓ conv-26_q184: "What type of instrument does Caroli..." - Retrieval: 100%
+  ✗ conv-26_q185: "Which classical musicians does Caro..." - Retrieval: 0%
+  ✓ conv-26_q186: "Who is Caroline a fan of in terms o..." - Retrieval: 100%
+  ✓ conv-26_q187: "What precautionary sign did Carolin..." - Retrieval: 100%
+  ✓ conv-26_q188: "What setback did Caroline face rece..." - Retrieval: 100%
+  ✓ conv-26_q189: "What does Caroline do to keep herse..." - Retrieval: 100%
+  ✓ conv-26_q190: "What was the poetry reading that Me..." - Retrieval: 100%
+  ✓ conv-26_q191: "What happened to Caroline's son on ..." - Retrieval: 100%
+  ✓ conv-26_q192: "How did Caroline's son handle the a..." - Retrieval: 100%
+  ✓ conv-26_q193: "How did Caroline feel about her fam..." - Retrieval: 100%
+  ✓ conv-26_q194: "How did Caroline's children handle ..." - Retrieval: 100%
+  ✓ conv-26_q195: "How did Caroline feel after the acc..." - Retrieval: 100%
+  ✓ conv-26_q196: "What was Caroline's reaction to her..." - Retrieval: 100%
+  ✓ conv-26_q197: "What did Caroline do after the road..." - Retrieval: 100%
+  ✓ conv-26_q198: "What does Caroline love most about ..." - Retrieval: 100%
+  ✓ conv-30_q0: "When Jon has lost his job as a bank..." - Retrieval: 100%
+  ✓ conv-30_q1: "When Gina has lost her job at Door ..." - Retrieval: 100%
+  ✗ conv-30_q2: "How do Jon and Gina both like to de..." - Retrieval: 0%
+  ✓ conv-30_q3: "What do Jon and Gina both have in c..." - Retrieval: 50%
+  ✓ conv-30_q4: "Why did Jon decide to start his dan..." - Retrieval: 100%
+  ✓ conv-30_q5: "What Jon thinks the ideal dance stu..." - Retrieval: 100%
+  ✓ conv-30_q6: "When is Jon's group performing at a..." - Retrieval: 100%
+  ✓ conv-30_q7: "When did Gina launch an ad campaign..." - Retrieval: 100%
+  ✓ conv-30_q8: "When was Jon in Paris?..." - Retrieval: 100%
+  ✗ conv-30_q9: "Which city have both Jean and John ..." - Retrieval: 0%
+  ✓ conv-30_q10: "When did Gina team up with a local ..." - Retrieval: 100%
+  ✓ conv-30_q11: "When did Gina get her tattoo?..." - Retrieval: 100%
+  ✓ conv-30_q12: "When did Jon start to go to the gym..." - Retrieval: 100%
+  ✓ conv-30_q13: "When did Gina open her online cloth..." - Retrieval: 100%
+  ✓ conv-30_q14: "When did Jon start expanding his st..." - Retrieval: 100%
+  ✓ conv-30_q15: "When did Jon host a dance competiti..." - Retrieval: 100%
+  ✗ conv-30_q16: "When did Jon go to a fair to get mo..." - Retrieval: 0%
+  ✓ conv-30_q17: "Why did Gina decide to start her ow..." - Retrieval: 50%
+  ✓ conv-30_q18: "Do Jon and Gina start businesses ou..." - Retrieval: 100%
+  ✓ conv-30_q19: "When did Gina interview for a desig..." - Retrieval: 100%
+  ✓ conv-30_q20: "When did Gina get accepted for the ..." - Retrieval: 100%
+  ✓ conv-30_q21: "When did Jon start reading "The Lea..." - Retrieval: 100%
+  ✓ conv-30_q22: "When did Gina develop a video prese..." - Retrieval: 100%
+  ✓ conv-30_q23: "How did Gina promote her clothes st..." - Retrieval: 50%
+  ✓ conv-30_q24: "Which events has Jon participated i..." - Retrieval: 67%
+  ✓ conv-30_q25: "What does Jon's dance studio offer?..." - Retrieval: 100%
+  ✓ conv-30_q26: "When did Jon receive mentorship to ..." - Retrieval: 100%
+  ✓ conv-30_q27: "Did Jon and Gina both participate i..." - Retrieval: 100%
+  ✓ conv-30_q28: "When was Jon in Rome?..." - Retrieval: 100%
+  ✓ conv-30_q29: "Which cities has Jon visited?..." - Retrieval: 50%
+  ✓ conv-30_q30: "When Jon is planning to open his da..." - Retrieval: 100%
+  ✓ conv-30_q31: "How long did it take for Jon to ope..." - Retrieval: 50%
+  ✓ conv-30_q32: "When did Gina design a limited coll..." - Retrieval: 100%
+  ✓ conv-30_q33: "When did Jon visit networking event..." - Retrieval: 100%
+  ✓ conv-30_q34: "When did Gina start being recognize..." - Retrieval: 100%
+  ✓ conv-30_q35: "When did Jon start learning marketi..." - Retrieval: 100%
+  ✓ conv-30_q36: "When did Jon and Gina decide to col..." - Retrieval: 100%
+  ✓ conv-30_q37: "When did Gina mention Shia Labeouf?..." - Retrieval: 100%
+  ✓ conv-30_q38: "When did Gina go to a dance class w..." - Retrieval: 100%
+  ✓ conv-30_q39: "What is Gina's favorite style of da..." - Retrieval: 100%
+  ✓ conv-30_q40: "What is Jon's favorite style of dan..." - Retrieval: 100%
+  ✓ conv-30_q41: "What was Gina's favorite dancing me..." - Retrieval: 100%
+  ✓ conv-30_q42: "What kind of dance piece did Gina's..." - Retrieval: 100%
+  ✗ conv-30_q43: "What do the dancers in the photo re..." - Retrieval: 0%
+  ✗ conv-30_q44: "What does Gina say about the dancer..." - Retrieval: 0%
+  ✓ conv-30_q45: "What is Jon's attitude towards bein..." - Retrieval: 100%
+  ✓ conv-30_q46: "What kind of flooring is Jon lookin..." - Retrieval: 100%
+  ✓ conv-30_q47: "What did Gina find for her clothing..." - Retrieval: 100%
+  ✓ conv-30_q48: "What did Gina design for her store?..." - Retrieval: 100%
+  ✓ conv-30_q49: "What did Gina want her customers to..." - Retrieval: 100%
+  ✓ conv-30_q50: "What did Jon say about Gina's progr..." - Retrieval: 100%
+  ✓ conv-30_q51: "What made Gina choose the furniture..." - Retrieval: 100%
+  ✓ conv-30_q52: "What did Jon say about creating a s..." - Retrieval: 100%
+  ✓ conv-30_q53: "What did Gina say about creating an..." - Retrieval: 100%
+  ✓ conv-30_q54: "How is Gina's store doing?..." - Retrieval: 100%
+  ✓ conv-30_q55: "What does Gina's tattoo symbolize?..." - Retrieval: 100%
+  ✓ conv-30_q56: "What did Jon and Gina compare their..." - Retrieval: 100%
+  ✓ conv-30_q57: "What advice does Gina give to Jon a..." - Retrieval: 100%
+  ✓ conv-30_q58: "Why did Jon shut down his bank acco..." - Retrieval: 100%
+  ✓ conv-30_q59: "Why did Gina combine her clothing b..." - Retrieval: 100%
+  ✓ conv-30_q60: "What does Jon's dance make him?..." - Retrieval: 100%
+  ✓ conv-30_q61: "What did Gina receive from a dance ..." - Retrieval: 100%
+  ✓ conv-30_q62: "How does Gina stay confident in her..." - Retrieval: 100%
+  ✗ conv-30_q63: "What kind of professional experienc..." - Retrieval: 0%
+  ✓ conv-30_q64: "Where is Gina's fashion internship?..." - Retrieval: 100%
+  ✓ conv-30_q65: "What book is Jon currently reading?..." - Retrieval: 100%
+  ✓ conv-30_q66: "What is Jon offering to the dancers..." - Retrieval: 100%
+  ✓ conv-30_q67: "How does Jon use the clipboard with..." - Retrieval: 100%
+  ✓ conv-30_q68: "What does Jon tell Gina he won't do..." - Retrieval: 100%
+  ✓ conv-30_q69: "What did Jon take a trip to Rome fo..." - Retrieval: 100%
+  ✓ conv-30_q70: "What is Jon working on opening?..." - Retrieval: 100%
+  ✓ conv-30_q71: "How does Gina describe the studio t..." - Retrieval: 100%
+  ✓ conv-30_q72: "How does Jon feel about the opening..." - Retrieval: 100%
+  ✓ conv-30_q73: "How does Gina describe the feeling ..." - Retrieval: 100%
+  ✓ conv-30_q74: "What does Jon plan to do at the gra..." - Retrieval: 100%
+  ✓ conv-30_q75: "What does Gina say to Jon about the..." - Retrieval: 100%
+  ✓ conv-30_q76: "What is the general sentiment about..." - Retrieval: 100%
+  ✓ conv-30_q77: "What did Gina make a limited editio..." - Retrieval: 100%
+  ✓ conv-30_q78: "According to Gina, what makes Jon a..." - Retrieval: 100%
+  ✓ conv-30_q79: "What temporary job did Jon take to ..." - Retrieval: 100%
+  ✓ conv-30_q80: "What plans does Jon have after rece..." - Retrieval: 100%
+  ✓ conv-30_q81: "What offer does Gina make to Jon re..." - Retrieval: 100%
+  ✓ conv-30_q82: "What is Jon's favorite style of pai..." - Retrieval: 100%
+  ✓ conv-30_q83: "What was Jon's favorite dancing mem..." - Retrieval: 100%
+  ✓ conv-30_q84: "What kind of dance piece did Jon's ..." - Retrieval: 100%
+  ✓ conv-30_q85: "What is Gina's attitude towards par..." - Retrieval: 100%
+  ✓ conv-30_q86: "What kind of flooring is Gina looki..." - Retrieval: 100%
+  ✓ conv-30_q87: "What did Jon find for his clothing ..." - Retrieval: 100%
+  ✗ conv-30_q88: "What did Jon design for his store?..." - Retrieval: 0%
+  ✓ conv-30_q89: "What did Jon want his customers to ..." - Retrieval: 100%
+  ✓ conv-30_q90: "What made Jon choose the furniture ..." - Retrieval: 100%
+  ✓ conv-30_q91: "How is Jon's store doing?..." - Retrieval: 100%
+  ✓ conv-30_q92: "What does Jon's tattoo symbolize?..." - Retrieval: 100%
+  ✓ conv-30_q93: "Why did Gina shut down her bank acc..." - Retrieval: 100%
+  ✓ conv-30_q94: "Why did Jon combine his clothing bu..." - Retrieval: 100%
+  ✓ conv-30_q95: "What did Gina receive from a dance ..." - Retrieval: 100%
+  ✓ conv-30_q96: "What kind of professional experienc..." - Retrieval: 100%
+  ✓ conv-30_q97: "Where is Gina's HR internship?..." - Retrieval: 100%
+  ✓ conv-30_q98: "Where is Jon's fashion internship?..." - Retrieval: 100%
+  ✓ conv-30_q99: "What book is Gina currently reading..." - Retrieval: 100%
+  ✓ conv-30_q100: "How does Gina use the clipboard wit..." - Retrieval: 100%
+  ✗ conv-30_q101: "What did Jon take a trip to Barcelo..." - Retrieval: 0%
+  ✓ conv-30_q102: "What did Jon make a limited edition..." - Retrieval: 100%
+  ✓ conv-30_q103: "What temporary job did Gina take to..." - Retrieval: 100%
+  ✓ conv-30_q104: "What plans does Gina have after rec..." - Retrieval: 100%
+  ✓ conv-41_q0: "Who did Maria have dinner with on M..." - Retrieval: 100%
+  ✓ conv-41_q1: "When did Maria donate her car?..." - Retrieval: 100%
+  ✗ conv-41_q2: "What martial arts has John done?..." - Retrieval: 0%
+  ✗ conv-41_q3: "What type of volunteering have John..." - Retrieval: 0%
+  ✓ conv-41_q4: "When did John join the online suppo..." - Retrieval: 100%
+  ✗ conv-41_q5: "When did Maria go to the beach?..." - Retrieval: 0%
+  ✓ conv-41_q6: "Where has Maria made friends?..." - Retrieval: 25%
+  ✗ conv-41_q7: "What items des John mention having ..." - Retrieval: 0%
+  ✗ conv-41_q8: "What might John's financial status ..." - Retrieval: 0%
+  ✓ conv-41_q9: "Who gave Maria's family money when ..." - Retrieval: 50%
+  ✓ conv-41_q10: "When did Maria meet Jean?..." - Retrieval: 100%
+  ✓ conv-41_q11: "What people has Maria met and helpe..." - Retrieval: 50%
+  ✗ conv-41_q12: "What test has John taken multiple t..." - Retrieval: 0%
+  ✓ conv-41_q13: "When did Maria's grandmother pass a..." - Retrieval: 100%
+  ✗ conv-41_q14: "Would John be considered a patrioti..." - Retrieval: 0%
+  ✓ conv-41_q15: "What writing classes has Maria take..." - Retrieval: 50%
+  ✓ conv-41_q16: "When did John get his degree?..." - Retrieval: 100%
+  ✓ conv-41_q17: "What might John's degree be in?..." - Retrieval: 100%
+  ✗ conv-41_q18: "Who did John go to yoga with?..." - Retrieval: 0%
+  ✓ conv-41_q19: "What damages have happened to John'..." - Retrieval: 50%
+  ✓ conv-41_q20: "When did John take a road trip to t..." - Retrieval: 100%
+  ✗ conv-41_q21: "What areas of the U.S. has John bee..." - Retrieval: 0%
+  ✓ conv-41_q22: "When did John go to a convention wi..." - Retrieval: 100%
+  ✗ conv-41_q23: "What desserts has Maria made?..." - Retrieval: 0%
+  ✓ conv-41_q24: "When did John start boot camp with ..." - Retrieval: 100%
+  ✗ conv-41_q25: "What European countries has Maria b..." - Retrieval: 0%
+  ✓ conv-41_q26: "What has Maria done to feel closer ..." - Retrieval: 100%
+  ✓ conv-41_q27: "When did John have a party with vet..." - Retrieval: 100%
+  ✗ conv-41_q28: "What causes does John feel passiona..." - Retrieval: 0%
+  ✓ conv-41_q29: "What events is Maria planning for t..." - Retrieval: 50%
+  ✗ conv-41_q30: "What shelters does Maria volunteer ..." - Retrieval: 0%
+  ✓ conv-41_q31: "When did John get his dog Max?..." - Retrieval: 100%
+  ✗ conv-41_q32: "What outdoor activities has John do..." - Retrieval: 0%
+  ✓ conv-41_q33: "What types of yoga has Maria practi..." - Retrieval: 33%
+  ✓ conv-41_q34: "When did Maria join a gym?..." - Retrieval: 100%
+  ✓ conv-41_q35: "What states has Maria vacationed at..." - Retrieval: 50%
+  ✓ conv-41_q36: "What music events has John attended..." - Retrieval: 50%
+  ✓ conv-41_q37: "What events for veterans has John p..." - Retrieval: 75%
+  ✗ conv-41_q38: "When did Maria get in a car acciden..." - Retrieval: 0%
+  ✗ conv-41_q39: "Around which US holiday did Maria g..." - Retrieval: 0%
+  ✓ conv-41_q40: "What are the names of John's childr..." - Retrieval: 50%
+  ✗ conv-41_q41: "Does John live close to a beach or ..." - Retrieval: 0%
+  ✓ conv-41_q42: "What area was hit by a flood?..." - Retrieval: 50%
+  ✓ conv-41_q43: "When was John's old area hit with a..." - Retrieval: 100%
+  ✓ conv-41_q44: "What activities has Maria done with..." - Retrieval: 100%
+  ✗ conv-41_q45: "Would John be open to moving to ano..." - Retrieval: 0%
+  ✓ conv-41_q46: "When did Maria go hiking with her c..." - Retrieval: 100%
+  ✓ conv-41_q47: "What exercises has John done?..." - Retrieval: 33%
+  ✓ conv-41_q48: "When did John have his first firefi..." - Retrieval: 100%
+  ✓ conv-41_q49: "What food item did Maria drop off a..." - Retrieval: 50%
+  ✗ conv-41_q50: "What attributes describe John?..." - Retrieval: 0%
+  ✓ conv-41_q51: "When did Maria start volunteering a..." - Retrieval: 100%
+  ✓ conv-41_q52: "Who have written notes of gratitude..." - Retrieval: 100%
+  ✓ conv-41_q53: "When did John help renovate his hom..." - Retrieval: 100%
+  ✓ conv-41_q54: "When did Maria take up community wo..." - Retrieval: 100%
+  ✓ conv-41_q55: "When did Maria receive a medal from..." - Retrieval: 100%
+  ✓ conv-41_q56: "When did John participate in a 5K c..." - Retrieval: 100%
+  ✓ conv-41_q57: "What causes has John done events fo..." - Retrieval: 33%
+  ✓ conv-41_q58: "When did Maria get Coco?..." - Retrieval: 100%
+  ✓ conv-41_q59: "When did John go on a camping trip ..." - Retrieval: 100%
+  ✓ conv-41_q60: "What are Maria's dogs' names?..." - Retrieval: 50%
+  ✓ conv-41_q61: "When did Maria adopt Shadow?..." - Retrieval: 100%
+  ✓ conv-41_q62: "How many dogs has Maria adopted fro..." - Retrieval: 50%
+  ✓ conv-41_q63: "How many weeks passed between Maria..." - Retrieval: 100%
+  ✗ conv-41_q64: "What job might Maria pursue in the ..." - Retrieval: 0%
+  ✓ conv-41_q65: "What is John's main focus in local ..." - Retrieval: 100%
+  ✓ conv-41_q66: "What sparked John's interest in imp..." - Retrieval: 100%
+  ✓ conv-41_q67: "How did the extra funding help the ..." - Retrieval: 100%
+  ✓ conv-41_q68: "What type of workout class did Mari..." - Retrieval: 100%
+  ✓ conv-41_q69: "What did Maria donate to a homeless..." - Retrieval: 100%
+  ✓ conv-41_q70: "What kind of meal did John and his ..." - Retrieval: 100%
+  ✓ conv-41_q71: "What kind of online group did John ..." - Retrieval: 100%
+  ✓ conv-41_q72: "What kind of activities did John an..." - Retrieval: 100%
+  ✓ conv-41_q73: "Who inspired Maria to start volunte..." - Retrieval: 100%
+  ✓ conv-41_q74: "Why did Maria sit with the little g..." - Retrieval: 100%
+  ✗ conv-41_q75: "What did Jean go through before mee..." - Retrieval: 0%
+  ✓ conv-41_q76: "Why did John decide to run for offi..." - Retrieval: 100%
+  ✓ conv-41_q77: "What activity did John's colleague,..." - Retrieval: 100%
+  ✓ conv-41_q78: "What is the name of John's one-year..." - Retrieval: 100%
+  ✓ conv-41_q79: "How often does John take his kids t..." - Retrieval: 100%
+  ✓ conv-41_q80: "What did Maria make for her home to..." - Retrieval: 100%
+  ✓ conv-41_q81: "Where did Maria get the idea for th..." - Retrieval: 100%
+  ✗ conv-41_q82: "What did John receive a certificate..." - Retrieval: 0%
+  ✓ conv-41_q83: "What areas is John particularly int..." - Retrieval: 100%
+  ✓ conv-41_q84: "What did Maria participate in last ..." - Retrieval: 100%
+  ✗ conv-41_q85: "What event did John volunteer at la..." - Retrieval: 0%
+  ✓ conv-41_q86: "What did John do that put a strain ..." - Retrieval: 100%
+  ✓ conv-41_q87: "Where did John explore on a road tr..." - Retrieval: 100%
+  ✓ conv-41_q88: "What topic has John been blogging a..." - Retrieval: 100%
+  ✓ conv-41_q89: "Why did John start blogging about p..." - Retrieval: 100%
+  ✓ conv-41_q90: "What was the focus of John's recent..." - Retrieval: 100%
+  ✓ conv-41_q91: "What did John attend with his colle..." - Retrieval: 100%
+  ✓ conv-41_q92: "How often does John work out with h..." - Retrieval: 100%
+  ✓ conv-41_q93: "How has John's fitness improved sin..." - Retrieval: 100%
+  ✓ conv-41_q94: "What kind of food did Maria have on..." - Retrieval: 100%
+  ✓ conv-41_q95: "What activity did Maria and her mom..." - Retrieval: 100%
+  ✓ conv-41_q96: "What did Maria do to feel closer to..." - Retrieval: 100%
+  ✓ conv-41_q97: "Why did Maria join a nearby church ..." - Retrieval: 100%
+  ✓ conv-41_q98: "What did John host for the veterans..." - Retrieval: 100%
+  ✓ conv-41_q99: "What did John and the veterans do d..." - Retrieval: 100%
+  ✓ conv-41_q100: "What emotions did John feel during ..." - Retrieval: 100%
+  ✓ conv-41_q101: "What event is Maria getting ready f..." - Retrieval: 100%
+  ✓ conv-41_q102: "What does Maria need to spread the ..." - Retrieval: 100%
+  ✓ conv-41_q103: "What was the name of the pet that J..." - Retrieval: 100%
+  ✓ conv-41_q104: "How long was Max a part of John's f..." - Retrieval: 100%
+  ✓ conv-41_q105: "How does John plan to honor the mem..." - Retrieval: 100%
+  ✓ conv-41_q106: "What important values does John wan..." - Retrieval: 100%
+  ✗ conv-41_q107: "What new activity did Maria start r..." - Retrieval: 0%
+  ✓ conv-41_q108: "What did Maria say it was like bein..." - Retrieval: 100%
+  ✓ conv-41_q109: "What does Maria say she feels when ..." - Retrieval: 100%
+  ✗ conv-41_q110: "What exciting news did Maria share ..." - Retrieval: 0%
+  ✓ conv-41_q111: "What yoga activity has Maria been t..." - Retrieval: 100%
+  ✓ conv-41_q112: "What did John recently get promoted..." - Retrieval: 100%
+  ✓ conv-41_q113: "What was one of the biggest challen..." - Retrieval: 100%
+  ✓ conv-41_q114: "How does John describe the support ..." - Retrieval: 100%
+  ✓ conv-41_q115: "What kind of event did John and his..." - Retrieval: 100%
+  ✓ conv-41_q116: "Why did Maria need to help her cous..." - Retrieval: 100%
+  ✓ conv-41_q117: "What event did John participate in ..." - Retrieval: 100%
+  ✓ conv-41_q118: "What inspired John to join the marc..." - Retrieval: 100%
+  ✓ conv-41_q119: "How often does John get to see suns..." - Retrieval: 100%
+  ✓ conv-41_q120: "What natural disaster affected John..." - Retrieval: 100%
+  ✓ conv-41_q121: "How did the flood impact the homes ..." - Retrieval: 100%
+  ✓ conv-41_q122: "What motivated Maria and John to di..." - Retrieval: 100%
+  ✗ conv-41_q123: "What did Maria plan to do later on ..." - Retrieval: 0%
+  ✓ conv-41_q124: "What kind of activities did Maria d..." - Retrieval: 100%
+  ✓ conv-41_q125: "What does John appreciate about the..." - Retrieval: 100%
+  ✓ conv-41_q126: "What did John take away from visiti..." - Retrieval: 100%
+  ✓ conv-41_q127: "Why did John feel inspired to join ..." - Retrieval: 100%
+  ✓ conv-41_q128: "In what activity did Maria and her ..." - Retrieval: 100%
+  ✓ conv-41_q129: "What does John think about trying n..." - Retrieval: 100%
+  ✓ conv-41_q130: "Which activity has John done apart ..." - Retrieval: 100%
+  ✗ conv-41_q131: "What community service did Maria me..." - Retrieval: 0%
+  ✓ conv-41_q132: "How did Maria start volunteering at..." - Retrieval: 100%
+  ✗ conv-41_q133: "What did John do the week before Au..." - Retrieval: 0%
+  ✓ conv-41_q134: "How did John describe his kids' rea..." - Retrieval: 100%
+  ✓ conv-41_q135: "Why does Maria think it's important..." - Retrieval: 100%
+  ✓ conv-41_q136: "What does John believe is important..." - Retrieval: 100%
+  ✓ conv-41_q137: "What happened to John's job in Augu..." - Retrieval: 100%
+  ✓ conv-41_q138: "What activity did Maria take up wit..." - Retrieval: 100%
+  ✓ conv-41_q139: "What did John do to help his commun..." - Retrieval: 100%
+  ✓ conv-41_q140: "What cause did the 5K charity run o..." - Retrieval: 100%
+  ✓ conv-41_q141: "Who did John work with to raise awa..." - Retrieval: 100%
+  ✗ conv-41_q142: "What recognition did Maria receive ..." - Retrieval: 0%
+  ✓ conv-41_q143: "What is the name of Maria's puppy s..." - Retrieval: 100%
+  ✓ conv-41_q144: "What activity did John and Max enjo..." - Retrieval: 100%
+  ✓ conv-41_q145: "How does John describe the camping ..." - Retrieval: 100%
+  ✓ conv-41_q146: "Why does John say he feels stuck an..." - Retrieval: 100%
+  ✓ conv-41_q147: "What is the name of Maria's second ..." - Retrieval: 100%
+  ✗ conv-41_q148: "How is Maria's new puppy adjusting ..." - Retrieval: 0%
+  ✗ conv-41_q149: "What is John currently doing as a v..." - Retrieval: 0%
+  ✓ conv-41_q150: "What activities does John's family ..." - Retrieval: 100%
+  ✓ conv-41_q151: "What did the donations help John's ..." - Retrieval: 100%
+  ✓ conv-41_q152: "What is John's main focus in intern..." - Retrieval: 100%
+  ✗ conv-41_q153: "What did Maria donate to a luxury s..." - Retrieval: 0%
+  ✓ conv-41_q154: "Who inspired John to start voluntee..." - Retrieval: 100%
+  ✓ conv-41_q155: "Why did Maria decide to run for off..." - Retrieval: 100%
+  ✓ conv-41_q156: "What activity did Maria's colleague..." - Retrieval: 100%
+  ✓ conv-41_q157: "What is the name of Maria's one-yea..." - Retrieval: 100%
+  ✓ conv-41_q158: "How often does John take his kids t..." - Retrieval: 100%
+  ✓ conv-41_q159: "What did Maria make for her home to..." - Retrieval: 100%
+  ✓ conv-41_q160: "Where did John get the idea for the..." - Retrieval: 100%
+  ✗ conv-41_q161: "What did Maria receive a certificat..." - Retrieval: 0%
+  ✓ conv-41_q162: "What areas is John particularly int..." - Retrieval: 100%
+  ✓ conv-41_q163: "Why did Maria start blogging about ..." - Retrieval: 100%
+  ✓ conv-41_q164: "What was the focus of John's recent..." - Retrieval: 100%
+  ✓ conv-41_q165: "How often does Maria work out with ..." - Retrieval: 100%
+  ✓ conv-41_q166: "How has John's artistic skills impr..." - Retrieval: 100%
+  ✓ conv-41_q167: "What kind of food did Maria have on..." - Retrieval: 100%
+  ✓ conv-41_q168: "What did John do to feel closer to ..." - Retrieval: 100%
+  ✓ conv-41_q169: "Why did John join a nearby church r..." - Retrieval: 100%
+  ✓ conv-41_q170: "How long was Max a part of Maria's ..." - Retrieval: 100%
+  ✓ conv-41_q171: "How does Maria plan to honor the me..." - Retrieval: 100%
+  ✓ conv-41_q172: "What important values does Maria wa..." - Retrieval: 100%
+  ✓ conv-41_q173: "What did Maria say it was like bein..." - Retrieval: 100%
+  ✓ conv-41_q174: "What does John say she feels when d..." - Retrieval: 100%
+  ✓ conv-41_q175: "What did Maria recently get promote..." - Retrieval: 100%
+  ✓ conv-41_q176: "What was one of the biggest challen..." - Retrieval: 100%
+  ✓ conv-41_q177: "Why did John need to help his cousi..." - Retrieval: 100%
+  ✓ conv-41_q178: "What event did Maria participate in..." - Retrieval: 100%
+  ✓ conv-41_q179: "How did the drought impact the home..." - Retrieval: 100%
+  ✓ conv-41_q180: "What does John criticize about the ..." - Retrieval: 100%
+  ✓ conv-41_q181: "What did John take away from visiti..." - Retrieval: 100%
+  ✓ conv-41_q182: "Why did Maria feel inspired to join..." - Retrieval: 100%
+  ✓ conv-41_q183: "How did Maria describe her kids' re..." - Retrieval: 100%
+  ✓ conv-41_q184: "Why does Maria think it's important..." - Retrieval: 100%
+  ✓ conv-41_q185: "What happened to Maria's job in Aug..." - Retrieval: 100%
+  ✓ conv-41_q186: "What cause did the 5K charity run o..." - Retrieval: 100%
+  ✓ conv-41_q187: "Who did John work with to raise awa..." - Retrieval: 100%
+  ✓ conv-41_q188: "What recognition did John receive a..." - Retrieval: 100%
+  ✓ conv-41_q189: "What is the name of John's puppy he..." - Retrieval: 100%
+  ✓ conv-41_q190: "How does Maria describe the camping..." - Retrieval: 100%
+  ✓ conv-41_q191: "What is the name of Maria's second ..." - Retrieval: 100%
+  ✗ conv-41_q192: "How is John's new puppy adjusting t..." - Retrieval: 0%
+  ✓ conv-42_q0: "Is it likely that Nate has friends ..." - Retrieval: 100%
+  ✓ conv-42_q1: "What kind of interests do Joanna an..." - Retrieval: 20%
+  ✓ conv-42_q2: "When did Joanna first watch "Eterna..." - Retrieval: 100%
+  ✓ conv-42_q3: "When did Nate win his first video g..." - Retrieval: 100%
+  ✗ conv-42_q4: "What pets wouldn't cause any discom..." - Retrieval: 0%
+  ✓ conv-42_q5: "What are Joanna's hobbies?..." - Retrieval: 50%
+  ✗ conv-42_q6: "How long has Nate had his first two..." - Retrieval: 0%
+  ✓ conv-42_q7: "When did Joanna finish her first sc..." - Retrieval: 100%
+  ✗ conv-42_q8: "When did Nate get his first two tur..." - Retrieval: 0%
+  ✗ conv-42_q9: "What major achievement did Joanna a..." - Retrieval: 0%
+  ✓ conv-42_q10: "What emotions is Joanna feeling abo..." - Retrieval: 100%
+  ✓ conv-42_q11: "What is Joanna allergic to?..." - Retrieval: 67%
+  ✓ conv-42_q12: "What underlying condition might Joa..." - Retrieval: 50%
+  ✓ conv-42_q13: "When did Joanna have an audition fo..." - Retrieval: 100%
+  ✓ conv-42_q14: "What nickname does Nate use for Joa..." - Retrieval: 100%
+  ✓ conv-42_q15: "When did Nate get purple hair?..." - Retrieval: 100%
+  ✓ conv-42_q16: "What physical transformation did Na..." - Retrieval: 100%
+  ✗ conv-42_q17: "What movie did Joanna watch on 1 Ma..." - Retrieval: 0%
+  ✗ conv-42_q18: "Which outdoor spot did Joanna visit..." - Retrieval: 0%
+  ✓ conv-42_q19: "How many times has Joanna found new..." - Retrieval: 100%
+  ✓ conv-42_q20: "When did Nate adopt Max?..." - Retrieval: 100%
+  ✓ conv-42_q21: "Who was the new addition to Nate's ..." - Retrieval: 100%
+  ✓ conv-42_q22: "When did Joanna start writing her t..." - Retrieval: 100%
+  ✓ conv-42_q23: "Which of Joanna's screenplay were r..." - Retrieval: 50%
+  ✓ conv-42_q24: "When is Nate hosting a gaming party..." - Retrieval: 100%
+  ✓ conv-42_q25: "When did Joanna hike with her buddi..." - Retrieval: 100%
+  ✗ conv-42_q26: "When did Nate win his third tourney..." - Retrieval: 0%
+  ✓ conv-42_q27: "What places has Joanna submitted he..." - Retrieval: 50%
+  ✓ conv-42_q28: "When did Nate make vegan icecream a..." - Retrieval: 100%
+  ✓ conv-42_q29: "When is Joanna going to make Nate's..." - Retrieval: 100%
+  ✓ conv-42_q30: "What kind of writings does Joanna d..." - Retrieval: 33%
+  ✓ conv-42_q31: "When did Nate win his fourth video ..." - Retrieval: 100%
+  ✗ conv-42_q32: "Where did Joanna travel to in July ..." - Retrieval: 0%
+  ✓ conv-42_q33: "When did someone write Joanna a tou..." - Retrieval: 100%
+  ✓ conv-42_q34: "What book recommendations has Joann..." - Retrieval: 50%
+  ✓ conv-42_q35: "When did Nate take time off to chil..." - Retrieval: 100%
+  ✓ conv-42_q36: "When did Joanna share her book with..." - Retrieval: 100%
+  ✓ conv-42_q37: "When did Nate win an international ..." - Retrieval: 100%
+  ✓ conv-42_q38: "When did Joanna make a desert with ..." - Retrieval: 100%
+  ✓ conv-42_q39: "When did Nate attend a cooking show..." - Retrieval: 100%
+  ✓ conv-42_q40: "When did Joanna's laptop crash?..." - Retrieval: 100%
+  ✓ conv-42_q41: "When did Joanna make a chocolate ta..." - Retrieval: 100%
+  ✓ conv-42_q42: "What movies have both Joanna and Na..." - Retrieval: 33%
+  ✓ conv-42_q43: "How long did it take for Joanna to ..." - Retrieval: 50%
+  ✓ conv-42_q44: "When did Nate win a lot of money in..." - Retrieval: 100%
+  ✓ conv-42_q45: "When did Joanna finish up the writi..." - Retrieval: 100%
+  ✗ conv-42_q46: "What board games has Nate played?..." - Retrieval: 0%
+  ✓ conv-42_q47: "What places has Nate met new people..." - Retrieval: 100%
+  ✓ conv-42_q48: "When did Nate go to a convention an..." - Retrieval: 100%
+  ✓ conv-42_q49: "How many times has Joanna's scripts..." - Retrieval: 100%
+  ✗ conv-42_q50: "What is something Nate gave to Joan..." - Retrieval: 0%
+  ✓ conv-42_q51: "When did Nate get Tilly for Joanna?..." - Retrieval: 50%
+  ✓ conv-42_q52: "How many of Joanna's writing have m..." - Retrieval: 100%
+  ✓ conv-42_q53: "How many times has Nate taken his t..." - Retrieval: 50%
+  ✓ conv-42_q54: "When was Joanna's second movie scri..." - Retrieval: 100%
+  ✓ conv-42_q55: "What is Joanna inspired by?..." - Retrieval: 40%
+  ✗ conv-42_q56: "What animal do both Nate and Joanna..." - Retrieval: 0%
+  ✓ conv-42_q57: "When did Joanna plan to go over to ..." - Retrieval: 100%
+  ✓ conv-42_q58: "What things has Nate reccomended to..." - Retrieval: 80%
+  ✗ conv-42_q59: "What does Joanna do to remember hap..." - Retrieval: 0%
+  ✗ conv-42_q60: "What Console does Nate own?..." - Retrieval: 0%
+  ✓ conv-42_q61: "What mediums does Nate use to play ..." - Retrieval: 50%
+  ✓ conv-42_q62: "How many letters has Joanna recieve..." - Retrieval: 50%
+  ✓ conv-42_q63: "What video games does Nate play?..." - Retrieval: 50%
+  ✓ conv-42_q64: "When did Nate win a big Valorant to..." - Retrieval: 100%
+  ✓ conv-42_q65: "Which torunament did Nate win in th..." - Retrieval: 100%
+  ✓ conv-42_q66: "What alternative career might Nate ..." - Retrieval: 25%
+  ✗ conv-42_q67: "What pets does Nate have?..." - Retrieval: 0%
+  ✓ conv-42_q68: "How many hikes has Joanna been on?..." - Retrieval: 25%
+  ✓ conv-42_q69: "How many turtles does Nate have?..." - Retrieval: 50%
+  ✓ conv-42_q70: "What activities does Nate do with h..." - Retrieval: 50%
+  ✓ conv-42_q71: "What do both Joanna and Nate apprec..." - Retrieval: 50%
+  ✓ conv-42_q72: "When did Joanna plan on going to Na..." - Retrieval: 100%
+  ✓ conv-42_q73: "What state did Joanna visit in summ..." - Retrieval: 100%
+  ✓ conv-42_q74: "What recommendations has Nate recei..." - Retrieval: 40%
+  ✓ conv-42_q75: "What are Nate's favorite desserts?..." - Retrieval: 100%
+  ✓ conv-42_q76: "How has Nate tried to disburse his ..." - Retrieval: 50%
+  ✓ conv-42_q77: "When did Nate win his second tourna..." - Retrieval: 100%
+  ✓ conv-42_q78: "How many video game tournaments has..." - Retrieval: 56%
+  ✓ conv-42_q79: "How many screenplays has Joanna wri..." - Retrieval: 25%
+  ✓ conv-42_q80: "How many tournaments has Nate won?..." - Retrieval: 86%
+  ✓ conv-42_q81: "What recipes has Joanna made?..." - Retrieval: 40%
+  ✗ conv-42_q82: "What recipes has Nate made?..." - Retrieval: 0%
+  ✓ conv-42_q83: "What are the skills that Nate has h..." - Retrieval: 33%
+  ✓ conv-42_q84: "Was the first half of September 202..." - Retrieval: 100%
+  ✓ conv-42_q85: "What kind of job is Joanna beginnin..." - Retrieval: 100%
+  ✓ conv-42_q86: "When did Nate take his turtles to t..." - Retrieval: 100%
+  ✗ conv-42_q87: "What state did Nate visit?..." - Retrieval: 0%
+  ✓ conv-42_q88: "What is one of Joanna's favorite mo..." - Retrieval: 100%
+  ✓ conv-42_q89: "What color did Nate choose for his ..." - Retrieval: 100%
+  ✗ conv-42_q90: "What is Nate's favorite movie trilo..." - Retrieval: 0%
+  ✓ conv-42_q91: "What is Nate's favorite book series..." - Retrieval: 100%
+  ✓ conv-42_q92: "What kind of lighting does Nate's g..." - Retrieval: 100%
+  ✓ conv-42_q93: "What game was the second tournament..." - Retrieval: 100%
+  ✓ conv-42_q94: "What is Joanna's third screenplay a..." - Retrieval: 100%
+  ✓ conv-42_q95: "What is Nate's favorite video game?..." - Retrieval: 100%
+  ✓ conv-42_q96: "What type of movies does Nate enjoy..." - Retrieval: 100%
+  ✓ conv-42_q97: "What did Joanna just finish last Fr..." - Retrieval: 100%
+  ✓ conv-42_q98: "What genre is Joanna's first screen..." - Retrieval: 100%
+  ✓ conv-42_q99: "What are Joanna's plans for her fin..." - Retrieval: 100%
+  ✗ conv-42_q100: "For how long has Nate had his turtl..." - Retrieval: 0%
+  ✗ conv-42_q101: "What did Nate think of the coconut ..." - Retrieval: 0%
+  ✓ conv-42_q102: "Which dairy-free dessert flavors do..." - Retrieval: 100%
+  ✓ conv-42_q103: "What did Joanna recently watch and ..." - Retrieval: 100%
+  ✓ conv-42_q104: "What is "Little Women" about accord..." - Retrieval: 100%
+  ✓ conv-42_q105: "What flavor of ice cream did Nate m..." - Retrieval: 100%
+  ✓ conv-42_q106: "What inspired Joanna's new screenpl..." - Retrieval: 100%
+  ✓ conv-42_q107: "Why does Nate like turtles as pets?..." - Retrieval: 100%
+  ✗ conv-42_q108: "How does Nate describe the process ..." - Retrieval: 0%
+  ✓ conv-42_q109: "What was Joanna's audition for?..." - Retrieval: 100%
+  ✓ conv-42_q110: "Why did Nate choose the hair color ..." - Retrieval: 100%
+  ✓ conv-42_q111: "What are the main ingredients of th..." - Retrieval: 100%
+  ✓ conv-42_q112: "What is Joanna's project called in ..." - Retrieval: 100%
+  ✗ conv-42_q113: "What is Nate's favorite genre of mo..." - Retrieval: 0%
+  ✓ conv-42_q114: "What kind of books does Nate enjoy?..." - Retrieval: 100%
+  ✓ conv-42_q115: "What kind of films does Joanna enjo..." - Retrieval: 100%
+  ✓ conv-42_q116: "Which activity helps Nate escape an..." - Retrieval: 100%
+  ✓ conv-42_q117: "What filling did Joanna use in the ..." - Retrieval: 100%
+  ✓ conv-42_q118: "What kind of frosting did Joanna us..." - Retrieval: 100%
+  ✓ conv-42_q119: "What does Nate feel he could do whe..." - Retrieval: 100%
+  ✓ conv-42_q120: "What creative activity does Nate jo..." - Retrieval: 100%
+  ✓ conv-42_q121: "Who invited Nate to join her on the..." - Retrieval: 100%
+  ✗ conv-42_q122: "What did Nate do for Joanna on 25 M..." - Retrieval: 0%
+  ✓ conv-42_q123: "How does Nate describe the stuffed ..." - Retrieval: 100%
+  ✗ conv-42_q124: "What event is Nate organizing in Ju..." - Retrieval: 0%
+  ✓ conv-42_q125: "Who did Nate plan to invite to his ..." - Retrieval: 100%
+  ✓ conv-42_q126: "What special items did Nate get for..." - Retrieval: 100%
+  ✓ conv-42_q127: "What did Joanna write yesterday tha..." - Retrieval: 100%
+  ✓ conv-42_q128: "What superhero is Joanna a fan of?..." - Retrieval: 100%
+  ✓ conv-42_q129: "Which superhero toy figure does Nat..." - Retrieval: 100%
+  ✓ conv-42_q130: "What is displayed on Joanna's cork ..." - Retrieval: 100%
+  ✓ conv-42_q131: "What does the photo on Joanna's cor..." - Retrieval: 100%
+  ✓ conv-42_q132: "What did Nate make and share with h..." - Retrieval: 100%
+  ✓ conv-42_q133: "How many people attended the gaming..." - Retrieval: 100%
+  ✗ conv-42_q134: "What recipe Nate offer to share wit..." - Retrieval: 0%
+  ✗ conv-42_q135: "What did Joanna plan to do with the..." - Retrieval: 0%
+  ✓ conv-42_q136: "How many video game tournaments has..." - Retrieval: 100%
+  ✓ conv-42_q137: "Where did Joanna go for a road trip..." - Retrieval: 100%
+  ✓ conv-42_q138: "What did Joanna discover at the lib..." - Retrieval: 100%
+  ✓ conv-42_q139: "What specific themes are explored i..." - Retrieval: 100%
+  ✓ conv-42_q140: "What inspired Joanna's new script i..." - Retrieval: 100%
+  ✓ conv-42_q141: "What did Nate do while Joanna was o..." - Retrieval: 100%
+  ✓ conv-42_q142: "What does Nate do that he loves and..." - Retrieval: 100%
+  ✓ conv-42_q143: "How did Joanna feel when someone wr..." - Retrieval: 100%
+  ✓ conv-42_q144: "What kind of impact does Joanna hop..." - Retrieval: 100%
+  ✓ conv-42_q145: "What kind of content did Joanna sha..." - Retrieval: 100%
+  ✓ conv-42_q146: "What motivates Joanna to keep writi..." - Retrieval: 100%
+  ✓ conv-42_q147: "What type of ice cream does Joanna ..." - Retrieval: 100%
+  ✓ conv-42_q148: "How did Nate feel about sharing his..." - Retrieval: 100%
+  ✓ conv-42_q149: "What did Joanna share with her writ..." - Retrieval: 100%
+  ✓ conv-42_q150: "How did Joanna celebrate after shar..." - Retrieval: 100%
+  ✓ conv-42_q151: "How did Nate celebrate winning the ..." - Retrieval: 100%
+  ✓ conv-42_q152: "Why is Joanna experimenting with da..." - Retrieval: 100%
+  ✓ conv-42_q153: "What substitution does Nate suggest..." - Retrieval: 100%
+  ✓ conv-42_q154: "What type of show did Nate host whe..." - Retrieval: 100%
+  ✓ conv-42_q155: "What is Nate's favorite dish from t..." - Retrieval: 100%
+  ✓ conv-42_q156: "What is one of Nate's favorite dair..." - Retrieval: 100%
+  ✓ conv-42_q157: "What dessert did Joanna share a pho..." - Retrieval: 100%
+  ✓ conv-42_q158: "What kind of cake did Joanna share ..." - Retrieval: 100%
+  ✓ conv-42_q159: "What two main ingredients are part ..." - Retrieval: 100%
+  ✓ conv-42_q160: "What movie did Nate recently watch ..." - Retrieval: 100%
+  ✓ conv-42_q161: "What did Joanna make for one of the..." - Retrieval: 100%
+  ✓ conv-42_q162: "What game did Nate play at the game..." - Retrieval: 100%
+  ✓ conv-42_q163: "What movie has Nate recently seen t..." - Retrieval: 100%
+  ✓ conv-42_q164: "What game has Nate been playing non..." - Retrieval: 100%
+  ✓ conv-42_q165: "What did Nate share a photo of when..." - Retrieval: 100%
+  ✓ conv-42_q166: "How did Joanna describe the classic..." - Retrieval: 100%
+  ✓ conv-42_q167: "What does Joanna recommend to make ..." - Retrieval: 100%
+  ✓ conv-42_q168: "What helps Joanna stay focused and ..." - Retrieval: 100%
+  ✓ conv-42_q169: "What does Joanna do while she write..." - Retrieval: 100%
+  ✓ conv-42_q170: "Why did Joanna name the stuffed ani..." - Retrieval: 100%
+  ✓ conv-42_q171: "What does Joanna do after receiving..." - Retrieval: 100%
+  ✓ conv-42_q172: "How does Nate feel about Joanna's a..." - Retrieval: 100%
+  ✓ conv-42_q173: "What encouragement does Nate give t..." - Retrieval: 100%
+  ✗ conv-42_q174: "What does Nate rely on for cheer an..." - Retrieval: 0%
+  ✓ conv-42_q175: "What does Joanna use to remember he..." - Retrieval: 100%
+  ✓ conv-42_q176: "What did Joanna contribute to that ..." - Retrieval: 100%
+  ✓ conv-42_q177: "What inspires Joanna to create draw..." - Retrieval: 100%
+  ✓ conv-42_q178: "Where does Joanna get her ideas for..." - Retrieval: 100%
+  ✓ conv-42_q179: "How did Joanna feel on October 25, ..." - Retrieval: 100%
+  ✓ conv-42_q180: "What type of diet do Nate's turtles..." - Retrieval: 100%
+  ✓ conv-42_q181: "What ingredient did Nate use to mak..." - Retrieval: 100%
+  ✓ conv-42_q182: "What did Joanna find in old noteboo..." - Retrieval: 100%
+  ✓ conv-42_q183: "What game is Nate currently playing..." - Retrieval: 100%
+  ✓ conv-42_q184: "What did Joanna receive from her br..." - Retrieval: 100%
+  ✓ conv-42_q185: "What is the type of game "Xenoblade..." - Retrieval: 100%
+  ✗ conv-42_q186: "What dish did Nate make on 9 Novemb..." - Retrieval: 0%
+  ✓ conv-42_q187: "What project is Joanna working on i..." - Retrieval: 100%
+  ✓ conv-42_q188: "What is Nate creating for YouTube o..." - Retrieval: 100%
+  ✓ conv-42_q189: "What inspired Nate to start making ..." - Retrieval: 100%
+  ✓ conv-42_q190: "What new content is Nate creating f..." - Retrieval: 100%
+  ✓ conv-42_q191: "What advice does Joanna give to Nat..." - Retrieval: 100%
+  ✓ conv-42_q192: "What did Joanna take a picture of n..." - Retrieval: 100%
+  ✓ conv-42_q193: "What inspired Joanna to take a pict..." - Retrieval: 100%
+  ✓ conv-42_q194: "Why did Nate get a third turtle?..." - Retrieval: 100%
+  ✗ conv-42_q195: "What does Nate want to do when he g..." - Retrieval: 0%
+  ✓ conv-42_q196: "What did Nate take to the beach in ..." - Retrieval: 100%
+  ✓ conv-42_q197: "What does Nate love most about havi..." - Retrieval: 100%
+  ✗ conv-42_q198: "What did Nate share a photo of as a..." - Retrieval: 0%
+  ✓ conv-42_q199: "What color did Joanna choose for he..." - Retrieval: 100%
+  ✓ conv-42_q200: "What is Joanna's favorite movie tri..." - Retrieval: 100%
+  ✗ conv-42_q201: "What is Joanna's favorite book seri..." - Retrieval: 0%
+  ✓ conv-42_q202: "What kind of lighting does Joanna's..." - Retrieval: 100%
+  ✓ conv-42_q203: "What game was the second tournament..." - Retrieval: 100%
+  ✓ conv-42_q204: "What is Nate's third screenplay abo..." - Retrieval: 100%
+  ✓ conv-42_q205: "What type of movies does Nate hate ..." - Retrieval: 100%
+  ✗ conv-42_q206: "What genre is Joanna's first novell..." - Retrieval: 0%
+  ✓ conv-42_q207: "What are Nate's plans for his finis..." - Retrieval: 100%
+  ✗ conv-42_q208: "For how long has Nate had his snake..." - Retrieval: 0%
+  ✗ conv-42_q209: "What did Nate think of the caramel ..." - Retrieval: 0%
+  ✓ conv-42_q210: "What flavor of cake did Nate make f..." - Retrieval: 100%
+  ✓ conv-42_q211: "What was Nate's audition for?..." - Retrieval: 100%
+  ✓ conv-42_q212: "Why did Joanna choose the hair colo..." - Retrieval: 100%
+  ✗ conv-42_q213: "What are the main ingredients of th..." - Retrieval: 0%
+  ✓ conv-42_q214: "What is Nate's project called in th..." - Retrieval: 100%
+  ✗ conv-42_q215: "Which activity helps Nate escape an..." - Retrieval: 0%
+  ✓ conv-42_q216: "What filling did Nate use in the ca..." - Retrieval: 100%
+  ✓ conv-42_q217: "Who did Joanna plan to invite to he..." - Retrieval: 100%
+  ✓ conv-42_q218: "What special items did Joanna get f..." - Retrieval: 100%
+  ✓ conv-42_q219: "What supervillain is Joanna a fan o..." - Retrieval: 100%
+  ✓ conv-42_q220: "Which superhero toy figure does Joa..." - Retrieval: 100%
+  ✓ conv-42_q221: "What did Joanna make and share with..." - Retrieval: 100%
+  ✓ conv-42_q222: "How many people attended the gaming..." - Retrieval: 100%
+  ✓ conv-42_q223: "Where did Nate go for a road trip f..." - Retrieval: 100%
+  ✓ conv-42_q224: "What did Joanna discover at the mus..." - Retrieval: 100%
+  ✓ conv-42_q225: "What specific themes are explored i..." - Retrieval: 100%
+  ✓ conv-42_q226: "How did Nate feel when someone wrot..." - Retrieval: 100%
+  ✗ conv-42_q227: "What kind of impact does Joanna hop..." - Retrieval: 0%
+  ✓ conv-42_q228: "What did Nate share with his writer..." - Retrieval: 100%
+  ✓ conv-42_q229: "How did Nate celebrate after sharin..." - Retrieval: 100%
+  ✓ conv-42_q230: "How did Joanna celebrate winning th..." - Retrieval: 100%
+  ✓ conv-42_q231: "What substitution does Nate suggest..." - Retrieval: 100%
+  ✓ conv-42_q232: "What type of show did Joanna host w..." - Retrieval: 100%
+  ✓ conv-42_q233: "What is Joanna's favorite dish from..." - Retrieval: 100%
+  ✓ conv-42_q234: "What dessert did Nate share a photo..." - Retrieval: 100%
+  ✓ conv-42_q235: "What two main ingredients are part ..." - Retrieval: 100%
+  ✓ conv-42_q236: "What movie did Joanna recently watc..." - Retrieval: 100%
+  ✓ conv-42_q237: "What did Nate make for one of the l..." - Retrieval: 100%
+  ✓ conv-42_q238: "What game has Joanna been playing n..." - Retrieval: 100%
+  ✓ conv-42_q239: "How did Nate describe the classic m..." - Retrieval: 100%
+  ✓ conv-42_q240: "What does Nate recommend to make a ..." - Retrieval: 100%
+  ✓ conv-42_q241: "What helps Joanna stay distracted a..." - Retrieval: 100%
+  ✗ conv-42_q242: "What does Nate do while he writes?..." - Retrieval: 0%
+  ✓ conv-42_q243: "What does Nate do after receiving a..." - Retrieval: 100%
+  ✓ conv-42_q244: "What does Joanna rely on for cheer ..." - Retrieval: 100%
+  ✓ conv-42_q245: "What does Nate use to remember his ..." - Retrieval: 100%
+  ✓ conv-42_q246: "What inspires Joanna to create musi..." - Retrieval: 100%
+  ✓ conv-42_q247: "What type of diet do Joanna's turtl..." - Retrieval: 100%
+  ✓ conv-42_q248: "What did Nate find in old notebooks..." - Retrieval: 100%
+  ✓ conv-42_q249: "What game is Joanna currently playi..." - Retrieval: 100%
+  ✓ conv-42_q250: "What did Nate receive from his brot..." - Retrieval: 100%
+  ✓ conv-42_q251: "What is the type of game "Xenoblade..." - Retrieval: 100%
+  ✓ conv-42_q252: "What project is Nate working on in ..." - Retrieval: 100%
+  ✓ conv-42_q253: "What is Joanna creating for YouTube..." - Retrieval: 100%
+  ✓ conv-42_q254: "What inspired Joanna to start makin..." - Retrieval: 100%
+  ✓ conv-42_q255: "What new content is Nate creating f..." - Retrieval: 100%
+  ✓ conv-42_q256: "What did Nate take a picture of nea..." - Retrieval: 100%
+  ✓ conv-42_q257: "Why did Joanna get a third turtle?..." - Retrieval: 100%
+  ✓ conv-42_q258: "What did Joanna take to the beach i..." - Retrieval: 100%
+  ✓ conv-42_q259: "What does Joanna love most about ha..." - Retrieval: 100%
+  ✓ conv-43_q0: "what are John's goals with regards ..." - Retrieval: 67%
+  ✓ conv-43_q1: "What are John's goals for his caree..." - Retrieval: 100%
+  ✓ conv-43_q2: "What items does John collect?..." - Retrieval: 67%
+  ✗ conv-43_q3: "Would Tim enjoy reading books by C...." - Retrieval: 0%
+  ✓ conv-43_q4: "What books has Tim read?..." - Retrieval: 14%
+  ✗ conv-43_q5: "Based on Tim's collections, what is..." - Retrieval: 0%
+  ✓ conv-43_q6: "In which month's game did John achi..." - Retrieval: 100%
+  ✓ conv-43_q7: "Which geographical locations has Ti..." - Retrieval: 33%
+  ✓ conv-43_q8: "Which outdoor gear company likely s..." - Retrieval: 100%
+  ✓ conv-43_q9: "Which endorsement deals has John be..." - Retrieval: 67%
+  ✓ conv-43_q10: "When was John in Seattle for a game..." - Retrieval: 50%
+  ✗ conv-43_q11: "What sports does John like besides ..." - Retrieval: 0%
+  ✓ conv-43_q12: "What year did John start surfing?..." - Retrieval: 100%
+  ✓ conv-43_q13: "What does Tim do to escape reality?..." - Retrieval: 50%
+  ✓ conv-43_q14: "What kind of writing does Tim do?..." - Retrieval: 33%
+  ✓ conv-43_q15: "Who is Anthony?..." - Retrieval: 100%
+  ✓ conv-43_q16: "After how many weeks did Tim reconn..." - Retrieval: 50%
+  ✓ conv-43_q17: "How many games has John mentioned w..." - Retrieval: 60%
+  ✓ conv-43_q18: "What authors has Tim read books fro..." - Retrieval: 33%
+  ✓ conv-43_q19: "What is a prominent charity organiz..." - Retrieval: 50%
+  ✓ conv-43_q20: "Which city was John in before trave..." - Retrieval: 33%
+  ✓ conv-43_q21: "Which US cities does John mention v..." - Retrieval: 33%
+  ✓ conv-43_q22: "When did John meet with his teammat..." - Retrieval: 100%
+  ✓ conv-43_q23: "When is Tim attending a book confer..." - Retrieval: 100%
+  ✗ conv-43_q24: "Where was John between August 11 an..." - Retrieval: 0%
+  ✗ conv-43_q25: "What similar sports collectible do ..." - Retrieval: 0%
+  ✓ conv-43_q26: "Which TV series does Tim mention wa..." - Retrieval: 50%
+  ✓ conv-43_q27: "Which popular time management techn..." - Retrieval: 100%
+  ✓ conv-43_q28: "Which popular music composer's tune..." - Retrieval: 100%
+  ✓ conv-43_q29: "What schools did John play basketba..." - Retrieval: 100%
+  ✓ conv-43_q30: "Which cities has John been to?..." - Retrieval: 25%
+  ✓ conv-43_q31: "What month did Tim plan on going to..." - Retrieval: 100%
+  ✓ conv-43_q32: "Which US states might Tim be in dur..." - Retrieval: 100%
+  ✓ conv-43_q33: "When does John plan on traveling wi..." - Retrieval: 100%
+  ✓ conv-43_q34: "What could John do after his basket..." - Retrieval: 33%
+  ✗ conv-43_q35: "What outdoor activities does John e..." - Retrieval: 0%
+  ✓ conv-43_q36: "Who is Tim and John's favorite bask..." - Retrieval: 100%
+  ✓ conv-43_q37: "Which week did Tim visit the UK for..." - Retrieval: 100%
+  ✗ conv-43_q38: "which country has Tim visited most ..." - Retrieval: 0%
+  ✓ conv-43_q39: "What year did Tim go to the Smoky M..." - Retrieval: 100%
+  ✓ conv-43_q40: "Has Tim been to North Carolina and/..." - Retrieval: 100%
+  ✗ conv-43_q41: "What kind of fiction stories does T..." - Retrieval: 0%
+  ✗ conv-43_q42: "What has John cooked?..." - Retrieval: 0%
+  ✓ conv-43_q43: "What does John like about Lebron Ja..." - Retrieval: 100%
+  ✓ conv-43_q44: "When did John and his wife go on a ..." - Retrieval: 100%
+  ✓ conv-43_q45: "Which country was Tim visiting in t..." - Retrieval: 100%
+  ✓ conv-43_q46: "Where was Tim in the week before 16..." - Retrieval: 100%
+  ✓ conv-43_q47: "When did John get married at a gree..." - Retrieval: 100%
+  ✓ conv-43_q48: "When did John get an ankle injury i..." - Retrieval: 100%
+  ✗ conv-43_q49: "How many times has John injured his..." - Retrieval: 0%
+  ✓ conv-43_q50: "Which book was John reading during ..." - Retrieval: 100%
+  ✓ conv-43_q51: "What kind of yoga for building core..." - Retrieval: 100%
+  ✓ conv-43_q52: "What does John do to supplement his..." - Retrieval: 50%
+  ✓ conv-43_q53: "What other exercises can help John ..." - Retrieval: 50%
+  ✓ conv-43_q54: "When did John take a trip to the Ro..." - Retrieval: 100%
+  ✓ conv-43_q55: "When did John start playing profess..." - Retrieval: 50%
+  ✓ conv-43_q56: "When did Tim start playing the viol..." - Retrieval: 100%
+  ✓ conv-43_q57: "What instruments does Tim play?..." - Retrieval: 100%
+  ✓ conv-43_q58: "When did John attend the Harry Pott..." - Retrieval: 100%
+  ✓ conv-43_q59: "Which career-high performances did ..." - Retrieval: 50%
+  ✓ conv-43_q60: "When did John achieve a career-high..." - Retrieval: 100%
+  ✓ conv-43_q61: "What books has John read?..." - Retrieval: 60%
+  ✓ conv-43_q62: "What does John do to share his know..." - Retrieval: 100%
+  ✓ conv-43_q63: "When did John organize a basketball..." - Retrieval: 100%
+  ✓ conv-43_q64: "Which month was John in Italy?..." - Retrieval: 100%
+  ✓ conv-43_q65: "What fantasy movies does Tim like?..." - Retrieval: 100%
+  ✓ conv-43_q66: "What is a Star Wars book that Tim m..." - Retrieval: 100%
+  ✓ conv-43_q67: "What would be a good hobby related ..." - Retrieval: 25%
+  ✓ conv-43_q68: "What day did Tim get into his study..." - Retrieval: 100%
+  ✓ conv-43_q69: "When will Tim leave for Ireland?..." - Retrieval: 100%
+  ✓ conv-43_q70: "Which Star Wars-related locations w..." - Retrieval: 67%
+  ✓ conv-43_q71: "Which team did John sign with on 21..." - Retrieval: 100%
+  ✓ conv-43_q72: "What is John's position on the team..." - Retrieval: 100%
+  ✓ conv-43_q73: "What challenge did John encounter d..." - Retrieval: 100%
+  ✓ conv-43_q74: "What aspects of the Harry Potter un..." - Retrieval: 100%
+  ✓ conv-43_q75: "What forum did Tim join recently?..." - Retrieval: 100%
+  ✓ conv-43_q76: "What kind of picture did Tim share ..." - Retrieval: 100%
+  ✓ conv-43_q77: "What was the highest number of poin..." - Retrieval: 100%
+  ✓ conv-43_q78: "What did John celebrate at a restau..." - Retrieval: 100%
+  ✓ conv-43_q79: "What kind of deals did John sign wi..." - Retrieval: 100%
+  ✓ conv-43_q80: "Which city is John excited to have ..." - Retrieval: 100%
+  ✓ conv-43_q81: "How long has John been surfing?..." - Retrieval: 100%
+  ✓ conv-43_q82: "How does John feel while surfing?..." - Retrieval: 100%
+  ✓ conv-43_q83: "What kind of articles has Tim been ..." - Retrieval: 100%
+  ✓ conv-43_q84: "Which two fantasy novels does Tim p..." - Retrieval: 100%
+  ✓ conv-43_q85: "What did Anthony and John end up pl..." - Retrieval: 100%
+  ✓ conv-43_q86: "What did John share with the person..." - Retrieval: 100%
+  ✓ conv-43_q87: "How did John describe the team bond..." - Retrieval: 100%
+  ✗ conv-43_q88: "How did John get introduced to bask..." - Retrieval: 0%
+  ✓ conv-43_q89: "What is John's number one goal in h..." - Retrieval: 100%
+  ✓ conv-43_q90: "What organization is John teaming u..." - Retrieval: 100%
+  ✓ conv-43_q91: "When did John meet back up with his..." - Retrieval: 100%
+  ✓ conv-43_q92: "What did John's teammates give him ..." - Retrieval: 100%
+  ✓ conv-43_q93: "Why did John's teammates sign the b..." - Retrieval: 100%
+  ✓ conv-43_q94: "What is the main intention behind T..." - Retrieval: 100%
+  ✗ conv-43_q95: "What new activity has Tim started l..." - Retrieval: 0%
+  ✓ conv-43_q96: "Which movie's theme is Tim's favori..." - Retrieval: 100%
+  ✓ conv-43_q97: "What special memory does "Harry Pot..." - Retrieval: 100%
+  ✓ conv-43_q98: "Which movie does Tim mention they e..." - Retrieval: 100%
+  ✓ conv-43_q99: "What tradition does Tim mention the..." - Retrieval: 100%
+  ✓ conv-43_q100: "How long did John and his high scho..." - Retrieval: 100%
+  ✓ conv-43_q101: "How was John's experience in New Yo..." - Retrieval: 100%
+  ✓ conv-43_q102: "What did John say about NYC, entici..." - Retrieval: 100%
+  ✓ conv-43_q103: "What kind of soup did John make rec..." - Retrieval: 100%
+  ✓ conv-43_q104: "What spice did John add to the soup..." - Retrieval: 100%
+  ✓ conv-43_q105: "What is Tim excited to see at Unive..." - Retrieval: 100%
+  ✓ conv-43_q106: "Where are John and his teammates pl..." - Retrieval: 100%
+  ✓ conv-43_q107: "What city did Tim suggest to John f..." - Retrieval: 100%
+  ✓ conv-43_q108: "What does John want to do after his..." - Retrieval: 100%
+  ✓ conv-43_q109: "What advice did Tim give John about..." - Retrieval: 100%
+  ✓ conv-43_q110: "What book recommendation did Tim gi..." - Retrieval: 100%
+  ✓ conv-43_q111: "What type of venue did John and his..." - Retrieval: 100%
+  ✓ conv-43_q112: "What was the setting for John and h..." - Retrieval: 100%
+  ✓ conv-43_q113: "Which basketball team does Tim supp..." - Retrieval: 100%
+  ✓ conv-43_q114: "What passion does Tim mention conne..." - Retrieval: 100%
+  ✗ conv-43_q115: "How does John describe the game sea..." - Retrieval: 0%
+  ✓ conv-43_q116: "How does John say his team handles ..." - Retrieval: 100%
+  ✗ conv-43_q117: "What motivates John's team to get b..." - Retrieval: 0%
+  ✓ conv-43_q118: "What did John's team win at the end..." - Retrieval: 100%
+  ✗ conv-43_q119: "Where did Tim capture the photograp..." - Retrieval: 0%
+  ✓ conv-43_q120: "How does John feel about being seen..." - Retrieval: 100%
+  ✓ conv-43_q121: "What does John find rewarding about..." - Retrieval: 100%
+  ✓ conv-43_q122: "What has John been able to help the..." - Retrieval: 100%
+  ✓ conv-43_q123: "What genre is the novel that Tim is..." - Retrieval: 100%
+  ✓ conv-43_q124: "Who is one of Tim's sources of insp..." - Retrieval: 100%
+  ✓ conv-43_q125: "What J.K. Rowling quote does Tim re..." - Retrieval: 100%
+  ✓ conv-43_q126: "What does John write on the whitebo..." - Retrieval: 100%
+  ✓ conv-43_q127: "What hobby is a therapy for John wh..." - Retrieval: 100%
+  ✓ conv-43_q128: "What type of meal does John often c..." - Retrieval: 100%
+  ✓ conv-43_q129: "How will John share the honey garli..." - Retrieval: 100%
+  ✓ conv-43_q130: "What was Tim's huge writing issue l..." - Retrieval: 100%
+  ✓ conv-43_q131: "What does Tim have that serves as a..." - Retrieval: 100%
+  ✓ conv-43_q132: "Why do Tim and John find LeBron ins..." - Retrieval: 100%
+  ✓ conv-43_q133: "How did John describe the views dur..." - Retrieval: 100%
+  ✓ conv-43_q134: "What is one of Tim's favorite fanta..." - Retrieval: 100%
+  ✓ conv-43_q135: "How does Tim stay motivated during ..." - Retrieval: 100%
+  ✓ conv-43_q136: "What did Tim say about his injury o..." - Retrieval: 100%
+  ✓ conv-43_q137: "What was the setback Tim faced in h..." - Retrieval: 100%
+  ✓ conv-43_q138: "How did John overcome his ankle inj..." - Retrieval: 100%
+  ✓ conv-43_q139: "What motivated Tim to keep pushing ..." - Retrieval: 100%
+  ✓ conv-43_q140: "How did John overcome a mistake he ..." - Retrieval: 100%
+  ✓ conv-43_q141: "What book did John recently finish ..." - Retrieval: 100%
+  ✓ conv-43_q142: "How did "The Alchemist" impact John..." - Retrieval: 100%
+  ✓ conv-43_q143: "What is John trying out to improve ..." - Retrieval: 100%
+  ✓ conv-43_q144: "How long does John usually hold the..." - Retrieval: 100%
+  ✓ conv-43_q145: "Where was the forest picture shared..." - Retrieval: 100%
+  ✓ conv-43_q146: "What did Tim recently start learnin..." - Retrieval: 100%
+  ✓ conv-43_q147: "What instrument is Tim learning to ..." - Retrieval: 100%
+  ✓ conv-43_q148: "How long has Tim been playing the p..." - Retrieval: 100%
+  ✓ conv-43_q149: "What book did Tim just finish readi..." - Retrieval: 100%
+  ✓ conv-43_q150: "Which book did Tim recommend to Joh..." - Retrieval: 100%
+  ✓ conv-43_q151: "What is the topic of discussion bet..." - Retrieval: 100%
+  ✓ conv-43_q152: "What kind of game did John have a c..." - Retrieval: 100%
+  ✓ conv-43_q153: "What was John's way of dealing with..." - Retrieval: 100%
+  ✓ conv-43_q154: "How did John feel about the atmosph..." - Retrieval: 100%
+  ✓ conv-43_q155: "How did John feel after being able ..." - Retrieval: 100%
+  ✓ conv-43_q156: "What kind of deal did John get in D..." - Retrieval: 100%
+  ✓ conv-43_q157: "Where was the photoshoot done for J..." - Retrieval: 100%
+  ✓ conv-43_q158: "In which area has John's team seen ..." - Retrieval: 100%
+  ✓ conv-43_q159: "What type of seminars is John condu..." - Retrieval: 100%
+  ✓ conv-43_q160: "What activity did Tim do after read..." - Retrieval: 100%
+  ✓ conv-43_q161: "What is one cause that John support..." - Retrieval: 100%
+  ✓ conv-43_q162: "What new fantasy TV series is Tim e..." - Retrieval: 100%
+  ✓ conv-43_q163: "Which language is Tim learning?..." - Retrieval: 100%
+  ✓ conv-43_q164: "What language does Tim know besides..." - Retrieval: 100%
+  ✓ conv-43_q165: "What book did Tim get in Italy that..." - Retrieval: 100%
+  ✓ conv-43_q166: "What is John's favorite book series..." - Retrieval: 100%
+  ✓ conv-43_q167: "According to John, who is his favor..." - Retrieval: 100%
+  ✓ conv-43_q168: "Why does John like Aragorn from Lor..." - Retrieval: 100%
+  ✓ conv-43_q169: "What kind of painting does John hav..." - Retrieval: 100%
+  ✓ conv-43_q170: "What is the painting of Aragorn a r..." - Retrieval: 100%
+  ✓ conv-43_q171: "What map does Tim show to his frien..." - Retrieval: 100%
+  ✓ conv-43_q172: "Where will Tim be going for a semes..." - Retrieval: 100%
+  ✓ conv-43_q173: "Which city in Ireland will Tim be s..." - Retrieval: 100%
+  ✓ conv-43_q174: "What charity event did John organiz..." - Retrieval: 100%
+  ✗ conv-43_q175: "What achievement did John share wit..." - Retrieval: 0%
+  ✓ conv-43_q176: "What was Johns's reaction to sealin..." - Retrieval: 100%
+  ✗ conv-43_q177: "Which city did John recommend to Ti..." - Retrieval: 0%
+  ✓ conv-43_q178: "Which team did Tim sign with on 21 ..." - Retrieval: 100%
+  ✓ conv-43_q179: "What is Tim's position on the team ..." - Retrieval: 100%
+  ✓ conv-43_q180: "What challenge did Tim encounter du..." - Retrieval: 100%
+  ✗ conv-43_q181: "What cult did Tim join recently?..." - Retrieval: 0%
+  ✓ conv-43_q182: "What was the highest number of poin..." - Retrieval: 100%
+  ✓ conv-43_q183: "What did Tim celebrate at a restaur..." - Retrieval: 100%
+  ✓ conv-43_q184: "What kind of deals did Tim sign wit..." - Retrieval: 100%
+  ✓ conv-43_q185: "How does Tim feel while surfing?..." - Retrieval: 100%
+  ✓ conv-43_q186: "What kind of articles has John been..." - Retrieval: 100%
+  ✓ conv-43_q187: "Which two mystery novels does Tim p..." - Retrieval: 100%
+  ✓ conv-43_q188: "What did Anthony and Tim end up pla..." - Retrieval: 100%
+  ✗ conv-43_q189: "How did Tim get introduced to baske..." - Retrieval: 0%
+  ✓ conv-43_q190: "What is Tim's number one goal in hi..." - Retrieval: 100%
+  ✓ conv-43_q191: "What organization is Tim teaming up..." - Retrieval: 100%
+  ✓ conv-43_q192: "What did Tim's teammates give him w..." - Retrieval: 100%
+  ✓ conv-43_q193: "Why did John's teammates sign the f..." - Retrieval: 100%
+  ✓ conv-43_q194: "What is the main intention behind J..." - Retrieval: 100%
+  ✗ conv-43_q195: "What new activity has John started ..." - Retrieval: 0%
+  ✓ conv-43_q196: "What special memory does "Fifty Sha..." - Retrieval: 100%
+  ✓ conv-43_q197: "Which movie does John mention they ..." - Retrieval: 100%
+  ✓ conv-43_q198: "What tradition does Tim mention the..." - Retrieval: 100%
+  ✓ conv-43_q199: "How long did Tim and his high schoo..." - Retrieval: 100%
+  ✓ conv-43_q200: "How was Tim's experience in New Yor..." - Retrieval: 100%
+  ✓ conv-43_q201: "What spice did Tim add to the soup ..." - Retrieval: 100%
+  ✗ conv-43_q202: "What is Tim excited to see at Disne..." - Retrieval: 0%
+  ✓ conv-43_q203: "Where are John and his teammates pl..." - Retrieval: 100%
+  ✓ conv-43_q204: "What does Tim want to do after his ..." - Retrieval: 100%
+  ✓ conv-43_q205: "What type of venue did John and his..." - Retrieval: 100%
+  ✓ conv-43_q206: "What passion does John mention conn..." - Retrieval: 100%
+  ✓ conv-43_q207: "How does Tim say his team handles t..." - Retrieval: 100%
+  ✗ conv-43_q208: "Where did Tim capture the painting ..." - Retrieval: 0%
+  ✓ conv-43_q209: "What does Tim find rewarding about ..." - Retrieval: 100%
+  ✓ conv-43_q210: "What has Tim been able to help the ..." - Retrieval: 100%
+  ✓ conv-43_q211: "What genre is the novel that John i..." - Retrieval: 100%
+  ✓ conv-43_q212: "Who is one of Tim's sources of insp..." - Retrieval: 100%
+  ✓ conv-43_q213: "What does Tim write on the whiteboa..." - Retrieval: 100%
+  ✓ conv-43_q214: "What hobby is a therapy for Tim whe..." - Retrieval: 100%
+  ✓ conv-43_q215: "What type of meal does Tim often co..." - Retrieval: 100%
+  ✓ conv-43_q216: "How will Tim share the honey garlic..." - Retrieval: 100%
+  ✗ conv-43_q217: "What is one of Tim's favorite crime..." - Retrieval: 0%
+  ✓ conv-43_q218: "What was the setback Tim faced in h..." - Retrieval: 100%
+  ✓ conv-43_q219: "How did Tim overcome his ankle inju..." - Retrieval: 100%
+  ✓ conv-43_q220: "What motivated John to keep pushing..." - Retrieval: 100%
+  ✓ conv-43_q221: "How did Tim overcome a mistake he m..." - Retrieval: 100%
+  ✓ conv-43_q222: "What is Tim trying out to improve h..." - Retrieval: 100%
+  ✓ conv-43_q223: "What did John recently start learni..." - Retrieval: 100%
+  ✓ conv-43_q224: "What instrument is John learning to..." - Retrieval: 100%
+  ✓ conv-43_q225: "How long has John been playing the ..." - Retrieval: 100%
+  ✗ conv-43_q226: "What movie did Tim just finish watc..." - Retrieval: 0%
+  ✓ conv-43_q227: "What kind of game did Tim have a ca..." - Retrieval: 100%
+  ✓ conv-43_q228: "What was Tim's way of dealing with ..." - Retrieval: 100%
+  ✓ conv-43_q229: "Where was the photoshoot done for J..." - Retrieval: 100%
+  ✓ conv-43_q230: "In which area has Tim's team seen t..." - Retrieval: 100%
+  ✓ conv-43_q231: "What type of seminars is Tim conduc..." - Retrieval: 100%
+  ✓ conv-43_q232: "What is one cause that John opposes..." - Retrieval: 100%
+  ✓ conv-43_q233: "What new fantasy TV series is John ..." - Retrieval: 100%
+  ✓ conv-43_q234: "Which language is John learning?..." - Retrieval: 100%
+  ✓ conv-43_q235: "According to John, who is his least..." - Retrieval: 100%
+  ✓ conv-43_q236: "Why does Tim like Aragorn from Lord..." - Retrieval: 100%
+  ✓ conv-43_q237: "What kind of painting does Tim have..." - Retrieval: 100%
+  ✓ conv-43_q238: "What is the sculpture of Aragorn a ..." - Retrieval: 100%
+  ✓ conv-43_q239: "Which city in Ireland will John be ..." - Retrieval: 100%
+  ✓ conv-43_q240: "What charity event did Tim organize..." - Retrieval: 100%
+  ✓ conv-43_q241: "What was Tims's reaction to sealing..." - Retrieval: 100%
+  ✗ conv-44_q0: "Which year did Audrey adopt the fir..." - Retrieval: 0%
+  ✓ conv-44_q1: "When did Andrew start his new job a..." - Retrieval: 100%
+  ✗ conv-44_q2: "What kind of indoor activities has ..." - Retrieval: 0%
+  ✓ conv-44_q3: "What kind of places have Andrew and..." - Retrieval: 14%
+  ✓ conv-44_q4: "When did Audrey make muffins for he..." - Retrieval: 100%
+  ✓ conv-44_q5: "When did Audrey see a hummingbird?..." - Retrieval: 100%
+  ✓ conv-44_q6: "When did Audrey adopt Pixie?..." - Retrieval: 100%
+  ✓ conv-44_q7: "How many years passed between Audre..." - Retrieval: 50%
+  ✗ conv-44_q8: "Did Andrew have a pet dog during Ma..." - Retrieval: 0%
+  ✓ conv-44_q9: "What kind of classes or groups has ..." - Retrieval: 60%
+  ✓ conv-44_q10: "When did Audrey's positive reinforc..." - Retrieval: 100%
+  ✓ conv-44_q11: "When did Andrew go rock climbing?..." - Retrieval: 100%
+  ✓ conv-44_q12: "What outdoor activities has Andrew ..." - Retrieval: 67%
+  ✓ conv-44_q13: "When did Audrey move to a new place..." - Retrieval: 100%
+  ✓ conv-44_q14: "What is something that Andrew reall..." - Retrieval: 50%
+  ✗ conv-44_q15: "What is a shared frustration regard..." - Retrieval: 0%
+  ✓ conv-44_q16: "When is Andrew going to go hiking w..." - Retrieval: 100%
+  ✓ conv-44_q17: "How many times did Audrey and Andew..." - Retrieval: 33%
+  ✓ conv-44_q18: "Where did Audrey get Pixie from?..." - Retrieval: 50%
+  ✗ conv-44_q19: "What is an indoor activity that And..." - Retrieval: 0%
+  ✗ conv-44_q20: "Which meat does Audrey prefer eatin..." - Retrieval: 0%
+  ✓ conv-44_q21: "What are the classes that Audrey to..." - Retrieval: 33%
+  ✓ conv-44_q22: "Where did Andrew go during the firs..." - Retrieval: 100%
+  ✓ conv-44_q23: "What are some problems that Andrew ..." - Retrieval: 50%
+  ✗ conv-44_q24: "Did Audrey and Andrew grow up with ..." - Retrieval: 0%
+  ✓ conv-44_q25: "When did Andrew and his girlfriend ..." - Retrieval: 100%
+  ✗ conv-44_q26: "What is the biggest stressor in And..." - Retrieval: 0%
+  ✓ conv-44_q27: "How does Andrew feel about his curr..." - Retrieval: 25%
+  ✓ conv-44_q28: "What is something that Audrey often..." - Retrieval: 50%
+  ✓ conv-44_q29: "What are the names of Audrey's dogs..." - Retrieval: 33%
+  ✓ conv-44_q30: "When is Andrew planning to go to th..." - Retrieval: 100%
+  ✓ conv-44_q31: "What has Andrew done with his dogs?..." - Retrieval: 100%
+  ✓ conv-44_q32: "What kind of tattoo does Audrey hav..." - Retrieval: 100%
+  ✓ conv-44_q33: "What can Andrew potentially do to i..." - Retrieval: 33%
+  ✓ conv-44_q34: "How many months passed between Andr..." - Retrieval: 50%
+  ✓ conv-44_q35: "What are the names of Andrew's dogs..." - Retrieval: 67%
+  ✓ conv-44_q36: "What are some foods that Audrey lik..." - Retrieval: 67%
+  ✓ conv-44_q37: "When did Audrey get into an acciden..." - Retrieval: 100%
+  ✓ conv-44_q38: "When did Andrew and his girlfriend ..." - Retrieval: 100%
+  ✗ conv-44_q39: "What did Audrey get wtih having so ..." - Retrieval: 0%
+  ✓ conv-44_q40: "What is a good place for dogs to ru..." - Retrieval: 33%
+  ✓ conv-44_q41: "What are the breeds of Audrey's dog..." - Retrieval: 50%
+  ✓ conv-44_q42: "What technique is Audrey using to d..." - Retrieval: 50%
+  ✗ conv-44_q43: "Which US state do Audrey and Andrew..." - Retrieval: 0%
+  ✓ conv-44_q44: "Which national park could Audrey an..." - Retrieval: 50%
+  ✓ conv-44_q45: "How many pets will Andrew have, as ..." - Retrieval: 67%
+  ✓ conv-44_q46: "How many pets did Andrew have, as o..." - Retrieval: 50%
+  ✓ conv-44_q47: "How many months passed between Andr..." - Retrieval: 100%
+  ✓ conv-44_q48: "What does Andrew view his pets as?..." - Retrieval: 50%
+  ✗ conv-44_q49: "What does Audrey view her pets as?..." - Retrieval: 0%
+  ✓ conv-44_q50: "What is a skill that Audrey learned..." - Retrieval: 50%
+  ✗ conv-44_q51: "What items has Audrey bought or mad..." - Retrieval: 0%
+  ✓ conv-44_q52: "What is something that Andrew could..." - Retrieval: 33%
+  ✗ conv-44_q53: "What is a career that Andrew could ..." - Retrieval: 0%
+  ✓ conv-44_q54: "What activity do Audrey's dogs like..." - Retrieval: 40%
+  ✗ conv-44_q55: "When did Andrew make his dogs a fun..." - Retrieval: 0%
+  ✗ conv-44_q56: "Has Andrew moved into a new apartme..." - Retrieval: 0%
+  ✓ conv-44_q57: "When did Andrew adopt Scout?..." - Retrieval: 100%
+  ✓ conv-44_q58: "What did Audrey eat for dinner on O..." - Retrieval: 100%
+  ✗ conv-44_q59: "How long has it been since Andrew a..." - Retrieval: 0%
+  ✓ conv-44_q60: "How many dogs does Andrew have?..." - Retrieval: 67%
+  ✓ conv-44_q61: "Which specific type of bird mesmeri..." - Retrieval: 100%
+  ✓ conv-44_q62: "What did Andrew express missing abo..." - Retrieval: 100%
+  ✓ conv-44_q63: "What kind of pastries did Andrew an..." - Retrieval: 100%
+  ✓ conv-44_q64: "What kind of flowers does Audrey ha..." - Retrieval: 100%
+  ✓ conv-44_q65: "What does Audrey do during dog play..." - Retrieval: 100%
+  ✓ conv-44_q66: "What type of dog was Andrew looking..." - Retrieval: 100%
+  ✓ conv-44_q67: "Where does Andrew want to live to g..." - Retrieval: 100%
+  ✓ conv-44_q68: "Why did Audrey sign up for a worksh..." - Retrieval: 100%
+  ✓ conv-44_q69: "How did Audrey hear about the works..." - Retrieval: 100%
+  ✓ conv-44_q70: "What type of training was the works..." - Retrieval: 100%
+  ✓ conv-44_q71: "How did Audrey describe she dog he ..." - Retrieval: 100%
+  ✓ conv-44_q72: "Why did Audrey think positive reinf..." - Retrieval: 100%
+  ✓ conv-44_q73: "What challenge is Andrew facing in ..." - Retrieval: 100%
+  ✓ conv-44_q74: "How does Andrew feel about their se..." - Retrieval: 100%
+  ✓ conv-44_q75: "What outdoor activities does Andrew..." - Retrieval: 100%
+  ✓ conv-44_q76: "How long does Audrey typically walk..." - Retrieval: 100%
+  ✓ conv-44_q77: "What did Audrey set up in the backy..." - Retrieval: 100%
+  ✓ conv-44_q78: "What did Audrey and her friends stu..." - Retrieval: 100%
+  ✓ conv-44_q79: "What is Audrey's favorite recipe th..." - Retrieval: 100%
+  ✓ conv-44_q80: "What dish is one of Audrey's favori..." - Retrieval: 100%
+  ✓ conv-44_q81: "What did Andrew and his GF do on th..." - Retrieval: 100%
+  ✓ conv-44_q82: "What is the name of Audrey's childh..." - Retrieval: 100%
+  ✓ conv-44_q83: "What special memories does Audrey h..." - Retrieval: 100%
+  ✓ conv-44_q84: "What are some of the personalities ..." - Retrieval: 100%
+  ✓ conv-44_q85: "What type of classes did Audrey sta..." - Retrieval: 100%
+  ✓ conv-44_q86: "How often does Audrey take her pups..." - Retrieval: 100%
+  ✓ conv-44_q87: "How long did the trail hike that Au..." - Retrieval: 100%
+  ✓ conv-44_q88: "What advice did Audrey give to Andr..." - Retrieval: 100%
+  ✓ conv-44_q89: "What is essential to keep the dogs ..." - Retrieval: 100%
+  ✓ conv-44_q90: "What did Audrey organize with the n..." - Retrieval: 100%
+  ✓ conv-44_q91: "What did Audrey do to give her dogs..." - Retrieval: 100%
+  ✓ conv-44_q92: "How does Audrey describe the new be..." - Retrieval: 100%
+  ✓ conv-44_q93: "How did Audrey calm down her dog af..." - Retrieval: 100%
+  ✓ conv-44_q94: "How often does Audrey take her dogs..." - Retrieval: 100%
+  ✓ conv-44_q95: "What kind of flowers does Audrey ta..." - Retrieval: 100%
+  ✓ conv-44_q96: "What did Andrew learn from reading ..." - Retrieval: 100%
+  ✓ conv-44_q97: "What did Andrew suggest as a way to..." - Retrieval: 100%
+  ✓ conv-44_q98: "How does Andrew suggest helping the..." - Retrieval: 100%
+  ✓ conv-44_q99: "What did Audrey do with her pups ov..." - Retrieval: 100%
+  ✓ conv-44_q100: "What was the reason Audrey couldn't..." - Retrieval: 100%
+  ✓ conv-44_q101: "What type of jewelry does Audrey ma..." - Retrieval: 100%
+  ✓ conv-44_q102: "Why does Audrey make jewelry out of..." - Retrieval: 100%
+  ✓ conv-44_q103: "What organization does Audrey donat..." - Retrieval: 100%
+  ✓ conv-44_q104: "How does Audrey help out the animal..." - Retrieval: 100%
+  ✓ conv-44_q105: "What type of games do Audrey's dogs..." - Retrieval: 100%
+  ✓ conv-44_q106: "What did Audrey make to thank her n..." - Retrieval: 100%
+  ✓ conv-44_q107: "How do Audrey's dogs react to snow?..." - Retrieval: 100%
+  ✓ conv-44_q108: "How does Audrey describe her dogs' ..." - Retrieval: 100%
+  ✗ conv-44_q109: "What kind of experiences are Audrey..." - Retrieval: 0%
+  ✓ conv-44_q110: "What activity do Andrew and Buddy e..." - Retrieval: 100%
+  ✓ conv-44_q111: "What do Andrew and Buddy like doing..." - Retrieval: 100%
+  ✓ conv-44_q112: "What cuisine did Andrew recently tr..." - Retrieval: 100%
+  ✓ conv-44_q113: "Which type of sushi did Audrey sugg..." - Retrieval: 100%
+  ✓ conv-44_q114: "What type of date is Andrew going o..." - Retrieval: 100%
+  ✓ conv-44_q115: "What did Andrew and Audrey plan to ..." - Retrieval: 100%
+  ✓ conv-44_q116: "What aspect of autumn does Andrew f..." - Retrieval: 100%
+  ✓ conv-44_q117: "What did Audrey do in November 2023..." - Retrieval: 100%
+  ✓ conv-44_q118: "How often does Audrey meet up with ..." - Retrieval: 100%
+  ✓ conv-44_q119: "What did Audrey share to show ways ..." - Retrieval: 100%
+  ✓ conv-44_q120: "What type of activities does Audrey..." - Retrieval: 100%
+  ✓ conv-44_q121: "What is Andrew planning to do with ..." - Retrieval: 100%
+  ✓ conv-44_q122: "What did Andrew get for Scout to cr..." - Retrieval: 100%
+  ✓ conv-44_q123: "Which specific type of bird mesmeri..." - Retrieval: 100%
+  ✓ conv-44_q124: "What kind of flowers does Andrew ha..." - Retrieval: 100%
+  ✓ conv-44_q125: "What type of dog was Audrey looking..." - Retrieval: 100%
+  ✓ conv-44_q126: "Why did Audrey sign up for a worksh..." - Retrieval: 100%
+  ✓ conv-44_q127: "How did Andrew hear about the works..." - Retrieval: 100%
+  ✓ conv-44_q128: "What type of training was the works..." - Retrieval: 100%
+  ✓ conv-44_q129: "How did Andrew describe the dog he ..." - Retrieval: 100%
+  ✓ conv-44_q130: "What challenge is Audrey facing in ..." - Retrieval: 100%
+  ✓ conv-44_q131: "What indoor activities does Andrew ..." - Retrieval: 100%
+  ✓ conv-44_q132: "What did Andrew set up in the backy..." - Retrieval: 100%
+  ✓ conv-44_q133: "What did Audrey and her GF do on th..." - Retrieval: 100%
+  ✓ conv-44_q134: "What is the name of Andrew's childh..." - Retrieval: 100%
+  ✓ conv-44_q135: "What special memories does Andrew h..." - Retrieval: 100%
+  ✓ conv-44_q136: "What are some of the personalities ..." - Retrieval: 100%
+  ✓ conv-44_q137: "What type of classes did Andrew sta..." - Retrieval: 100%
+  ✓ conv-44_q138: "What is essential to keep the dogs ..." - Retrieval: 100%
+  ✓ conv-44_q139: "What did Audrey organize with the n..." - Retrieval: 100%
+  ✓ conv-44_q140: "What did Andrew do to give his dogs..." - Retrieval: 100%
+  ✓ conv-44_q141: "How does Andrew describe the new be..." - Retrieval: 100%
+  ✓ conv-44_q142: "How did Andrew calm down his dog af..." - Retrieval: 100%
+  ✓ conv-44_q143: "How often does Andrew take his dogs..." - Retrieval: 100%
+  ✗ conv-44_q144: "What kind of vegetables does Audrey..." - Retrieval: 0%
+  ✓ conv-44_q145: "What did Andrew learn from reading ..." - Retrieval: 100%
+  ✓ conv-44_q146: "What was the reason Andrew couldn't..." - Retrieval: 100%
+  ✓ conv-44_q147: "What type of jewelry does Andrew ma..." - Retrieval: 100%
+  ✓ conv-44_q148: "Why does Andrew make jewelry out of..." - Retrieval: 100%
+  ✓ conv-44_q149: "What type of games do Andrew's dogs..." - Retrieval: 100%
+  ✓ conv-44_q150: "What did Andrew make to thank his n..." - Retrieval: 100%
+  ✓ conv-44_q151: "How do Andrew's dogs react to snow?..." - Retrieval: 100%
+  ✓ conv-44_q152: "How does Andrew describe his dogs' ..." - Retrieval: 100%
+  ✗ conv-44_q153: "What kind of experiences are Audrey..." - Retrieval: 0%
+  ✓ conv-44_q154: "What activity do Audrey and Buddy e..." - Retrieval: 100%
+  ✓ conv-44_q155: "What type of drink did Andrew recen..." - Retrieval: 100%
+  ✓ conv-44_q156: "Which type of pizza did Audrey sugg..." - Retrieval: 100%
+  ✓ conv-44_q157: "How often does Andrew meet up with ..." - Retrieval: 100%
+  ✗ conv-47_q0: "What are John's suspected health pr..." - Retrieval: 0%
+  ✓ conv-47_q1: "Which recreational activity was Jam..." - Retrieval: 100%
+  ✗ conv-47_q2: "Which places or events have John an..." - Retrieval: 0%
+  ✓ conv-47_q3: "Do both James and John have pets?..." - Retrieval: 50%
+  ✓ conv-47_q4: "When did John resume playing drums ..." - Retrieval: 100%
+  ✓ conv-47_q5: "What are John and James' favorite g..." - Retrieval: 100%
+  ✗ conv-47_q6: "Does James live in Connecticut?..." - Retrieval: 0%
+  ✓ conv-47_q7: "In which state is the shelter from ..." - Retrieval: 100%
+  ✓ conv-47_q8: "How many pets does James have?..." - Retrieval: 50%
+  ✓ conv-47_q9: "What are the names of James's dogs?..." - Retrieval: 50%
+  ✓ conv-47_q10: "When did James adopt Ned?..." - Retrieval: 100%
+  ✗ conv-47_q11: "How was John feeling on April 10, 2..." - Retrieval: 0%
+  ✗ conv-47_q12: "Did James have a girlfriend during ..." - Retrieval: 0%
+  ✓ conv-47_q13: "When did James visit Italy?..." - Retrieval: 100%
+  ✓ conv-47_q14: "When did James buy himself a new ad..." - Retrieval: 100%
+  ✓ conv-47_q15: "When did James start playing Civili..." - Retrieval: 100%
+  ✓ conv-47_q16: "What is the game with different col..." - Retrieval: 100%
+  ✓ conv-47_q17: "What is the board game where you ha..." - Retrieval: 100%
+  ✓ conv-47_q18: "Which books has John recommended to..." - Retrieval: 50%
+  ✗ conv-47_q19: "Was James feeling lonely before mee..." - Retrieval: 0%
+  ✓ conv-47_q20: "How many charity tournaments has Jo..." - Retrieval: 100%
+  ✓ conv-47_q21: "When did John first organize a char..." - Retrieval: 100%
+  ✓ conv-47_q22: "Who or which organizations have bee..." - Retrieval: 100%
+  ✓ conv-47_q23: "When will John start his new job?..." - Retrieval: 100%
+  ✗ conv-47_q24: "What kind of games has James tried ..." - Retrieval: 0%
+  ✓ conv-47_q25: "Are John and James fans of the same..." - Retrieval: 100%
+  ✓ conv-47_q26: "Which countries has James visited?..." - Retrieval: 100%
+  ✗ conv-47_q27: "What kind of classes has James join..." - Retrieval: 0%
+  ✓ conv-47_q28: "When did James volunteer at an orga..." - Retrieval: 100%
+  ✗ conv-47_q29: "When did James depart for his trip ..." - Retrieval: 0%
+  ✓ conv-47_q30: "Which country did James book ticket..." - Retrieval: 100%
+  ✗ conv-47_q31: "How many days did James plan to spe..." - Retrieval: 0%
+  ✓ conv-47_q32: "Where was James at on July 12, 2022..." - Retrieval: 100%
+  ✗ conv-47_q33: "Did John and James study together?..." - Retrieval: 0%
+  ✓ conv-47_q34: "Which countries did James visit in ..." - Retrieval: 100%
+  ✓ conv-47_q35: "What additional country did James v..." - Retrieval: 100%
+  ✓ conv-47_q36: "Who is Jill?..." - Retrieval: 100%
+  ✓ conv-47_q37: "When did John spend time with his s..." - Retrieval: 100%
+  ✗ conv-47_q38: "What happened to John's job situati..." - Retrieval: 0%
+  ✗ conv-47_q39: "When did John start his job in IT?..." - Retrieval: 0%
+  ✓ conv-47_q40: "What kind of tricks do James's pets..." - Retrieval: 33%
+  ✓ conv-47_q41: "When did James meet Samantha?..." - Retrieval: 100%
+  ✓ conv-47_q42: "When did James take his 3 dogs to t..." - Retrieval: 100%
+  ✓ conv-47_q43: "When did John plan his next meeting..." - Retrieval: 100%
+  ✓ conv-47_q44: "Why didn't John want to go to Starb..." - Retrieval: 100%
+  ✓ conv-47_q45: "What kind of beer does McGee's bar ..." - Retrieval: 100%
+  ✓ conv-47_q46: "When did John and James meet at McG..." - Retrieval: 100%
+  ✓ conv-47_q47: "When did James ask Samantha to be h..." - Retrieval: 100%
+  ✓ conv-47_q48: "When did James, Samantha and John g..." - Retrieval: 100%
+  ✓ conv-47_q49: "What gaming equipments did John buy..." - Retrieval: 100%
+  ✓ conv-47_q50: "When did James start taking cooking..." - Retrieval: 100%
+  ✓ conv-47_q51: "Which new games did John start play..." - Retrieval: 20%
+  ✓ conv-47_q52: "When did John start working on his ..." - Retrieval: 100%
+  ✓ conv-47_q53: "How long did it take for James to c..." - Retrieval: 100%
+  ✗ conv-47_q54: "What kind of programming-related ev..." - Retrieval: 0%
+  ✗ conv-47_q55: "When did John and his programming f..." - Retrieval: 0%
+  ✗ conv-47_q56: "Which of James's family members hav..." - Retrieval: 0%
+  ✓ conv-47_q57: "When did James' mother and her frie..." - Retrieval: 100%
+  ✓ conv-47_q58: "When did James try Cyberpunk 2077 g..." - Retrieval: 100%
+  ✓ conv-47_q59: "When did John and his gaming friend..." - Retrieval: 100%
+  ✓ conv-47_q60: "What games has John played with his..." - Retrieval: 100%
+  ✓ conv-47_q61: "What was James' big moment with Sam..." - Retrieval: 100%
+  ✓ conv-47_q62: "How long did James and Samantha dat..." - Retrieval: 100%
+  ✓ conv-47_q63: "When did James, his family and his ..." - Retrieval: 100%
+  ✓ conv-47_q64: "How long did John practice chess fo..." - Retrieval: 100%
+  ✓ conv-47_q65: "When did James and his family visit..." - Retrieval: 100%
+  ✓ conv-47_q66: "When did John work with a game deve..." - Retrieval: 100%
+  ✓ conv-47_q67: "What programming languages has Jame..." - Retrieval: 100%
+  ✓ conv-47_q68: "What type of mobile application doe..." - Retrieval: 100%
+  ✓ conv-47_q69: "How does James plan to make his dog..." - Retrieval: 100%
+  ✓ conv-47_q70: "What has John mostly found with the..." - Retrieval: 100%
+  ✓ conv-47_q71: "What did James offer to do for John..." - Retrieval: 100%
+  ✓ conv-47_q72: "What instrument is John learning to..." - Retrieval: 100%
+  ✓ conv-47_q73: "How long has John been playing the ..." - Retrieval: 100%
+  ✓ conv-47_q74: "What game did John play in an inten..." - Retrieval: 100%
+  ✓ conv-47_q75: "What game was James playing in the ..." - Retrieval: 100%
+  ✓ conv-47_q76: "How does James communicate with his..." - Retrieval: 100%
+  ✓ conv-47_q77: "What advice did James receive from ..." - Retrieval: 100%
+  ✗ conv-47_q78: "What did James adopt in April 2022?..." - Retrieval: 0%
+  ✓ conv-47_q79: "What is the name of the pup that wa..." - Retrieval: 100%
+  ✓ conv-47_q80: "Why did James embody the appearance..." - Retrieval: 100%
+  ✓ conv-47_q81: "What inspired James to create the g..." - Retrieval: 100%
+  ✓ conv-47_q82: "Which country did James visit in 20..." - Retrieval: 100%
+  ✓ conv-47_q83: "What impresses John about Japan?..." - Retrieval: 100%
+  ✓ conv-47_q84: "What kind of assignment was giving ..." - Retrieval: 100%
+  ✓ conv-47_q85: "What breed is Daisy, one of James' ..." - Retrieval: 100%
+  ✓ conv-47_q86: "What type of pizza is James' favori..." - Retrieval: 100%
+  ✓ conv-47_q87: "What type of pizza is John's favori..." - Retrieval: 100%
+  ✓ conv-47_q88: "What did John organize with his fri..." - Retrieval: 100%
+  ✓ conv-47_q89: "What did John and his friends do wi..." - Retrieval: 100%
+  ✓ conv-47_q90: "What was the main goal of the money..." - Retrieval: 100%
+  ✓ conv-47_q91: "What did the system John created he..." - Retrieval: 100%
+  ✓ conv-47_q92: "What did John create for the charit..." - Retrieval: 100%
+  ✓ conv-47_q93: "What did John receive for achieving..." - Retrieval: 100%
+  ✗ conv-47_q94: "What project is James working on in..." - Retrieval: 0%
+  ✓ conv-47_q95: "Who does James support in football ..." - Retrieval: 100%
+  ✓ conv-47_q96: "Which football club does John suppo..." - Retrieval: 100%
+  ✓ conv-47_q97: "What disagreement do James and John..." - Retrieval: 100%
+  ✓ conv-47_q98: "What is Max good at doing according..." - Retrieval: 100%
+  ✓ conv-47_q99: "What is the main focus of the organ..." - Retrieval: 100%
+  ✓ conv-47_q100: "Will there be an interview required..." - Retrieval: 100%
+  ✓ conv-47_q101: "How did John relax in his free time..." - Retrieval: 100%
+  ✓ conv-47_q102: "What did James enjoy doing on cold ..." - Retrieval: 100%
+  ✓ conv-47_q103: "What new hobby did James become int..." - Retrieval: 100%
+  ✓ conv-47_q104: "Where did James plan to visit after..." - Retrieval: 100%
+  ✓ conv-47_q105: "When did James plan to return from ..." - Retrieval: 100%
+  ✓ conv-47_q106: "What online game did John start pla..." - Retrieval: 100%
+  ✓ conv-47_q107: "What made John leave his IT job?..." - Retrieval: 100%
+  ✓ conv-47_q108: "Which game tournaments does John pl..." - Retrieval: 100%
+  ✓ conv-47_q109: "What happened to James's puppy duri..." - Retrieval: 100%
+  ✓ conv-47_q110: "What game genre did John start expl..." - Retrieval: 100%
+  ✓ conv-47_q111: "Which RPG game is John playing and ..." - Retrieval: 100%
+  ✓ conv-47_q112: "What aspect of "The Witcher 3" does..." - Retrieval: 100%
+  ✓ conv-47_q113: "Whose phone number did James receiv..." - Retrieval: 100%
+  ✓ conv-47_q114: "What is James planning to do after ..." - Retrieval: 100%
+  ✓ conv-47_q115: "What is John organizing with his si..." - Retrieval: 100%
+  ✓ conv-47_q116: "What type of beer does John not lik..." - Retrieval: 100%
+  ✓ conv-47_q117: "What were some difficulties James f..." - Retrieval: 100%
+  ✓ conv-47_q118: "What has John been teaching his sib..." - Retrieval: 100%
+  ✓ conv-47_q119: "What kind of programs are John's si..." - Retrieval: 100%
+  ✓ conv-47_q120: "Which company's headphones did John..." - Retrieval: 100%
+  ✓ conv-47_q121: "What did James and Samantha discove..." - Retrieval: 100%
+  ✓ conv-47_q122: "How much does James pay per cooking..." - Retrieval: 100%
+  ✓ conv-47_q123: "What did James learn to make in the..." - Retrieval: 100%
+  ✓ conv-47_q124: "Why did James sign up for a cooking..." - Retrieval: 100%
+  ✓ conv-47_q125: "What did James prepare for the firs..." - Retrieval: 100%
+  ✓ conv-47_q126: "What is the name of the board game ..." - Retrieval: 100%
+  ✗ conv-47_q127: "Where does James get his ideas from..." - Retrieval: 0%
+  ✗ conv-47_q128: "What kind of dream did James have r..." - Retrieval: 0%
+  ✓ conv-47_q129: "What kind of music does John like?..." - Retrieval: 100%
+  ✓ conv-47_q130: "What instrument did James used to p..." - Retrieval: 100%
+  ✓ conv-47_q131: "What did John use to play when he w..." - Retrieval: 100%
+  ✓ conv-47_q132: "What career milestone did John achi..." - Retrieval: 100%
+  ✓ conv-47_q133: "What type of game is John's upcomin..." - Retrieval: 100%
+  ✓ conv-47_q134: "What does John do to stay informed ..." - Retrieval: 100%
+  ✓ conv-47_q135: "What kind of gig was John offered a..." - Retrieval: 100%
+  ✓ conv-47_q136: "What does John feel about starting ..." - Retrieval: 100%
+  ✓ conv-47_q137: "What kind of games is James excited..." - Retrieval: 100%
+  ✓ conv-47_q138: "What inspired James to create his g..." - Retrieval: 100%
+  ✓ conv-47_q139: "What sparked James' passion for gam..." - Retrieval: 100%
+  ✓ conv-47_q140: "What did James lose progress on due..." - Retrieval: 100%
+  ✓ conv-47_q141: "What games were played at the gamin..." - Retrieval: 100%
+  ✓ conv-47_q142: "What was the purpose of the gaming ..." - Retrieval: 100%
+  ✓ conv-47_q143: "What decision did James and Samanth..." - Retrieval: 100%
+  ✓ conv-47_q144: "Where did James and Samantha decide..." - Retrieval: 100%
+  ✓ conv-47_q145: "Why did James and Samantha choose a..." - Retrieval: 100%
+  ✓ conv-47_q146: "What game is John hooked on playing..." - Retrieval: 100%
+  ✓ conv-47_q147: "What did John suggest James practic..." - Retrieval: 100%
+  ✓ conv-47_q148: "What project did John work on with ..." - Retrieval: 100%
+  ✓ conv-47_q149: "What is the name of John's cousin's..." - Retrieval: 100%
+  ✓ conv-47_q150: "What did John adopt in April 2022?..." - Retrieval: 100%
+  ✓ conv-47_q151: "What is the name of the kitten that..." - Retrieval: 100%
+  ✓ conv-47_q152: "What inspired John to create the ga..." - Retrieval: 100%
+  ✓ conv-47_q153: "Which country did John visit in 202..." - Retrieval: 100%
+  ✓ conv-47_q154: "What kind of assignment was giving ..." - Retrieval: 100%
+  ✓ conv-47_q155: "What did James and his friends do w..." - Retrieval: 100%
+  ✓ conv-47_q156: "What was the main goal of the money..." - Retrieval: 100%
+  ✓ conv-47_q157: "What did the system John created he..." - Retrieval: 100%
+  ✓ conv-47_q158: "What did James create for the chari..." - Retrieval: 100%
+  ✓ conv-47_q159: "Who does James support in cricket m..." - Retrieval: 100%
+  ✗ conv-47_q160: "What is Max good at doing according..." - Retrieval: 0%
+  ✓ conv-47_q161: "Will there be a background check re..." - Retrieval: 100%
+  ✓ conv-47_q162: "How did James relax in his free tim..." - Retrieval: 100%
+  ✓ conv-47_q163: "What new hobby did John become inte..." - Retrieval: 100%
+  ✓ conv-47_q164: "When did John plan to return from h..." - Retrieval: 100%
+  ✓ conv-47_q165: "What made James leave his IT job?..." - Retrieval: 100%
+  ✓ conv-47_q166: "Which game tournaments does James p..." - Retrieval: 100%
+  ✓ conv-47_q167: "What happened to James's kitten dur..." - Retrieval: 100%
+  ✗ conv-47_q168: "What aspect of "The Witcher 3" does..." - Retrieval: 0%
+  ✓ conv-47_q169: "What is John planning to do after r..." - Retrieval: 100%
+  ✓ conv-47_q170: "What has James been teaching his si..." - Retrieval: 100%
+  ✓ conv-47_q171: "How much does James pay per dance c..." - Retrieval: 100%
+  ✓ conv-47_q172: "What did James learn to make in the..." - Retrieval: 100%
+  ✓ conv-47_q173: "Why did James sign up for a ballet ..." - Retrieval: 100%
+  ✓ conv-47_q174: "What did John prepare for the first..." - Retrieval: 100%
+  ✓ conv-47_q175: "What is the name of the board game ..." - Retrieval: 100%
+  ✗ conv-47_q176: "Where does John get his ideas from?..." - Retrieval: 0%
+  ✓ conv-47_q177: "What did James use to play when he ..." - Retrieval: 100%
+  ✓ conv-47_q178: "What does James do to stay informed..." - Retrieval: 100%
+  ✓ conv-47_q179: "What kind of gig was James offered ..." - Retrieval: 100%
+  ✓ conv-47_q180: "What does James feel about starting..." - Retrieval: 100%
+  ✓ conv-47_q181: "What inspired James to create his p..." - Retrieval: 100%
+  ✓ conv-47_q182: "What games were played at the gamin..." - Retrieval: 100%
+  ✓ conv-47_q183: "What was the purpose of the gaming ..." - Retrieval: 100%
+  ✓ conv-47_q184: "What decision did John and Samantha..." - Retrieval: 100%
+  ✓ conv-47_q185: "Where did John and Samantha decide ..." - Retrieval: 100%
+  ✓ conv-47_q186: "Why did John and Samantha choose an..." - Retrieval: 100%
+  ✓ conv-47_q187: "What game is James hooked on playin..." - Retrieval: 100%
+  ✓ conv-47_q188: "What project did James work on with..." - Retrieval: 100%
+  ✓ conv-47_q189: "What is the name of James's cousin'..." - Retrieval: 100%
+  ✗ conv-48_q0: "What kind of project was Jolene wor..." - Retrieval: 0%
+  ✓ conv-48_q1: "Which of Deborah`s family and frien..." - Retrieval: 67%
+  ✓ conv-48_q2: "When did Deborah`s mother pass away..." - Retrieval: 100%
+  ✓ conv-48_q3: "When did Jolene`s mother pass away?..." - Retrieval: 100%
+  ✓ conv-48_q4: "When did Jolene's mom gift her a pe..." - Retrieval: 100%
+  ✓ conv-48_q5: "In what country did Jolene's mother..." - Retrieval: 100%
+  ✓ conv-48_q6: "What symbolic gifts do Deborah and ..." - Retrieval: 100%
+  ✓ conv-48_q7: "Which country were Jolene and her m..." - Retrieval: 100%
+  ✓ conv-48_q8: "What helped Deborah find peace when..." - Retrieval: 50%
+  ✓ conv-48_q9: "When did Deborah's father pass away..." - Retrieval: 100%
+  ✓ conv-48_q10: "When was Deborah's parents' wedding..." - Retrieval: 100%
+  ✓ conv-48_q11: "Is Deborah married?..." - Retrieval: 50%
+  ✓ conv-48_q12: "When did Deborah receive an appreci..." - Retrieval: 100%
+  ✓ conv-48_q13: "What places give Deborah peace?..." - Retrieval: 75%
+  ✓ conv-48_q14: "What were Deborah's mother's hobbie..." - Retrieval: 33%
+  ✓ conv-48_q15: "What pets does Jolene have?..." - Retrieval: 100%
+  ✓ conv-48_q16: "What are the names of Jolene's snak..." - Retrieval: 100%
+  ✓ conv-48_q17: "When did Jolene buy her pet Seraphi..." - Retrieval: 100%
+  ✓ conv-48_q18: "In what country did Jolene buy snak..." - Retrieval: 100%
+  ✓ conv-48_q19: "How many times has Jolene been to F..." - Retrieval: 50%
+  ✓ conv-48_q20: "Which games have Jolene and her par..." - Retrieval: 75%
+  ✓ conv-48_q21: "When do Jolene and her partner plan..." - Retrieval: 100%
+  ✓ conv-48_q22: "When did Deborah meet Anna?..." - Retrieval: 100%
+  ✓ conv-48_q23: "Why did Jolene sometimes put off do..." - Retrieval: 50%
+  ✓ conv-48_q24: "What new yoga poses did Deborah try..." - Retrieval: 100%
+  ✓ conv-48_q25: "What are Jolene's favorite books?..." - Retrieval: 100%
+  ✗ conv-48_q26: "Which book did Jolene read in Janua..." - Retrieval: 0%
+  ✓ conv-48_q27: "When was Jolene in Bogota?..." - Retrieval: 100%
+  ✗ conv-48_q28: "In what country was Jolene during s..." - Retrieval: 0%
+  ✓ conv-48_q29: "When did Jolene have a mini-retreat..." - Retrieval: 100%
+  ✓ conv-48_q30: "When did Jolene have a dinner and d..." - Retrieval: 100%
+  ✓ conv-48_q31: "When was the last photo of Deborah ..." - Retrieval: 100%
+  ✓ conv-48_q32: "When was Deborah in Bali?..." - Retrieval: 100%
+  ✗ conv-48_q33: "How long have Jolene and her partne..." - Retrieval: 0%
+  ✗ conv-48_q34: "Which year did Jolene and her partn..." - Retrieval: 0%
+  ✓ conv-48_q35: "When did Deborah go for her first m..." - Retrieval: 100%
+  ✓ conv-48_q36: "How old is Jolene?..." - Retrieval: 14%
+  ✓ conv-48_q37: "When did Jolene take Seraphim to th..." - Retrieval: 100%
+  ✓ conv-48_q38: "When did Deborah start the yoga cla..." - Retrieval: 100%
+  ✓ conv-48_q39: "What time management techniques do ..." - Retrieval: 100%
+  ✗ conv-48_q40: "Does Deborah live close to the beac..." - Retrieval: 0%
+  ✓ conv-48_q41: "What ways do Deborah and Jolene use..." - Retrieval: 100%
+  ✓ conv-48_q42: "What music pieces does Deborah list..." - Retrieval: 100%
+  ✗ conv-48_q43: "When did Deborah go for a bicycle r..." - Retrieval: 0%
+  ✓ conv-48_q44: "When did Deborah go to an art show ..." - Retrieval: 100%
+  ✗ conv-48_q45: "When did Jolene finish her robotics..." - Retrieval: 0%
+  ✓ conv-48_q46: "How long did Jolene work on the rob..." - Retrieval: 67%
+  ✓ conv-48_q47: "When did Jolene do yoga at Talkeetn..." - Retrieval: 100%
+  ✓ conv-48_q48: "Which US state did Jolene visit dur..." - Retrieval: 100%
+  ✓ conv-48_q49: "How long has Jolene been doing yoga..." - Retrieval: 100%
+  ✓ conv-48_q50: "Which year did Jolene start practic..." - Retrieval: 100%
+  ✓ conv-48_q51: "When did Jolene buy a new aquarium ..." - Retrieval: 100%
+  ✗ conv-48_q52: "When did Jolene lose a lot of progr..." - Retrieval: 0%
+  ✓ conv-48_q53: "When did Jolene adopt her snake Sus..." - Retrieval: 100%
+  ✓ conv-48_q54: "Which pet did Jolene adopt first - ..." - Retrieval: 100%
+  ✓ conv-48_q55: "Which pet did Jolene adopt more rec..." - Retrieval: 100%
+  ✓ conv-48_q56: "When did Deborah lead a meditation ..." - Retrieval: 100%
+  ✓ conv-48_q57: "When did Jolene gift her partner a ..." - Retrieval: 100%
+  ✓ conv-48_q58: "What games does Jolene recommend fo..." - Retrieval: 100%
+  ✓ conv-48_q59: "What do Deborah and her husband do ..." - Retrieval: 100%
+  ✓ conv-48_q60: "When did Deborah go to a yoga retre..." - Retrieval: 100%
+  ✗ conv-48_q61: "What projects is Jolene planning fo..." - Retrieval: 0%
+  ✓ conv-48_q62: "Where did Deborah get her cats?..." - Retrieval: 100%
+  ✓ conv-48_q63: "How old are Deborah's cats?..." - Retrieval: 100%
+  ✓ conv-48_q64: "Does Deborah like cats?..." - Retrieval: 100%
+  ✗ conv-48_q65: "Which country was Jolene located in..." - Retrieval: 0%
+  ✓ conv-48_q66: "When did Jolene and her partner ret..." - Retrieval: 100%
+  ✓ conv-48_q67: "What was Jolene doing with her part..." - Retrieval: 100%
+  ✗ conv-48_q68: "When did Deborah visit Brazil?..." - Retrieval: 0%
+  ✓ conv-48_q69: "Have Deborah and Jolene been to Rio..." - Retrieval: 100%
+  ✓ conv-48_q70: "Is the friend who wrote Deborah the..." - Retrieval: 100%
+  ✓ conv-48_q71: "When did Deborah go to a community ..." - Retrieval: 100%
+  ✗ conv-48_q72: "When did Jolene's parents give her ..." - Retrieval: 0%
+  ✓ conv-48_q73: "Did Jolene teach herself how to pla..." - Retrieval: 50%
+  ✓ conv-48_q74: "What do Deborah and Jolene plan to ..." - Retrieval: 100%
+  ✓ conv-48_q75: "What card game is Deborah talking a..." - Retrieval: 100%
+  ✓ conv-48_q76: "When did Jolene and her partner try..." - Retrieval: 100%
+  ✓ conv-48_q77: "Where did Jolene and her partner fi..." - Retrieval: 50%
+  ✓ conv-48_q78: "Where did Jolene and her partner sp..." - Retrieval: 100%
+  ✓ conv-48_q79: "Has Deborah tried surfing?..." - Retrieval: 50%
+  ✓ conv-48_q80: "Has Jolene tried surfing?..." - Retrieval: 100%
+  ✗ conv-48_q81: "When did the Deboran and Jolene agr..." - Retrieval: 0%
+  ✗ conv-48_q82: "Which locations does Deborah practi..." - Retrieval: 0%
+  ✓ conv-48_q83: "What kind of professional activitie..." - Retrieval: 50%
+  ✓ conv-48_q84: "What kind of engineering projects h..." - Retrieval: 25%
+  ✓ conv-48_q85: "Which community activities have Deb..." - Retrieval: 100%
+  ✓ conv-48_q86: "What gifts has Deborah received?..." - Retrieval: 33%
+  ✗ conv-48_q87: "Which countries has Deborah travele..." - Retrieval: 0%
+  ✗ conv-48_q88: "What activities does Deborah pursue..." - Retrieval: 0%
+  ✓ conv-48_q89: "What are the names of Jolene's snak..." - Retrieval: 100%
+  ✓ conv-48_q90: "What are Jolene's favorite books?..." - Retrieval: 100%
+  ✓ conv-48_q91: "What music pieces does Deborah list..." - Retrieval: 100%
+  ✓ conv-48_q92: "What games does Jolene recommend fo..." - Retrieval: 100%
+  ✗ conv-48_q93: "What projects is Jolene planning fo..." - Retrieval: 0%
+  ✓ conv-48_q94: "Where did Deborah get her cats?..." - Retrieval: 100%
+  ✓ conv-48_q95: "How old are Deborah's cats?..." - Retrieval: 100%
+  ✓ conv-48_q96: "What was Jolene doing with her part..." - Retrieval: 100%
+  ✓ conv-48_q97: "Have Deborah and Jolene been to Rio..." - Retrieval: 100%
+  ✗ conv-48_q98: "When did Jolene's parents give her ..." - Retrieval: 0%
+  ✓ conv-48_q99: "What do Deborah and Jolene plan to ..." - Retrieval: 100%
+  ✓ conv-48_q100: "What project did Jolene finish last..." - Retrieval: 100%
+  ✓ conv-48_q101: "When did Jolene buy her pet snake?..." - Retrieval: 100%
+  ✓ conv-48_q102: "What project was Jolene working on ..." - Retrieval: 100%
+  ✓ conv-48_q103: "Where did Deborah meet her new neig..." - Retrieval: 100%
+  ✓ conv-48_q104: "What activity did Jolene and her pa..." - Retrieval: 100%
+  ✗ conv-48_q105: "What milestone did Jolene achieve r..." - Retrieval: 0%
+  ✓ conv-48_q106: "What is Jolene's favorite book whic..." - Retrieval: 100%
+  ✓ conv-48_q107: "What does Deborah bring with her wh..." - Retrieval: 100%
+  ✓ conv-48_q108: "What new outlook did Jolene gain af..." - Retrieval: 100%
+  ✓ conv-48_q109: "What cool stuff did Jolene accompli..." - Retrieval: 100%
+  ✓ conv-48_q110: "What idea did Jolene have to help u..." - Retrieval: 100%
+  ✓ conv-48_q111: "How does Jolene plan to involve loc..." - Retrieval: 100%
+  ✓ conv-48_q112: "What gave Deborah peace in the gard..." - Retrieval: 100%
+  ✓ conv-48_q113: "Why did Deborah spend time in the g..." - Retrieval: 100%
+  ✓ conv-48_q114: "How did Jolene and her partner init..." - Retrieval: 100%
+  ✓ conv-48_q115: "What activity does Deborah incorpor..." - Retrieval: 100%
+  ✓ conv-48_q116: "According to Jolene, what does exer..." - Retrieval: 100%
+  ✓ conv-48_q117: "What did Deb share a photo of, whic..." - Retrieval: 100%
+  ✓ conv-48_q118: "What is one of Jolene's favorite di..." - Retrieval: 100%
+  ✓ conv-48_q119: "What picture did Jolene share relat..." - Retrieval: 100%
+  ✓ conv-48_q120: "What did Jolene and Deb discuss as ..." - Retrieval: 100%
+  ✗ conv-48_q121: "What did Jolene ask Deb to help wit..." - Retrieval: 0%
+  ✓ conv-48_q122: "What method does Deb suggest Jolene..." - Retrieval: 100%
+  ✓ conv-48_q123: "What did Jolene and Anna discuss wh..." - Retrieval: 100%
+  ✓ conv-48_q124: "How does Jolene plan to pursue her ..." - Retrieval: 100%
+  ✓ conv-48_q125: "What did Deborah buy to enhance her..." - Retrieval: 100%
+  ✓ conv-48_q126: "What type of music does Deborah fin..." - Retrieval: 100%
+  ✓ conv-48_q127: "Who are the musicians mentioned by ..." - Retrieval: 100%
+  ✓ conv-48_q128: "What album does Deborah recommend f..." - Retrieval: 100%
+  ✓ conv-48_q129: "Which show did Deborah go to with a..." - Retrieval: 100%
+  ✓ conv-48_q130: "What does Deborah find comforting a..." - Retrieval: 100%
+  ✓ conv-48_q131: "How does Jolene describe the time s..." - Retrieval: 100%
+  ✓ conv-48_q132: "What does Jolene enjoy doing with h..." - Retrieval: 100%
+  ✓ conv-48_q133: "What is Jolene currently doing in J..." - Retrieval: 100%
+  ✓ conv-48_q134: "For how long has Jolene had Seraphi..." - Retrieval: 100%
+  ✗ conv-48_q135: "How does Jolene feel when spending ..." - Retrieval: 0%
+  ✓ conv-48_q136: "Which new yoga pose did Deborah sha..." - Retrieval: 100%
+  ✓ conv-48_q137: "What group activity did Deborah sta..." - Retrieval: 100%
+  ✓ conv-48_q138: "What made being part of the running..." - Retrieval: 100%
+  ✓ conv-48_q139: "Why did Jolene decide to get a snak..." - Retrieval: 100%
+  ✓ conv-48_q140: "What is the favorite game Jolene pl..." - Retrieval: 100%
+  ✓ conv-48_q141: "What activity does Deborah do with ..." - Retrieval: 100%
+  ✓ conv-48_q142: "How does Jolene describe the feelin..." - Retrieval: 100%
+  ✓ conv-48_q143: "Why does Deborah take her cats out ..." - Retrieval: 100%
+  ✓ conv-48_q144: "How did Jolene come to have her pet..." - Retrieval: 100%
+  ✓ conv-48_q145: "What activities have been helping J..." - Retrieval: 100%
+  ✓ conv-48_q146: "What kind of yoga routine does Debo..." - Retrieval: 100%
+  ✓ conv-48_q147: "What did Jolene design inspired by ..." - Retrieval: 100%
+  ✓ conv-48_q148: "What journal has Jolene been using ..." - Retrieval: 100%
+  ✓ conv-48_q149: "What game did Jolene recommend for ..." - Retrieval: 100%
+  ✓ conv-48_q150: "What game did Jolene suggest as an ..." - Retrieval: 100%
+  ✓ conv-48_q151: "What did Deborah and her husband us..." - Retrieval: 100%
+  ✓ conv-48_q152: "What is special about the bench at ..." - Retrieval: 100%
+  ✓ conv-48_q153: "What did Deborah and her mom chat a..." - Retrieval: 100%
+  ✓ conv-48_q154: "What feeling does Deborah get when ..." - Retrieval: 100%
+  ✓ conv-48_q155: "What habits does Jolene practice to..." - Retrieval: 100%
+  ✓ conv-48_q156: "Which yoga pose is Jolene a fan of ..." - Retrieval: 100%
+  ✓ conv-48_q157: "How long has Jolene been doing yoga..." - Retrieval: 100%
+  ✗ conv-48_q158: "What did Jolene participate in rece..." - Retrieval: 0%
+  ✓ conv-48_q159: "How did Jolene feel after receiving..." - Retrieval: 100%
+  ✓ conv-48_q160: "What kind of event did Jolene prese..." - Retrieval: 100%
+  ✓ conv-48_q161: "What did Jolene's mom stress the va..." - Retrieval: 100%
+  ✓ conv-48_q162: "What type of projects is Jolene int..." - Retrieval: 100%
+  ✓ conv-48_q163: "How did Deborah get Luna, one of he..." - Retrieval: 100%
+  ✓ conv-48_q164: "How old is Max?..." - Retrieval: 100%
+  ✓ conv-48_q165: "What type of classes did Jolene and..." - Retrieval: 100%
+  ✓ conv-48_q166: "What type of place does Jolene visi..." - Retrieval: 100%
+  ✓ conv-48_q167: "What was the new plant Jolene got u..." - Retrieval: 100%
+  ✓ conv-48_q168: "Why did Jolene get the new plant on..." - Retrieval: 100%
+  ✓ conv-48_q169: "What has Jolene been focusing on la..." - Retrieval: 100%
+  ✓ conv-48_q170: "How did Deborah's mom support her y..." - Retrieval: 100%
+  ✓ conv-48_q171: "What was the video game console tha..." - Retrieval: 100%
+  ✓ conv-48_q172: "What was one of Jolene's favorite g..." - Retrieval: 100%
+  ✓ conv-48_q173: "What course did Jolene sign up for ..." - Retrieval: 100%
+  ✗ conv-48_q174: "Why did Jolene have to reschedule t..." - Retrieval: 0%
+  ✓ conv-48_q175: "Where did Jolene and her partner tr..." - Retrieval: 100%
+  ✓ conv-48_q176: "What was the main focus of the sess..." - Retrieval: 100%
+  ✓ conv-48_q177: "How did Jolene feel about her progr..." - Retrieval: 100%
+  ✗ conv-48_q178: "What positive change did Jolene exp..." - Retrieval: 0%
+  ✗ conv-48_q179: "What did Jolene recently play that ..." - Retrieval: 0%
+  ✓ conv-48_q180: "What did Deborah do with their mom'..." - Retrieval: 100%
+  ✓ conv-48_q181: "Where did Deborah get married?..." - Retrieval: 100%
+  ✗ conv-48_q182: "What does yoga on the beach provide..." - Retrieval: 0%
+  ✓ conv-48_q183: "How does Jolene describe their home..." - Retrieval: 100%
+  ✓ conv-48_q184: "What new activity did Deborah and h..." - Retrieval: 100%
+  ✓ conv-48_q185: "What was Deborah's mom passionate a..." - Retrieval: 100%
+  ✓ conv-48_q186: "What food did Deborah's mom make fo..." - Retrieval: 100%
+  ✓ conv-48_q187: "What kind of cookies did Jolene use..." - Retrieval: 100%
+  ✗ conv-48_q188: "What outdoor activity did Jolene su..." - Retrieval: 0%
+  ✓ conv-48_q189: "What activity did Deborah enjoy at ..." - Retrieval: 100%
+  ✓ conv-48_q190: "What did Deborah find freeing at th..." - Retrieval: 100%
+  ✓ conv-48_q191: "What are the names of Deborah's sna..." - Retrieval: 100%
+  ✓ conv-48_q192: "What are Deborah's favorite books?..." - Retrieval: 100%
+  ✗ conv-48_q193: "Where did Deborah get her dogs?..." - Retrieval: 0%
+  ✓ conv-48_q194: "How old are Jolene's cats?..." - Retrieval: 100%
+  ✗ conv-48_q195: "When did Deborah's parents give her..." - Retrieval: 0%
+  ✓ conv-48_q196: "When did Jolene release her pet sna..." - Retrieval: 100%
+  ✓ conv-48_q197: "Where did Jolene meet her new frien..." - Retrieval: 100%
+  ✓ conv-48_q198: "What is Deborah's favorite book whi..." - Retrieval: 100%
+  ✓ conv-48_q199: "What cool stuff did Deborah accompl..." - Retrieval: 100%
+  ✓ conv-48_q200: "How does Deborah plan to involve lo..." - Retrieval: 100%
+  ✓ conv-48_q201: "What gave Deborah anxiety in the ga..." - Retrieval: 100%
+  ✓ conv-48_q202: "Why did Jolene spend time in the ga..." - Retrieval: 100%
+  ✓ conv-48_q203: "How did Jolene and her rival initia..." - Retrieval: 100%
+  ✓ conv-48_q204: "What activity does Jolene incorpora..." - Retrieval: 100%
+  ✓ conv-48_q205: "What method does Jolene suggest Deb..." - Retrieval: 100%
+  ✓ conv-48_q206: "How does Jolene plan to pursue her ..." - Retrieval: 100%
+  ✗ conv-48_q207: "Who are the authors mentioned by Jo..." - Retrieval: 0%
+  ✓ conv-48_q208: "Which show did Jolene go to with a ..." - Retrieval: 100%
+  ✗ conv-48_q209: "What does Deborah find comforting a..." - Retrieval: 0%
+  ✓ conv-48_q210: "How does Deborah describe the time ..." - Retrieval: 100%
+  ✓ conv-48_q211: "For how long has Jolene had Lucifer..." - Retrieval: 100%
+  ✗ conv-48_q212: "How does Deborah feel when spending..." - Retrieval: 0%
+  ✓ conv-48_q213: "What made being part of the running..." - Retrieval: 100%
+  ✓ conv-48_q214: "Why did Jolene decide to get a tara..." - Retrieval: 100%
+  ✓ conv-48_q215: "How did Deborah come to have her pe..." - Retrieval: 100%
+  ✓ conv-48_q216: "What did Deborah design inspired by..." - Retrieval: 100%
+  ✓ conv-48_q217: "What journal has Deborah been using..." - Retrieval: 100%
+  ✓ conv-48_q218: "What game did Jolene recommend to D..." - Retrieval: 100%
+  ✓ conv-48_q219: "What game did Deborah suggest as an..." - Retrieval: 100%
+  ✓ conv-48_q220: "What is special about the bench at ..." - Retrieval: 100%
+  ✓ conv-48_q221: "What did Jolene and her mom chat ab..." - Retrieval: 100%
+  ✓ conv-48_q222: "How did Deborah feel after receivin..." - Retrieval: 100%
+  ✓ conv-48_q223: "What kind of event did Deborah pres..." - Retrieval: 100%
+  ✓ conv-48_q224: "What did Deborah's mom stress the v..." - Retrieval: 100%
+  ✓ conv-48_q225: "What type of projects is Deborah in..." - Retrieval: 100%
+  ✓ conv-48_q226: "How did Jolene get Luna, one of her..." - Retrieval: 100%
+  ✓ conv-48_q227: "What type of classes did Deborah an..." - Retrieval: 100%
+  ✓ conv-48_q228: "Why did Deborah get the new plant o..." - Retrieval: 100%
+  ✓ conv-48_q229: "How did Jolene's mom support her yo..." - Retrieval: 100%
+  ✓ conv-48_q230: "What was the video game console tha..." - Retrieval: 100%
+  ✓ conv-48_q231: "What was one of Deborah's favorite ..." - Retrieval: 100%
+  ✓ conv-48_q232: "Where did Deborah and her partner t..." - Retrieval: 100%
+  ✓ conv-48_q233: "What did Jolene do with their mom's..." - Retrieval: 100%
+  ✓ conv-48_q234: "Where did Jolene get married?..." - Retrieval: 100%
+  ✓ conv-48_q235: "What new activity did Jolene and he..." - Retrieval: 100%
+  ✓ conv-48_q236: "What food did Jolene's mom make for..." - Retrieval: 100%
+  ✓ conv-48_q237: "What kind of cookies did Deborah us..." - Retrieval: 100%
+  ✓ conv-48_q238: "What activity did Jolene enjoy at t..." - Retrieval: 100%
+  ✓ conv-49_q0: "What kind of car does Evan drive?..." - Retrieval: 33%
+  ✓ conv-49_q1: "What kinds of things did Evan have ..." - Retrieval: 100%
+  ✗ conv-49_q2: "Where has Evan been on roadtrips wi..." - Retrieval: 0%
+  ✓ conv-49_q3: "How many Prius has Evan owned?..." - Retrieval: 100%
+  ✓ conv-49_q4: "Which hobby did Sam take up in May ..." - Retrieval: 100%
+  ✗ conv-49_q5: "Which country was Evan visiting in ..." - Retrieval: 0%
+  ✓ conv-49_q6: "How many roadtrips did Evan take in..." - Retrieval: 50%
+  ✓ conv-49_q7: "What new hobbies did Sam consider t..." - Retrieval: 29%
+  ✓ conv-49_q8: "What hobby did Evan start practicin..." - Retrieval: 50%
+  ✓ conv-49_q9: "When did Evan go to Jasper with his..." - Retrieval: 100%
+  ✗ conv-49_q10: "Which type of vacation would Evan p..." - Retrieval: 0%
+  ✓ conv-49_q11: "What health issue did Sam face that..." - Retrieval: 40%
+  ✓ conv-49_q12: "When did Sam first go to the doctor..." - Retrieval: 100%
+  ✓ conv-49_q13: "When did Evan have his sudden heart..." - Retrieval: 100%
+  ✗ conv-49_q14: "What is Evan's favorite food?..." - Retrieval: 0%
+  ✓ conv-49_q15: "What kind of unhealthy snacks does ..." - Retrieval: 100%
+  ✓ conv-49_q16: "What recurring issue frustrates Sam..." - Retrieval: 100%
+  ✓ conv-49_q17: "When did Sam's friends mock him for..." - Retrieval: 100%
+  ✓ conv-49_q18: "What kind of healthy food suggestio..." - Retrieval: 50%
+  ✗ conv-49_q19: "Considering their conversations and..." - Retrieval: 0%
+  ✓ conv-49_q20: "In light of the health and dietary ..." - Retrieval: 75%
+  ✓ conv-49_q21: "How does Evan describe the woman an..." - Retrieval: 50%
+  ✗ conv-49_q22: "When Evan did meet his future wife?..." - Retrieval: 0%
+  ✓ conv-49_q23: "When did Sam start working out at t..." - Retrieval: 100%
+  ✗ conv-49_q24: "What significant event happened in ..." - Retrieval: 0%
+  ✗ conv-49_q25: "Which year did Evan start taking ca..." - Retrieval: 0%
+  ✓ conv-49_q26: "What motivates Evan to take care of..." - Retrieval: 100%
+  ✓ conv-49_q27: "What electronic device could Evan g..." - Retrieval: 100%
+  ✓ conv-49_q28: "What kind of writing does Sam do to..." - Retrieval: 100%
+  ✓ conv-49_q29: "Who did Evan meet on his trip to Ca..." - Retrieval: 100%
+  ✗ conv-49_q30: "When Evan get back from a vacation ..." - Retrieval: 0%
+  ✓ conv-49_q31: "How might Evan and Sam's experience..." - Retrieval: 100%
+  ✗ conv-49_q32: "What recurring frustration does Eva..." - Retrieval: 0%
+  ✓ conv-49_q33: "What is the recurring dream that Sa..." - Retrieval: 100%
+  ✓ conv-49_q34: "What accidents has Evan's son faced..." - Retrieval: 100%
+  ✓ conv-49_q35: "When was Evan's son injured at socc..." - Retrieval: 100%
+  ✓ conv-49_q36: "What kind of foods or recipes has S..." - Retrieval: 33%
+  ✓ conv-49_q37: "What kind of healthy meals did Sam ..." - Retrieval: 50%
+  ✗ conv-49_q38: "What role does nature and the outdo..." - Retrieval: 0%
+  ✓ conv-49_q39: "How many months lapsed between Sam'..." - Retrieval: 50%
+  ✓ conv-49_q40: "When did Evan start taking painting..." - Retrieval: 100%
+  ✓ conv-49_q41: "Which classes did Evan join in mid-..." - Retrieval: 100%
+  ✓ conv-49_q42: "How did Evan get into painting?..." - Retrieval: 50%
+  ✓ conv-49_q43: "How often does Sam get health check..." - Retrieval: 33%
+  ✓ conv-49_q44: "What kind of subjects does Evan enj..." - Retrieval: 100%
+  ✗ conv-49_q45: "Which places in Canada was Evan vis..." - Retrieval: 0%
+  ✗ conv-49_q46: "How do Evan and Sam use creative ou..." - Retrieval: 0%
+  ✓ conv-49_q47: "When did Evan go skiing in Banff?..." - Retrieval: 100%
+  ✓ conv-49_q48: "What new diet and lifestyle change ..." - Retrieval: 50%
+  ✗ conv-49_q49: "Who was injured in Evan's family?..." - Retrieval: 0%
+  ✗ conv-49_q50: "What kind of hobbies does Evan purs..." - Retrieval: 0%
+  ✓ conv-49_q51: "What challenges does Sam face in hi..." - Retrieval: 50%
+  ✗ conv-49_q52: "Which activity do Evan and Sam plan..." - Retrieval: 0%
+  ✓ conv-49_q53: "When did Evan and Sam decide to pai..." - Retrieval: 100%
+  ✓ conv-49_q54: "What personal health incidents does..." - Retrieval: 33%
+  ✓ conv-49_q55: "What recurring adventure does Evan ..." - Retrieval: 50%
+  ✓ conv-49_q56: "What is Sam's persistent problem wi..." - Retrieval: 100%
+  ✓ conv-49_q57: "Which US state was Sam travelling i..." - Retrieval: 100%
+  ✓ conv-49_q58: "When did Evan start lifting weights..." - Retrieval: 100%
+  ✓ conv-49_q59: "When did Sam and his friend decide ..." - Retrieval: 100%
+  ✓ conv-49_q60: "Which new activity does Sam take up..." - Retrieval: 100%
+  ✓ conv-49_q61: "What kind of stress was Sam dealing..." - Retrieval: 100%
+  ✓ conv-49_q62: "What health scares did Sam and Evan..." - Retrieval: 100%
+  ✗ conv-49_q63: "When was Sam in the ER?..." - Retrieval: 0%
+  ✓ conv-49_q64: "Which ailment does Sam have to face..." - Retrieval: 50%
+  ✗ conv-49_q65: "Does Evan live close to a beach or ..." - Retrieval: 0%
+  ✓ conv-49_q66: "When did Evan lose his job?..." - Retrieval: 100%
+  ✓ conv-49_q67: "When did Evan and Sam planned a tri..." - Retrieval: 100%
+  ✓ conv-49_q68: "What was Sam doing on December 4, 2..." - Retrieval: 100%
+  ✗ conv-49_q69: "Which two significant life events o..." - Retrieval: 0%
+  ✓ conv-49_q70: "How long did Evan and his partner d..." - Retrieval: 50%
+  ✗ conv-49_q71: "Which major holiday season conincid..." - Retrieval: 0%
+  ✓ conv-49_q72: "Which activity did Sam resume in De..." - Retrieval: 50%
+  ✓ conv-49_q73: "When is Evan planning a big family ..." - Retrieval: 100%
+  ✓ conv-49_q74: "When did Evan's son fall off his bi..." - Retrieval: 100%
+  ✓ conv-49_q75: "When did Evan announce his marriage..." - Retrieval: 100%
+  ✓ conv-49_q76: "When did Evan finish the painting t..." - Retrieval: 100%
+  ✗ conv-49_q77: "How does Evan spend his time with h..." - Retrieval: 0%
+  ✓ conv-49_q78: "Who did Evan tell about his marriag..." - Retrieval: 67%
+  ✓ conv-49_q79: "When will Evan and his partner have..." - Retrieval: 100%
+  ✓ conv-49_q80: "When did Evan have a drunken night ..." - Retrieval: 100%
+  ✓ conv-49_q81: "What is a stress reliever for Evan?..." - Retrieval: 50%
+  ✓ conv-49_q82: "What is a stress reliever for Sam?..." - Retrieval: 50%
+  ✓ conv-49_q83: "What type of car did Evan get after..." - Retrieval: 100%
+  ✓ conv-49_q84: "How did Evan get into watercolor pa..." - Retrieval: 100%
+  ✓ conv-49_q85: "What did Evan start doing a few yea..." - Retrieval: 100%
+  ✗ conv-49_q86: "What advice did Evan give Sam about..." - Retrieval: 0%
+  ✓ conv-49_q87: "Where did Evan take his family for ..." - Retrieval: 100%
+  ✓ conv-49_q88: "What did Evan find relaxing about h..." - Retrieval: 100%
+  ✓ conv-49_q89: "What habit is Sam trying to change ..." - Retrieval: 100%
+  ✓ conv-49_q90: "What new suggestion did Evan give t..." - Retrieval: 100%
+  ✓ conv-49_q91: "What did Sam agree to try instead o..." - Retrieval: 100%
+  ✓ conv-49_q92: "What frustrating issue did Sam face..." - Retrieval: 100%
+  ✓ conv-49_q93: "What novel is Evan reading that he ..." - Retrieval: 100%
+  ✓ conv-49_q94: "What kind of water does Evan sugges..." - Retrieval: 100%
+  ✗ conv-49_q95: "What does the smartwatch help Evan ..." - Retrieval: 0%
+  ✓ conv-49_q96: "What does the bonsai tree symbolize..." - Retrieval: 100%
+  ✓ conv-49_q97: "Why did Evan decide to get the bons..." - Retrieval: 100%
+  ✓ conv-49_q98: "According to Sam, what is more impo..." - Retrieval: 100%
+  ✓ conv-49_q99: "What did Evan suggest Sam to check ..." - Retrieval: 100%
+  ✓ conv-49_q100: "What did Evan mention he had been s..." - Retrieval: 100%
+  ✓ conv-49_q101: "What class is Sam taking to learn h..." - Retrieval: 100%
+  ✓ conv-49_q102: "What dish did Sam make on 18 August..." - Retrieval: 100%
+  ✓ conv-49_q103: "What kind of recipe did Evan reques..." - Retrieval: 100%
+  ✗ conv-49_q104: "What food did Sam share a photo of ..." - Retrieval: 0%
+  ✓ conv-49_q105: "What type of painting classes did E..." - Retrieval: 100%
+  ✓ conv-49_q106: "What did Evan start painting years ..." - Retrieval: 100%
+  ✓ conv-49_q107: "What nature concept do watercolor p..." - Retrieval: 100%
+  ✓ conv-49_q108: "What type of landscapes does Evan l..." - Retrieval: 100%
+  ✓ conv-49_q109: "What fun activity did Evan mention ..." - Retrieval: 100%
+  ✗ conv-49_q110: "What injury did Evan suffer from in..." - Retrieval: 0%
+  ✓ conv-49_q111: "What sports activity has Evan been ..." - Retrieval: 100%
+  ✗ conv-49_q112: "What suggestion did Sam give to Eva..." - Retrieval: 0%
+  ✓ conv-49_q113: "What did Evan suggest Sam try as a ..." - Retrieval: 100%
+  ✓ conv-49_q114: "What did Evan recommend Sam acquire..." - Retrieval: 100%
+  ✓ conv-49_q115: "What activity does Evan do to keep ..." - Retrieval: 100%
+  ✓ conv-49_q116: "What painting did Evan share with S..." - Retrieval: 100%
+  ✓ conv-49_q117: "What kind of writing does Sam enjoy..." - Retrieval: 100%
+  ✗ conv-49_q118: "What electronics issue has been fru..." - Retrieval: 0%
+  ✓ conv-49_q119: "What activity did Evan start one ye..." - Retrieval: 100%
+  ✓ conv-49_q120: "What advice did Evan give to Sam to..." - Retrieval: 100%
+  ✓ conv-49_q121: "Where did Sam and his mate plan to ..." - Retrieval: 100%
+  ✗ conv-49_q122: "What digestive issue did Sam experi..." - Retrieval: 0%
+  ✓ conv-49_q123: "What adventurous theme is emerging ..." - Retrieval: 100%
+  ✓ conv-49_q124: "What does Evan mention about his pr..." - Retrieval: 100%
+  ✓ conv-49_q125: "How did Evan start his transformati..." - Retrieval: 100%
+  ✓ conv-49_q126: "What gift did Evan receive from a c..." - Retrieval: 100%
+  ✗ conv-49_q127: "Why had Evan been going through a t..." - Retrieval: 0%
+  ✓ conv-49_q128: "How does Evan describe the island h..." - Retrieval: 100%
+  ✓ conv-49_q129: "What was the main reason for Evan's..." - Retrieval: 100%
+  ✓ conv-49_q130: "How did Sam suggest Evan view the s..." - Retrieval: 100%
+  ✓ conv-49_q131: "What did Sam suggest Evan try for s..." - Retrieval: 100%
+  ✓ conv-49_q132: "What did Sam offer Evan regarding y..." - Retrieval: 100%
+  ✓ conv-49_q133: "What news did Evan share with Sam o..." - Retrieval: 100%
+  ✓ conv-49_q134: "What family event is Evan planning ..." - Retrieval: 100%
+  ✓ conv-49_q135: "What is the motto of Evan's family?..." - Retrieval: 100%
+  ✓ conv-49_q136: "According to Evan, what is importan..." - Retrieval: 100%
+  ✓ conv-49_q137: "Who helped Evan get the painting pu..." - Retrieval: 100%
+  ✓ conv-49_q138: "What did Sam recently start enjoyin..." - Retrieval: 100%
+  ✓ conv-49_q139: "What did Sam suggest Evan should do..." - Retrieval: 100%
+  ✗ conv-49_q140: "How did Evan feel when he painted t..." - Retrieval: 0%
+  ✓ conv-49_q141: "What did Evan suggest Sam should ke..." - Retrieval: 100%
+  ✓ conv-49_q142: "How did Evan describe the process o..." - Retrieval: 100%
+  ✓ conv-49_q143: "What did Evan want to share with hi..." - Retrieval: 100%
+  ✓ conv-49_q144: "What did Evan share with Sam after ..." - Retrieval: 100%
+  ✓ conv-49_q145: "What did Evan offer to share with S..." - Retrieval: 100%
+  ✓ conv-49_q146: "What did Evan and his partner share..." - Retrieval: 100%
+  ✓ conv-49_q147: "What was Evan limiting himself to o..." - Retrieval: 100%
+  ✗ conv-49_q148: "What sports activity did Evan and h..." - Retrieval: 0%
+  ✓ conv-49_q149: "What advice did Evan suggest Sam se..." - Retrieval: 100%
+  ✓ conv-49_q150: "What suggestions did Evan give for ..." - Retrieval: 100%
+  ✓ conv-49_q151: "What movie did Sam watch that motiv..." - Retrieval: 100%
+  ✓ conv-49_q152: "What activity helped Evan with stre..." - Retrieval: 100%
+  ✗ conv-49_q153: "What did Evan share a photo of that..." - Retrieval: 0%
+  ✓ conv-49_q154: "Why did Evan apologize to his partn..." - Retrieval: 100%
+  ✓ conv-49_q155: "How does Evan describe being out on..." - Retrieval: 100%
+  ✓ conv-49_q156: "What type of car did Sam get after ..." - Retrieval: 100%
+  ✓ conv-49_q157: "How did Sam get into watercolor pai..." - Retrieval: 100%
+  ✓ conv-49_q158: "What did Sam start doing a few year..." - Retrieval: 100%
+  ✗ conv-49_q159: "Where did Sam take his family for a..." - Retrieval: 0%
+  ✓ conv-49_q160: "What did Sam find relaxing about hi..." - Retrieval: 100%
+  ✓ conv-49_q161: "What habit is Evan trying to change..." - Retrieval: 100%
+  ✓ conv-49_q162: "What frustrating issue did Evan fac..." - Retrieval: 100%
+  ✓ conv-49_q163: "What novel is Sam reading that he f..." - Retrieval: 100%
+  ✗ conv-49_q164: "What does the smartwatch help Sam w..." - Retrieval: 0%
+  ✓ conv-49_q165: "Why did Sam decide to get the bonsa..." - Retrieval: 100%
+  ✓ conv-49_q166: "What did Sam mention he had been se..." - Retrieval: 100%
+  ✓ conv-49_q167: "What class is Evan taking to learn ..." - Retrieval: 100%
+  ✗ conv-49_q168: "What dish did Sam make on 18 August..." - Retrieval: 0%
+  ✗ conv-49_q169: "What food did Evan share a photo of..." - Retrieval: 0%
+  ✓ conv-49_q170: "What did Evan start sculpting years..." - Retrieval: 100%
+  ✓ conv-49_q171: "What nature concept do watercolor p..." - Retrieval: 100%
+  ✓ conv-49_q172: "What type of landscapes does Sam lo..." - Retrieval: 100%
+  ✓ conv-49_q173: "What sports activity has Sam been d..." - Retrieval: 100%
+  ✓ conv-49_q174: "What activity does Sam do to keep h..." - Retrieval: 100%
+  ✓ conv-49_q175: "What kind of writing does Evan enjo..." - Retrieval: 100%
+  ✗ conv-49_q176: "What electronics issue has been fru..." - Retrieval: 0%
+  ✗ conv-49_q177: "What activity did Evan quit one yea..." - Retrieval: 0%
+  ✓ conv-49_q178: "Where did Sam and his mate plan to ..." - Retrieval: 100%
+  ✗ conv-49_q179: "What digestive issue did Evan exper..." - Retrieval: 0%
+  ✓ conv-49_q180: "How did Sam start his transformatio..." - Retrieval: 100%
+  ✓ conv-49_q181: "What gift did Sam receive from a cl..." - Retrieval: 100%
+  ✓ conv-49_q182: "How does Sam describe the island he..." - Retrieval: 100%
+  ✓ conv-49_q183: "What was the main reason for Evan's..." - Retrieval: 100%
+  ✓ conv-49_q184: "What family event is Sam planning f..." - Retrieval: 100%
+  ✓ conv-49_q185: "What is the motto of Sam's family?..." - Retrieval: 100%
+  ✓ conv-49_q186: "Who helped Sam get the painting pub..." - Retrieval: 100%
+  ✓ conv-49_q187: "How did Sam feel when he painted th..." - Retrieval: 100%
+  ✓ conv-49_q188: "How did Sam describe the process of..." - Retrieval: 100%
+  ✓ conv-49_q189: "What did Evan and his partner keep ..." - Retrieval: 100%
+  ✓ conv-49_q190: "What was Sam limiting himself to on..." - Retrieval: 100%
+  ✗ conv-49_q191: "What dance activity did Evan and hi..." - Retrieval: 0%
+  ✓ conv-49_q192: "What suggestions did Evan give for ..." - Retrieval: 100%
+  ✓ conv-49_q193: "What movie did Evan watch that moti..." - Retrieval: 100%
+  ✓ conv-49_q194: "What activity hindered Evan's stres..." - Retrieval: 100%
+  ✗ conv-49_q195: "What did Sam share a photo of that ..." - Retrieval: 0%
+  ✓ conv-50_q0: "When did Calvin first travel to Tok..." - Retrieval: 100%
+  ✓ conv-50_q1: "What items did Calvin buy in March ..." - Retrieval: 50%
+  ✓ conv-50_q2: "When did Dave see Aerosmith perform..." - Retrieval: 100%
+  ✗ conv-50_q3: "Which bands has Dave enjoyed listen..." - Retrieval: 0%
+  ✗ conv-50_q4: "Which country do Calvin and Dave wa..." - Retrieval: 0%
+  ✓ conv-50_q5: "What are Dave's dreams?..." - Retrieval: 100%
+  ✓ conv-50_q6: "Which types of cars does Dave like ..." - Retrieval: 67%
+  ✓ conv-50_q7: "Does Dave's shop employ a lot of pe..." - Retrieval: 100%
+  ✓ conv-50_q8: "When did Dave start his car mainten..." - Retrieval: 100%
+  ✓ conv-50_q9: "When did a mishap occur with Calvin..." - Retrieval: 100%
+  ✓ conv-50_q10: "When did Calvin's place get flooded..." - Retrieval: 100%
+  ✗ conv-50_q11: "What mishaps has Calvin run into?..." - Retrieval: 0%
+  ✓ conv-50_q12: "When was Calvin's concert in Tokyo?..." - Retrieval: 100%
+  ✓ conv-50_q13: "Would Calvin enjoy performing at th..." - Retrieval: 100%
+  ✓ conv-50_q14: "When did Calvin meet with the creat..." - Retrieval: 100%
+  ✓ conv-50_q15: "Why does Dave regularly visit parks..." - Retrieval: 50%
+  ✓ conv-50_q16: "When did Dave take a trip to mounta..." - Retrieval: 100%
+  ✗ conv-50_q17: "When did Calvin have a car incident..." - Retrieval: 0%
+  ✓ conv-50_q18: "How many times has Calvin had to de..." - Retrieval: 100%
+  ✓ conv-50_q19: "Which places or events has Calvin v..." - Retrieval: 67%
+  ✓ conv-50_q20: "Who inspired Dave's passion for car..." - Retrieval: 50%
+  ✗ conv-50_q21: "Does Calvin wish to become more pop..." - Retrieval: 0%
+  ✓ conv-50_q22: "Does Calvin want to expand his bran..." - Retrieval: 50%
+  ✓ conv-50_q23: "What is Dave's main passion?..." - Retrieval: 25%
+  ✓ conv-50_q24: "Can Dave work with engines?..." - Retrieval: 67%
+  ✓ conv-50_q25: "When did Dave host a card-playing n..." - Retrieval: 100%
+  ✓ conv-50_q26: "When did Calvin record a podcast wi..." - Retrieval: 100%
+  ✗ conv-50_q27: "Which city was Calvin visiting in A..." - Retrieval: 0%
+  ✓ conv-50_q28: "What does Calvin do to relax?..." - Retrieval: 50%
+  ✗ conv-50_q29: "What are Dave's hobbies other than ..." - Retrieval: 0%
+  ✓ conv-50_q30: "What kind of music does Dave listen..." - Retrieval: 33%
+  ✗ conv-50_q31: "Where was Dave in the last two week..." - Retrieval: 0%
+  ✓ conv-50_q32: "Where did Dave return from with new..." - Retrieval: 100%
+  ✓ conv-50_q33: "What was Dave doing in San Francisc..." - Retrieval: 50%
+  ✓ conv-50_q34: "When did Dave return from San Franc..." - Retrieval: 100%
+  ✓ conv-50_q35: "When did Calvin book flight tickets..." - Retrieval: 100%
+  ✓ conv-50_q36: "When was Calvin's album released?..." - Retrieval: 100%
+  ✓ conv-50_q37: "Does Calvin love music tours?..." - Retrieval: 67%
+  ✓ conv-50_q38: "When did Dave have a great jam sess..." - Retrieval: 100%
+  ✗ conv-50_q39: "Would Dave prefer working on a Dodg..." - Retrieval: 0%
+  ✗ conv-50_q40: "What was the artists Calvin used to..." - Retrieval: 0%
+  ✓ conv-50_q41: "Which of their family member do Cal..." - Retrieval: 100%
+  ✗ conv-50_q42: "Based on the conversation, did Calv..." - Retrieval: 0%
+  ✗ conv-50_q43: "Which city was Calvin at on October..." - Retrieval: 0%
+  ✓ conv-50_q44: "When did Calvin met with local arti..." - Retrieval: 100%
+  ✗ conv-50_q45: "What shared activities do Dave and ..." - Retrieval: 0%
+  ✗ conv-50_q46: "What is Dave's favorite activity?..." - Retrieval: 0%
+  ✓ conv-50_q47: "How many car shows has Dave attende..." - Retrieval: 100%
+  ✗ conv-50_q48: "What was Dave doing in the first we..." - Retrieval: 0%
+  ✓ conv-50_q49: "When Dave was a child, what did he ..." - Retrieval: 50%
+  ✓ conv-50_q50: "When did Calvin buy his second Ferr..." - Retrieval: 100%
+  ✓ conv-50_q51: "When did Calvin and Frank Ocean sta..." - Retrieval: 100%
+  ✓ conv-50_q52: "When did Calvin plan on travelling ..." - Retrieval: 100%
+  ✗ conv-50_q53: "Who supports Calvin in tough times?..." - Retrieval: 0%
+  ✓ conv-50_q54: "What does help Calvin stay connecte..." - Retrieval: 100%
+  ✓ conv-50_q55: "When did Calvin visit some of the s..." - Retrieval: 100%
+  ✗ conv-50_q56: "Which cities did Dave travel to in ..." - Retrieval: 0%
+  ✗ conv-50_q57: "Which hobby did Dave pick up in Oct..." - Retrieval: 0%
+  ✗ conv-50_q58: "Which events in Dave's life inspire..." - Retrieval: 0%
+  ✓ conv-50_q59: "How many Ferraris does Calvin own?..." - Retrieval: 100%
+  ✓ conv-50_q60: "What gifts has Calvin received from..." - Retrieval: 100%
+  ✓ conv-50_q61: "How long did Dave's work on the For..." - Retrieval: 100%
+  ✓ conv-50_q62: "How long was the car modification w..." - Retrieval: 100%
+  ✓ conv-50_q63: "What style of guitars does Calvin o..." - Retrieval: 100%
+  ✓ conv-50_q64: "What activities has Dave participat..." - Retrieval: 50%
+  ✓ conv-50_q65: "When did Dave take a photo of a Bos..." - Retrieval: 100%
+  ✓ conv-50_q66: "Do all of Dave's car restoration pr..." - Retrieval: 50%
+  ✗ conv-50_q67: "Where was Calvin located in the las..." - Retrieval: 0%
+  ✓ conv-50_q68: "When did Dave find the car he repai..." - Retrieval: 100%
+  ✓ conv-50_q69: "When did Dave buy a vintage camera?..." - Retrieval: 100%
+  ✓ conv-50_q70: "When did Calvin attend a gala in Bo..." - Retrieval: 100%
+  ✓ conv-50_q71: "How long did Calvin plan to stay in..." - Retrieval: 100%
+  ✓ conv-50_q72: "Which band was Dave's favorite at t..." - Retrieval: 100%
+  ✓ conv-50_q73: "Where did Calvin attend a music fes..." - Retrieval: 100%
+  ✓ conv-50_q74: "What advice did Calvin receive from..." - Retrieval: 100%
+  ✗ conv-50_q75: "What is Dave's new business venture..." - Retrieval: 0%
+  ✓ conv-50_q76: "What type of cars does Dave work on..." - Retrieval: 100%
+  ✓ conv-50_q77: "What did Calvin receive as a gift f..." - Retrieval: 100%
+  ✓ conv-50_q78: "What was the necklace Calvin receiv..." - Retrieval: 100%
+  ✓ conv-50_q79: "What does Dave do when he feels his..." - Retrieval: 100%
+  ✓ conv-50_q80: "How does Calvin plan to jumpstart h..." - Retrieval: 100%
+  ✓ conv-50_q81: "What did Calvin manage to save duri..." - Retrieval: 100%
+  ✓ conv-50_q82: "What did Dave open in May 2023?..." - Retrieval: 100%
+  ✓ conv-50_q83: "What gives Dave a sense of achievem..." - Retrieval: 100%
+  ✓ conv-50_q84: "What fuels Calvin's soul?..." - Retrieval: 100%
+  ✓ conv-50_q85: "What is Dave doing to relax on week..." - Retrieval: 100%
+  ✓ conv-50_q86: "What sports activity is Calvin plan..." - Retrieval: 100%
+  ✓ conv-50_q87: "What was Calvin excited to do after..." - Retrieval: 100%
+  ✓ conv-50_q88: "What did Calvin and his friends arr..." - Retrieval: 100%
+  ✓ conv-50_q89: "What kind of music has Calvin been ..." - Retrieval: 100%
+  ✓ conv-50_q90: "How does Calvin describe his proces..." - Retrieval: 100%
+  ✓ conv-50_q91: "What car brand does Calvin own that..." - Retrieval: 100%
+  ✓ conv-50_q92: "What is Calvin's biggest current go..." - Retrieval: 100%
+  ✓ conv-50_q93: "What is Dave's advice to Calvin reg..." - Retrieval: 100%
+  ✓ conv-50_q94: "What workshop did Dave get picked f..." - Retrieval: 100%
+  ✓ conv-50_q95: "What kind of modifications has Dave..." - Retrieval: 100%
+  ✓ conv-50_q96: "What type of car did Dave work on d..." - Retrieval: 100%
+  ✓ conv-50_q97: "What does Dave say is important for..." - Retrieval: 100%
+  ✓ conv-50_q98: "How did the audience in Tokyo react..." - Retrieval: 100%
+  ✓ conv-50_q99: "How did Calvin meet Frank Ocean?..." - Retrieval: 100%
+  ✓ conv-50_q100: "Where did Calvin and Frank Ocean re..." - Retrieval: 100%
+  ✓ conv-50_q101: "What did Calvin and his friends rec..." - Retrieval: 100%
+  ✓ conv-50_q102: "Where did Calvin start shooting a v..." - Retrieval: 100%
+  ✓ conv-50_q103: "What design is featured on Calvin's..." - Retrieval: 100%
+  ✓ conv-50_q104: "Why did Calvin get his guitar custo..." - Retrieval: 100%
+  ✓ conv-50_q105: "What color glow did Calvin customiz..." - Retrieval: 100%
+  ✓ conv-50_q106: "Where did Dave come back from with ..." - Retrieval: 100%
+  ✓ conv-50_q107: "What emotion does Dave mention feel..." - Retrieval: 100%
+  ✓ conv-50_q108: "What did Calvin book a flight ticke..." - Retrieval: 100%
+  ✓ conv-50_q109: "What is Calvin excited about after ..." - Retrieval: 100%
+  ✓ conv-50_q110: "What plans do Calvin and Dave have ..." - Retrieval: 100%
+  ✓ conv-50_q111: "Which Disney movie did Dave mention..." - Retrieval: 100%
+  ✓ conv-50_q112: "How does Dave feel about the reacti..." - Retrieval: 100%
+  ✓ conv-50_q113: "What activity did Calvin enjoy duri..." - Retrieval: 100%
+  ✓ conv-50_q114: "Which song from the childhood of Ca..." - Retrieval: 100%
+  ✓ conv-50_q115: "What project did Calvin work on to ..." - Retrieval: 100%
+  ✓ conv-50_q116: "What car did Dave work on in the ju..." - Retrieval: 100%
+  ✓ conv-50_q117: "What does Dave find satisfying abou..." - Retrieval: 100%
+  ✓ conv-50_q118: "What do Calvin and Dave use to reac..." - Retrieval: 100%
+  ✗ conv-50_q119: "What does working on cars represent..." - Retrieval: 0%
+  ✓ conv-50_q120: "What does Dave aim to do with his p..." - Retrieval: 100%
+  ✓ conv-50_q121: "What did Calvin recently get that i..." - Retrieval: 100%
+  ✓ conv-50_q122: "Who headlined the music festival th..." - Retrieval: 100%
+  ✓ conv-50_q123: "How does Calvin stay motivated when..." - Retrieval: 100%
+  ✓ conv-50_q124: "What activity does Dave find fulfil..." - Retrieval: 100%
+  ✓ conv-50_q125: "Where did Calvin and Dave meet Fran..." - Retrieval: 100%
+  ✓ conv-50_q126: "Which part of Tokyo is described as..." - Retrieval: 100%
+  ✓ conv-50_q127: "What specific location in Tokyo doe..." - Retrieval: 100%
+  ✓ conv-50_q128: "What dish does Dave recommend Calvi..." - Retrieval: 100%
+  ✓ conv-50_q129: "What does Calvin find energizing du..." - Retrieval: 100%
+  ✓ conv-50_q130: "How does Calvin balance his job and..." - Retrieval: 100%
+  ✓ conv-50_q131: "What inspired Calvin's recent music..." - Retrieval: 100%
+  ✓ conv-50_q132: "How does Calvin describe his music ..." - Retrieval: 100%
+  ✓ conv-50_q133: "Why did Dave start working on cars?..." - Retrieval: 100%
+  ✓ conv-50_q134: "What is the toughest part of car re..." - Retrieval: 100%
+  ✓ conv-50_q135: "What does Calvin believe makes an a..." - Retrieval: 100%
+  ✓ conv-50_q136: "When did Dave sell the car he resto..." - Retrieval: 100%
+  ✗ conv-50_q137: "When did Calvin first get intereste..." - Retrieval: 0%
+  ✓ conv-50_q138: "How did Calvin feel about performin..." - Retrieval: 100%
+  ✓ conv-50_q139: "What realization did the nightclub ..." - Retrieval: 100%
+  ✗ conv-50_q140: "What do Dave and Calvin agree on re..." - Retrieval: 0%
+  ✗ conv-50_q141: "Which city is featured in the photo..." - Retrieval: 0%
+  ✓ conv-50_q142: "What did Calvin do recently at his ..." - Retrieval: 100%
+  ✓ conv-50_q143: "What did Dave recently start a blog..." - Retrieval: 100%
+  ✓ conv-50_q144: "What is Dave's way to share his pas..." - Retrieval: 100%
+  ✓ conv-50_q145: "What type of videos does Calvin usu..." - Retrieval: 100%
+  ✓ conv-50_q146: "What type of music has Dave been ge..." - Retrieval: 100%
+  ✓ conv-50_q147: "What tools does Calvin use to boost..." - Retrieval: 100%
+  ✓ conv-50_q148: "What type of content does Dave post..." - Retrieval: 100%
+  ✓ conv-50_q149: "What kind of impact does Dave's blo..." - Retrieval: 100%
+  ✓ conv-50_q150: "Who did Calvin invite to see him pe..." - Retrieval: 100%
+  ✗ conv-50_q151: "What hobby did Calvin take up recen..." - Retrieval: 0%
+  ✗ conv-50_q152: "What new item did Dave buy recently..." - Retrieval: 0%
+  ✓ conv-50_q153: "What type of photos does Dave like ..." - Retrieval: 100%
+  ✓ conv-50_q154: "What event did Calvin attend in Bos..." - Retrieval: 100%
+  ✓ conv-50_q155: "What did Calvin discuss with the co..." - Retrieval: 100%
+  ✓ conv-50_q156: "Where did Dave take a stunning phot..." - Retrieval: 100%
+  ✗ conv-50_q157: "What positive impact does Calvin me..." - Retrieval: 0%
+  ✓ conv-50_q158: "Which DJ was Dave's favorite at the..." - Retrieval: 100%
+  ✓ conv-50_q159: "What advice did Calvin receive from..." - Retrieval: 100%
+  ✓ conv-50_q160: "What is Calvin's new business ventu..." - Retrieval: 100%
+  ✓ conv-50_q161: "What type of cars does Calvin work ..." - Retrieval: 100%
+  ✓ conv-50_q162: "What did Dave receive as a gift fro..." - Retrieval: 100%
+  ✓ conv-50_q163: "What was the necklace Dave received..." - Retrieval: 100%
+  ✗ conv-50_q164: "What did Calvin open in May 2023?..." - Retrieval: 0%
+  ✓ conv-50_q165: "What gives Calvin a sense of achiev..." - Retrieval: 100%
+  ✓ conv-50_q166: "What sports activity is Dave planni..." - Retrieval: 100%
+  ✓ conv-50_q167: "How does Calvin describe his proces..." - Retrieval: 100%
+  ✓ conv-50_q168: "What clothing brand does Calvin own..." - Retrieval: 100%
+  ✓ conv-50_q169: "What workshop did Calvin get picked..." - Retrieval: 100%
+  ✓ conv-50_q170: "What kind of modifications has Calv..." - Retrieval: 100%
+  ✓ conv-50_q171: "What type of car did Calvin work on..." - Retrieval: 100%
+  ✓ conv-50_q172: "What did Dave and his friends recor..." - Retrieval: 100%
+  ✓ conv-50_q173: "Where did Dave start shooting a vid..." - Retrieval: 100%
+  ✓ conv-50_q174: "What design is featured on Dave's g..." - Retrieval: 100%
+  ✓ conv-50_q175: "Why did Dave get his guitar customi..." - Retrieval: 100%
+  ✓ conv-50_q176: "What color glow did Dave customize ..." - Retrieval: 100%
+  ✓ conv-50_q177: "Where did Calvin come back from wit..." - Retrieval: 100%
+  ✓ conv-50_q178: "What emotion does Calvin mention fe..." - Retrieval: 100%
+  ✓ conv-50_q179: "What did Dave book a flight ticket ..." - Retrieval: 100%
+  ✓ conv-50_q180: "Which horror movie did Dave mention..." - Retrieval: 100%
+  ✓ conv-50_q181: "Which song from the childhood of Da..." - Retrieval: 100%
+  ✓ conv-50_q182: "What car did Calvin work on in the ..." - Retrieval: 100%
+  ✓ conv-50_q183: "What does Dave find satisfying abou..." - Retrieval: 100%
+  ✓ conv-50_q184: "What does working on boats represen..." - Retrieval: 100%
+  ✗ conv-50_q185: "What does Dave aim to do with his p..." - Retrieval: 0%
+  ✗ conv-50_q186: "What did Calvin recently get that i..." - Retrieval: 0%
+  ✓ conv-50_q187: "Who headlined the music festival th..." - Retrieval: 100%
+  ✓ conv-50_q188: "Which part of Tokyo is described as..." - Retrieval: 100%
+  ✓ conv-50_q189: "What specific location in Tokyo doe..." - Retrieval: 100%
+  ✓ conv-50_q190: "When did Calvin sell the car he res..." - Retrieval: 100%
+  ✗ conv-50_q191: "When did Calvin first get intereste..." - Retrieval: 0%
+  ✓ conv-50_q192: "What realization did the nightclub ..." - Retrieval: 100%
+  ✓ conv-50_q193: "What did Dave do recently at his Ja..." - Retrieval: 100%
+  ✓ conv-50_q194: "What did Calvin recently start a bl..." - Retrieval: 100%
+  ✓ conv-50_q195: "What type of videos does Dave usual..." - Retrieval: 100%
+  ✗ conv-50_q196: "What type of art has Dave been gett..." - Retrieval: 0%
+  ✓ conv-50_q197: "What type of content does Dave post..." - Retrieval: 100%
+  ✓ conv-50_q198: "What kind of impact does Dave's blo..." - Retrieval: 100%
+  ✓ conv-50_q199: "Who did Dave invite to see him perf..." - Retrieval: 100%
+  ✗ conv-50_q200: "What new item did Calvin buy recent..." - Retrieval: 0%
+  ✓ conv-50_q201: "What type of photos does Calvin lik..." - Retrieval: 100%
+  ✓ conv-50_q202: "What did Dave discuss with the cool..." - Retrieval: 100%
+  ✓ conv-50_q203: "Where did Calvin take a stunning ph..." - Retrieval: 100%
+

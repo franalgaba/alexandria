@@ -23,6 +23,8 @@ function createMemory(overrides: Partial<MemoryObject> = {}): MemoryObject {
     updatedAt: new Date(),
     accessCount: 0,
     codeRefs: [],
+    strength: 1,
+    outcomeScore: 0.5,
     ...overrides,
   };
 }
