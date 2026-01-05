@@ -106,9 +106,9 @@ Get relevant memories for your current task:
 alex pack
 
 # Different detail levels
-alex pack --level minimal   # ~200 tokens, constraints only
-alex pack --level task      # ~500 tokens, + relevant memories
-alex pack --level deep      # ~1500 tokens, + history
+alex pack --level minimal   # ~500 tokens, constraints only
+alex pack --level task      # ~2000 tokens, + relevant memories
+alex pack --level deep      # ~4000 tokens, + history
 ```
 
 ## Core Concepts
@@ -149,9 +149,11 @@ Context packs use progressive disclosure to minimize token usage:
 
 | Level | Tokens | Contents |
 |-------|--------|----------|
-| `minimal` | ~200 | Constraints only |
-| `task` | ~500 | + Relevant decisions, conventions, fixes |
-| `deep` | ~1500 | + Full history and evidence |
+| `minimal` | ~500 | Constraints only |
+| `task` | ~2000 | + Relevant decisions, conventions, fixes |
+| `deep` | ~4000 | + Full history and evidence |
+
+Task/deep packs dedupe constraints and only include approved constraints, capped to leave room for relevant memories.
 
 ### Code Awareness
 

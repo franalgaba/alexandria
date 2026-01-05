@@ -13,6 +13,10 @@ import type { ProgressiveContextPack, SearchResult } from '../types/retriever.ts
 // Note: formatContextPack expects the legacy pack format; we build a simpler ContextPack
 import { HybridSearch } from './hybrid-search.ts';
 import { RetrievalRouter } from './router.ts';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { calculateConfidenceTier } from '../utils/confidence.ts';
+import { parseStructured } from '../types/structured.ts';
 
 export type ContextLevel = 'minimal' | 'task' | 'deep';
 
@@ -61,10 +65,63 @@ const LEVEL_CONFIGS: Record<ContextLevel, LevelConfig> = {
   },
 };
 
+const CONSTRAINT_BUDGET_FRACTION: Record<ContextLevel, number> = {
+  minimal: 1.0,
+  task: 0.4,
+  deep: 0.35,
+};
+
+const MAX_CONSTRAINTS_BY_LEVEL: Record<ContextLevel, number> = {
+  minimal: 60,
+  task: 25,
+  deep: 35,
+};
+
+const DEFAULT_KEYWORDS = new Set([
+  'alexandria',
+  'memory',
+  'memories',
+  'context',
+  'retrieval',
+  'retriever',
+  'benchmark',
+  'locomo',
+  'cli',
+  'tui',
+  'sdk',
+  'hooks',
+  'typescript',
+  'bun',
+  'node',
+  'sqlite',
+  'fts',
+  'vector',
+  'embedding',
+  'judge',
+  'hyde',
+  'revalidation',
+  'checkpoint',
+  'ingest',
+  'index',
+  'session',
+  'pack',
+  'agent',
+  'claude',
+  'anthropic',
+  'security',
+  'token',
+  'jwt',
+  'xss',
+  'sql',
+  'cookie',
+  'auth',
+]);
+
 export class ProgressiveRetriever {
   private db: Database;
   private searcher: HybridSearch;
   private router: RetrievalRouter;
+  private projectKeywords: Set<string> | null = null;
 
   constructor(db: Database) {
     this.db = db;
@@ -81,18 +138,64 @@ export class ProgressiveRetriever {
   ): Promise<ProgressiveContextPack> {
     const config = LEVEL_CONFIGS[level];
     const tokenBudget = options.tokenBudget ?? config.tokenBudget;
+    const constraintBudget = Math.floor(
+      tokenBudget * (CONSTRAINT_BUDGET_FRACTION[level] ?? 1.0),
+    );
+    let constraintTokensUsed = 0;
+    let constraintCount = 0;
+    const projectKeywords = this.getProjectKeywords();
+    const seenConstraintKeys = new Set<string>();
 
     const memories: MemoryObject[] = [];
     let tokensUsed = 0;
+    const seenIds = new Set<string>();
+    const seenContent = new Set<string>();
+
+    const addMemory = (memory: MemoryObject): boolean => {
+      if (seenIds.has(memory.id)) return false;
+      const contentKey = normalizeContentKey(memory.content);
+      if (contentKey && seenContent.has(contentKey)) return false;
+      const tokens = this.estimateTokens(memory.content);
+
+      const isConstraint = memory.objectType === 'constraint';
+      let constraintKey = '';
+      if (isConstraint) {
+        if (isIncompleteConstraint(memory.content)) return false;
+        if (!shouldIncludeConstraint(memory, projectKeywords)) return false;
+        constraintKey = normalizeConstraintKey(memory.content);
+        if (constraintKey && seenConstraintKeys.has(constraintKey)) return false;
+        if (constraintCount >= (MAX_CONSTRAINTS_BY_LEVEL[level] ?? 0)) return false;
+        if (constraintTokensUsed + tokens > constraintBudget) return false;
+      } else if (!shouldIncludeMemory(memory, projectKeywords)) {
+        return false;
+      }
+
+      if (tokensUsed + tokens > tokenBudget) return false;
+
+      memories.push(memory);
+      tokensUsed += tokens;
+      seenIds.add(memory.id);
+      if (contentKey) {
+        seenContent.add(contentKey);
+      }
+      if (isConstraint) {
+        constraintTokensUsed += tokens;
+        constraintCount += 1;
+        if (constraintKey) {
+          seenConstraintKeys.add(constraintKey);
+        }
+      }
+      return true;
+    };
 
     // 1. Always include constraints (highest priority)
     if (config.includeConstraints) {
       const constraints = this.getConstraints();
       for (const c of constraints) {
-        const tokens = this.estimateTokens(c.content);
-        if (tokensUsed + tokens <= tokenBudget) {
-          memories.push(c);
-          tokensUsed += tokens;
+        if (!addMemory(c)) {
+          if (constraintCount >= (MAX_CONSTRAINTS_BY_LEVEL[level] ?? 0)) {
+            break;
+          }
         }
       }
     }
@@ -101,11 +204,7 @@ export class ProgressiveRetriever {
     if (config.includeWarnings) {
       const warnings = this.getWarnings();
       for (const w of warnings) {
-        const tokens = this.estimateTokens(w.content);
-        if (tokensUsed + tokens <= tokenBudget) {
-          memories.push(w);
-          tokensUsed += tokens;
-        }
+        addMemory(w);
       }
     }
 
@@ -113,14 +212,7 @@ export class ProgressiveRetriever {
     if (options.priorityIds && options.priorityIds.length > 0) {
       const priorityMemories = this.getMemoriesByIds(options.priorityIds);
       for (const m of priorityMemories) {
-        // Skip if already included (e.g., it's a constraint)
-        if (memories.some((existing) => existing.id === m.id)) continue;
-
-        const tokens = this.estimateTokens(m.content);
-        if (tokensUsed + tokens <= tokenBudget) {
-          memories.push(m);
-          tokensUsed += tokens;
-        }
+        addMemory(m);
       }
     }
 
@@ -135,34 +227,29 @@ export class ProgressiveRetriever {
         memoriesToAdd = results.map((r) => r.object);
       } else {
         // No query: get recent high-value memories (decisions, known_fix, conventions)
-        memoriesToAdd = this.getRecentHighValueMemories();
+        memoriesToAdd = this.getRecentHighValueMemories().filter((memory) =>
+          shouldIncludeMemory(memory, projectKeywords),
+        );
       }
 
       for (const obj of memoriesToAdd) {
-        // Skip if already included
-        if (memories.some((m) => m.id === obj.id)) continue;
-
-        const tokens = this.estimateTokens(obj.content);
-        if (tokensUsed + tokens <= tokenBudget) {
-          memories.push(obj);
-          tokensUsed += tokens;
-        }
+        addMemory(obj);
       }
     }
 
     // 4. Include related memories (semantic neighbors)
     if (config.includeRelated && options.query) {
       const related = await this.getRelatedMemories(memories, tokenBudget - tokensUsed);
-      memories.push(...related);
-      tokensUsed += related.reduce((sum, m) => sum + this.estimateTokens(m.content), 0);
+      for (const memory of related) {
+        addMemory(memory);
+      }
     }
 
     // 5. Include historical decisions
     if (config.includeHistory && options.query) {
       const history = this.getHistoricalDecisions(options.query, tokenBudget - tokensUsed);
       for (const h of history) {
-        if (memories.some((m) => m.id === h.id)) continue;
-        memories.push(h);
+        addMemory(h);
       }
     }
 
@@ -220,9 +307,10 @@ export class ProgressiveRetriever {
       SELECT * FROM memory_objects 
       WHERE object_type = 'constraint' 
         AND status = 'active'
+        AND review_status = 'approved'
       ORDER BY created_at DESC
     `);
-    return stmt.all().map(this.rowToMemory);
+    return stmt.all().map((row) => this.rowToMemory(row));
   }
 
   /**
@@ -235,7 +323,7 @@ export class ProgressiveRetriever {
       ORDER BY updated_at DESC
       LIMIT 5
     `);
-    return stmt.all().map(this.rowToMemory);
+    return stmt.all().map((row) => this.rowToMemory(row));
   }
 
   /**
@@ -253,7 +341,7 @@ export class ProgressiveRetriever {
         created_at DESC
       LIMIT 20
     `);
-    return stmt.all().map(this.rowToMemory);
+    return stmt.all().map((row) => this.rowToMemory(row));
   }
 
   /**
@@ -386,24 +474,119 @@ export class ProgressiveRetriever {
    * Convert database row to MemoryObject
    */
   private rowToMemory(row: any): MemoryObject {
+    const codeRefs = safeJsonParse(row.code_refs, []);
+    const evidenceEventIds = safeJsonParse(row.evidence_event_ids, []);
+    const lastVerifiedAt = row.last_verified_at ? new Date(row.last_verified_at) : undefined;
+    const reviewStatus = row.review_status as MemoryObject['reviewStatus'];
+    const status = row.status as MemoryObject['status'];
+    const createdAt = row.created_at ? new Date(row.created_at) : new Date();
+    const updatedAt = row.updated_at ? new Date(row.updated_at) : createdAt;
+    const lastAccessed = row.last_accessed ? new Date(row.last_accessed) : undefined;
+    const lastReinforcedAt = row.last_reinforced_at
+      ? new Date(row.last_reinforced_at)
+      : undefined;
+    const supersedes = row.supersedes ? safeJsonParse(row.supersedes, undefined) : undefined;
+
+    let scopeType = row.scope_type ?? 'project';
+    let scopePath = row.scope_path ?? undefined;
+    if (!row.scope_type && row.scope) {
+      const parsedScope = safeJsonParse(row.scope, {});
+      if (parsedScope && typeof parsedScope === 'object') {
+        scopeType = parsedScope.type ?? scopeType;
+        scopePath = parsedScope.path ?? scopePath;
+      }
+    }
+
+    const confidenceTier = calculateConfidenceTier({
+      codeRefs,
+      evidenceEventIds,
+      reviewStatus,
+      lastVerifiedAt,
+    });
+
     return {
       id: row.id,
       content: row.content,
       objectType: row.object_type,
-      scope: JSON.parse(row.scope || '{"type":"project"}'),
-      status: row.status,
-      confidence: row.confidence,
-      confidenceTier: row.confidence_tier || 'inferred',
-      evidenceEventIds: JSON.parse(row.evidence_event_ids || '[]'),
-      reviewStatus: row.review_status,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      accessCount: row.access_count || 0,
-      lastAccessed: row.last_accessed,
-      codeRefs: JSON.parse(row.code_refs || '[]'),
-      supersedes: row.supersedes ? JSON.parse(row.supersedes) : undefined,
-      supersededBy: row.superseded_by,
+      scope: {
+        type: scopeType,
+        path: scopePath ?? undefined,
+      },
+      status,
+      supersededBy: row.superseded_by ?? undefined,
+      confidence: row.confidence ?? 'medium',
+      confidenceTier,
+      evidenceEventIds,
+      evidenceExcerpt: row.evidence_excerpt ?? undefined,
+      reviewStatus,
+      reviewedAt: row.reviewed_at ? new Date(row.reviewed_at) : undefined,
+      createdAt,
+      updatedAt,
+      accessCount: row.access_count ?? 0,
+      lastAccessed,
+      codeRefs,
+      lastVerifiedAt,
+      supersedes,
+      structured: parseStructured(row.structured),
+      strength: row.strength ?? 1.0,
+      lastReinforcedAt,
+      outcomeScore: row.outcome_score ?? 0.5,
     };
+  }
+
+  private getProjectKeywords(): Set<string> {
+    if (this.projectKeywords) {
+      return this.projectKeywords;
+    }
+
+    const keywords = new Set(DEFAULT_KEYWORDS);
+    const root = process.cwd();
+    const packagePath = join(root, 'package.json');
+    if (existsSync(packagePath)) {
+      try {
+        const pkg = JSON.parse(readFileSync(packagePath, 'utf8')) as {
+          name?: string;
+          description?: string;
+          keywords?: string[];
+          bin?: Record<string, string>;
+        };
+        this.addTokens(keywords, pkg.name);
+        this.addTokens(keywords, pkg.description);
+        if (pkg.keywords) {
+          for (const keyword of pkg.keywords) {
+            this.addTokens(keywords, keyword);
+          }
+        }
+        if (pkg.bin) {
+          for (const name of Object.keys(pkg.bin)) {
+            this.addTokens(keywords, name);
+          }
+        }
+      } catch {
+        // Ignore malformed package.json
+      }
+    }
+
+    const readmePath = join(root, 'README.md');
+    if (existsSync(readmePath)) {
+      try {
+        const readme = readFileSync(readmePath, 'utf8').slice(0, 4000);
+        this.addTokens(keywords, readme);
+      } catch {
+        // Ignore missing/invalid README
+      }
+    }
+
+    this.projectKeywords = keywords;
+    return keywords;
+  }
+
+  private addTokens(target: Set<string>, text: string | undefined | null): void {
+    if (!text) return;
+    const tokens = extractKeywords(text);
+    for (const token of tokens) {
+      target.add(token);
+    }
   }
 }
 
@@ -436,3 +619,134 @@ export function recommendLevel(query: string): ContextLevel {
 export function getLevelConfig(level: ContextLevel): LevelConfig {
   return { ...LEVEL_CONFIGS[level] };
 }
+
+function normalizeContentKey(content: string): string {
+  return content
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+function normalizeConstraintKey(content: string): string {
+  const tokens = Array.from(extractKeywords(content));
+  tokens.sort();
+  return tokens.join(' ');
+}
+
+function isIncompleteConstraint(content: string): boolean {
+  const trimmed = content.trim();
+  if (!trimmed) return true;
+  if (trimmed.endsWith(':')) {
+    return true;
+  }
+  return false;
+}
+
+function extractKeywords(text: string): Set<string> {
+  const tokens = text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter((token) => token.length >= 3 && !STOPWORDS.has(token));
+  return new Set(tokens);
+}
+
+function shouldIncludeConstraint(
+  constraint: MemoryObject,
+  projectKeywords: Set<string>,
+): boolean {
+  if (projectKeywords.size === 0) return true;
+  const tokens = extractKeywords(constraint.content);
+  if (tokens.size === 0) return true;
+
+  for (const token of tokens) {
+    if (projectKeywords.has(token)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function shouldIncludeMemory(
+  memory: MemoryObject,
+  projectKeywords: Set<string>,
+): boolean {
+  if (projectKeywords.size === 0) return true;
+  const tokens = extractKeywords(memory.content);
+  if (tokens.size === 0) return true;
+
+  for (const token of tokens) {
+    if (projectKeywords.has(token)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function safeJsonParse<T>(value: string | null | undefined, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+const STOPWORDS = new Set([
+  'the',
+  'and',
+  'for',
+  'with',
+  'from',
+  'that',
+  'this',
+  'these',
+  'those',
+  'use',
+  'using',
+  'used',
+  'should',
+  'must',
+  'always',
+  'never',
+  'into',
+  'over',
+  'under',
+  'when',
+  'where',
+  'what',
+  'which',
+  'who',
+  'why',
+  'how',
+  'before',
+  'after',
+  'during',
+  'while',
+  'because',
+  'while',
+  'then',
+  'than',
+  'with',
+  'without',
+  'system',
+  'project',
+  'workflow',
+  'process',
+  'create',
+  'creating',
+  'implement',
+  'implementation',
+  'ensure',
+  'ensure',
+  'update',
+  'updates',
+  'requires',
+  'require',
+  'required',
+  'avoid',
+]);

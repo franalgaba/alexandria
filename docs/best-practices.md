@@ -124,26 +124,28 @@ Alexandria auto-calculates confidence based on evidence:
 
 Choose the right level for your task:
 
-### Minimal (~200 tokens)
+### Minimal (~500 tokens)
 ```bash
 alex pack --level minimal
 ```
 - Just constraints
 - Use for: Quick fixes, simple changes
 
-### Task (~500 tokens, default)
+### Task (~2000 tokens, default)
 ```bash
 alex pack --level task
 ```
 - Constraints + relevant memories
 - Use for: Most development tasks
 
-### Deep (~1500 tokens)
+### Deep (~4000 tokens)
 ```bash
 alex pack --level deep
 ```
 - + Related memories + history
 - Use for: Complex features, unfamiliar areas
+
+Constraints are approved-only, deduped, and capped in task/deep packs to preserve room for relevant memories.
 
 ## Scoping
 

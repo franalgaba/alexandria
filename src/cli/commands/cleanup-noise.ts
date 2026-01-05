@@ -12,6 +12,7 @@ interface CleanupNoiseArgs {
   pattern?: string;
   type?: string;
   duplicates: boolean;
+  supersedeDuplicates: boolean;
   verbose: boolean;
 }
 
@@ -29,7 +30,7 @@ const NOISE_PATTERNS = [
 ];
 
 export const command = 'cleanup-noise';
-export const describe = 'Retire noisy memories from the database';
+export const describe = 'Retire noisy memories and supersede duplicates';
 
 export function builder(yargs: Argv) {
   return yargs
@@ -49,7 +50,12 @@ export function builder(yargs: Argv) {
     })
     .option('duplicates', {
       type: 'boolean',
-      description: 'Also detect and retire duplicate memories',
+      description: 'Also detect duplicate memories',
+      default: true,
+    })
+    .option('supersedeDuplicates', {
+      type: 'boolean',
+      description: 'Mark duplicate memories as superseded instead of retiring them',
       default: true,
     })
     .option('verbose', {
@@ -188,26 +194,28 @@ export async function handler(args: ArgumentsCamelCase<CleanupNoiseArgs>) {
 
   // Calculate total to retire
   const noiseIds = new Set(noiseMatches.map((m) => m.memory.id));
-  const duplicateIds = new Set<string>();
+  const duplicateSupersedes = new Map<string, string>();
   for (const group of duplicates.values()) {
     // Keep the newest, retire the rest
     const sorted = group.sort(
       (a: MemoryObject, b: MemoryObject) => b.createdAt.getTime() - a.createdAt.getTime(),
     );
+    const keeper = sorted[0];
+    if (!keeper) continue;
     for (const memory of sorted.slice(1)) {
-      duplicateIds.add(memory.id);
+      duplicateSupersedes.set(memory.id, keeper.id);
     }
   }
 
-  const allToRetire = new Set([...noiseIds, ...duplicateIds]);
+  const allToUpdate = new Set([...noiseIds, ...duplicateSupersedes.keys()]);
 
   console.log(`\n📊 Summary:`);
   console.log(`   Noisy memories: ${noiseIds.size}`);
-  console.log(`   Duplicate memories: ${duplicateIds.size}`);
-  console.log(`   Total to retire: ${allToRetire.size}`);
-  console.log(`   Remaining after cleanup: ${memories.length - allToRetire.size}`);
+  console.log(`   Duplicate memories: ${duplicateSupersedes.size}`);
+  console.log(`   Total to update: ${allToUpdate.size}`);
+  console.log(`   Remaining after cleanup: ${memories.length - allToUpdate.size}`);
 
-  if (allToRetire.size === 0) {
+  if (allToUpdate.size === 0) {
     console.log('\n✅ No noise found. Database is clean!');
     return;
   }
@@ -217,16 +225,21 @@ export async function handler(args: ArgumentsCamelCase<CleanupNoiseArgs>) {
     console.log('\n🗑️  Retiring memories...');
 
     let retired = 0;
-    for (const id of allToRetire) {
+    for (const id of allToUpdate) {
+      const supersededBy = duplicateSupersedes.get(id);
+      const update =
+        supersededBy && args.supersedeDuplicates && !noiseIds.has(id)
+          ? { status: 'superseded' as const, supersededBy }
+          : { status: 'retired' as const };
       try {
-        store.update(id, { status: 'retired' });
+        store.update(id, update);
         retired++;
       } catch (error) {
-        console.error(`Failed to retire ${id}:`, error);
+        console.error(`Failed to update ${id}:`, error);
       }
     }
 
-    console.log(`\n✅ Retired ${retired} memories`);
+    console.log(`\n✅ Updated ${retired} memories`);
     console.log('   Run "alex stats" to see updated counts');
   } else {
     console.log('\n💡 Run with --no-dry-run to execute cleanup:');

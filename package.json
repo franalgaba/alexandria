@@ -2,6 +2,7 @@
   "name": "alexandria",
   "version": "0.1.0",
   "type": "module",
+  "license": "MIT",
   "main": "dist/index.js",
   "bin": {
     "alex": "src/cli.ts"
@@ -11,7 +12,22 @@
     "dev": "bun --watch src/cli.ts",
     "test": "bun test",
     "check": "biome check --write .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "prepack": "bun run build"
+  },
+  "files": [
+    "dist",
+    "src",
+    "docs",
+    "integrations",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
   },
   "dependencies": {
     "@opentui/core": "^0.1.65",

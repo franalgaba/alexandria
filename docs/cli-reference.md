@@ -207,9 +207,9 @@ Generate a context pack for the current task.
 ```bash
 alex pack                              # Default task level
 alex pack --task "Add auth"            # Explicit task
-alex pack --level minimal              # Constraints only (~200 tokens)
-alex pack --level task                 # + Relevant (~500 tokens)
-alex pack --level deep                 # + History (~1500 tokens)
+alex pack --level minimal              # Constraints only (~500 tokens)
+alex pack --level task                 # + Relevant (~2000 tokens)
+alex pack --level deep                 # + History (~4000 tokens)
 alex pack --hot                        # Prioritize frequently accessed memories
 alex pack --format json                # JSON output
 ```
@@ -220,6 +220,9 @@ alex pack --format json                # JSON output
 - `--budget, -b` - Token budget
 - `--format, -f` - Output format: `yaml`, `json`, `text`
 - `--hot` - Prioritize frequently accessed memories (heatmap)
+
+Notes:
+- Constraints are approved-only, deduped, and capped to preserve room for relevant memories.
 
 ## Code Awareness
 
@@ -315,7 +318,7 @@ Feedback influences memory ranking via outcome scores.
 
 ### `alex cleanup-noise`
 
-Retire noisy or duplicate memories from the database.
+Retire noisy memories and supersede duplicates.
 
 ```bash
 alex cleanup-noise                    # Dry run (preview)
@@ -323,13 +326,15 @@ alex cleanup-noise --no-dry-run       # Execute cleanup
 alex cleanup-noise --verbose          # Show details
 alex cleanup-noise --pattern "TODO"   # Custom regex pattern
 alex cleanup-noise --type convention  # Only check specific type
+alex cleanup-noise --no-supersede-duplicates  # Retire duplicates instead
 ```
 
 **Options:**
 - `--dry-run` - Preview without changes (default: true)
 - `--pattern` - Additional regex pattern to match noise
 - `--type` - Only check memories of this type
-- `--duplicates` - Also detect and retire duplicates (default: true)
+- `--duplicates` - Also detect duplicates (default: true)
+- `--supersede-duplicates` - Supersede duplicates instead of retiring (default: true)
 - `--verbose` - Show details of each noisy memory
 
 **Detected Noise Patterns:**

@@ -194,6 +194,16 @@ bun test
 bun run check
 ```
 
+## Contributing
+
+See `CONTRIBUTING.md` for setup details and contribution guidelines.
+
+## Release
+
+Releases are published via GitHub Actions when a tag like `v0.1.0` is pushed.
+Make sure `package.json` matches the tag and `NPM_TOKEN` is configured in the
+repository secrets.
+
 ## License
 
 MIT
