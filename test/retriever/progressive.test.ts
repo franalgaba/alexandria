@@ -18,9 +18,9 @@ describe('ProgressiveRetriever', () => {
     retriever = new ProgressiveRetriever(db);
     store = new MemoryObjectStore(db);
 
-    // Add test memories
+    // Add test memories (must include keywords matching DEFAULT_KEYWORDS: bun, typescript, sqlite, node, etc.)
     store.create({
-      content: 'Always run tests before committing',
+      content: 'Always use bun for running tests',
       objectType: 'constraint',
       scope: { type: 'project' },
       reviewStatus: 'approved',
@@ -34,14 +34,14 @@ describe('ProgressiveRetriever', () => {
     });
 
     store.create({
-      content: 'Database decision: use SQLite',
+      content: 'Database decision: use SQLite for storage',
       objectType: 'decision',
       scope: { type: 'project' },
       reviewStatus: 'approved',
     });
 
     store.create({
-      content: 'API endpoint failed with 500 error',
+      content: 'Node API endpoint failed with 500 error',
       objectType: 'failed_attempt',
       scope: { type: 'project' },
       reviewStatus: 'approved',

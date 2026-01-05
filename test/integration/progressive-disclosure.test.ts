@@ -47,12 +47,14 @@ describe('Progressive Disclosure Integration', () => {
       )
     `);
 
-    // Create FTS table
+    // Create FTS table (must match the table name used in production: memory_objects_fts)
     db.run(`
-      CREATE VIRTUAL TABLE memory_fts USING fts5(
-        id,
+      CREATE VIRTUAL TABLE memory_objects_fts USING fts5(
         content,
-        object_type
+        scope_path,
+        content='memory_objects',
+        content_rowid='rowid',
+        tokenize='porter unicode61'
       )
     `);
 
@@ -84,13 +86,14 @@ describe('Progressive Disclosure Integration', () => {
   describe('Session Start Flow', () => {
     test('prioritizes hot memories at session start', () => {
       // Insert memories with varying access counts
+      // Note: Must use review_status='approved' and keywords matching DEFAULT_KEYWORDS (bun, typescript, node, sqlite, etc.)
       db.run(`
-        INSERT INTO memory_objects (id, content, object_type, access_count, last_accessed, status)
+        INSERT INTO memory_objects (id, content, object_type, access_count, last_accessed, status, review_status)
         VALUES
-          ('hot1', 'Use Bun for TypeScript', 'constraint', 50, datetime('now'), 'active'),
-          ('hot2', 'Never commit .env files', 'constraint', 40, datetime('now'), 'active'),
-          ('cold1', 'Use consistent naming', 'convention', 5, datetime('now', '-60 days'), 'active'),
-          ('cold2', 'Format with Prettier', 'convention', 3, datetime('now', '-60 days'), 'active')
+          ('hot1', 'Use Bun for TypeScript runtime', 'constraint', 50, datetime('now'), 'active', 'approved'),
+          ('hot2', 'Never commit node secrets to git', 'constraint', 40, datetime('now'), 'active', 'approved'),
+          ('cold1', 'Use consistent naming', 'convention', 5, datetime('now', '-60 days'), 'active', 'approved'),
+          ('cold2', 'Format with Prettier', 'convention', 3, datetime('now', '-60 days'), 'active', 'approved')
       `);
 
       // Get hot memory IDs
@@ -109,8 +112,8 @@ describe('Progressive Disclosure Integration', () => {
 
     test('retriever does not increment access count (no feedback loop)', () => {
       db.run(`
-        INSERT INTO memory_objects (id, content, object_type, access_count, last_accessed, status)
-        VALUES ('m1', 'Test memory', 'constraint', 10, datetime('now'), 'active')
+        INSERT INTO memory_objects (id, content, object_type, access_count, last_accessed, status, review_status)
+        VALUES ('m1', 'Use bun for package management', 'constraint', 10, datetime('now'), 'active', 'approved')
       `);
 
       const retriever = new ProgressiveRetriever(db);
@@ -250,19 +253,14 @@ describe('Progressive Disclosure Integration', () => {
 
   describe('Full Disclosure Flow', () => {
     test('progressive retrieval respects priority IDs', async () => {
-      // Insert memories
+      // Insert memories with keywords matching DEFAULT_KEYWORDS (bun, typescript, sqlite, node, etc.)
       db.run(`
-        INSERT INTO memory_objects (id, content, object_type, access_count, last_accessed, status)
+        INSERT INTO memory_objects (id, content, object_type, access_count, last_accessed, status, review_status)
         VALUES
-          ('c1', 'Use Bun for TS', 'constraint', 100, datetime('now'), 'active'),
-          ('c2', 'No .env commits', 'constraint', 80, datetime('now'), 'active'),
-          ('d1', 'Chose SQLite for simplicity', 'decision', 5, datetime('now', '-30 days'), 'active')
+          ('c1', 'Use Bun for TypeScript runtime', 'constraint', 100, datetime('now'), 'active', 'approved'),
+          ('c2', 'Never commit node secrets', 'constraint', 80, datetime('now'), 'active', 'approved'),
+          ('d1', 'Chose SQLite for simplicity', 'decision', 5, datetime('now', '-30 days'), 'active', 'approved')
       `);
-
-      // Also insert into FTS for searching
-      db.run(`INSERT INTO memory_fts (id, content, object_type) VALUES ('c1', 'Use Bun for TS', 'constraint')`);
-      db.run(`INSERT INTO memory_fts (id, content, object_type) VALUES ('c2', 'No .env commits', 'constraint')`);
-      db.run(`INSERT INTO memory_fts (id, content, object_type) VALUES ('d1', 'Chose SQLite for simplicity', 'decision')`);
 
       // Get hot memory IDs
       const heatmap = new AccessHeatmap(db);
@@ -283,11 +281,11 @@ describe('Progressive Disclosure Integration', () => {
 
     test('deduplication prevents re-injection', async () => {
       db.run(`
-        INSERT INTO memory_objects (id, content, object_type, status)
+        INSERT INTO memory_objects (id, content, object_type, status, review_status)
         VALUES
-          ('m1', 'Memory 1', 'constraint', 'active'),
-          ('m2', 'Memory 2', 'constraint', 'active'),
-          ('m3', 'Memory 3', 'decision', 'active')
+          ('m1', 'Use bun for builds', 'constraint', 'active', 'approved'),
+          ('m2', 'Use typescript for types', 'constraint', 'active', 'approved'),
+          ('m3', 'Chose sqlite for storage', 'decision', 'active', 'approved')
       `);
 
       const retriever = new ProgressiveRetriever(db);
@@ -311,9 +309,9 @@ describe('Progressive Disclosure Integration', () => {
   describe('Code Refs in Context', () => {
     test('memories include code refs in context', () => {
       db.run(`
-        INSERT INTO memory_objects (id, content, object_type, code_refs, status)
-        VALUES ('m1', 'Use getConnection for DB', 'constraint',
-                '[{"path": "src/stores/connection.ts", "line": 15}]', 'active')
+        INSERT INTO memory_objects (id, content, object_type, code_refs, status, review_status)
+        VALUES ('m1', 'Use sqlite for database connections', 'constraint',
+                '[{"path": "src/stores/connection.ts", "line": 15}]', 'active', 'approved')
       `);
 
       const retriever = new ProgressiveRetriever(db);
