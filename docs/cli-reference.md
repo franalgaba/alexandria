@@ -71,6 +71,7 @@ alex checkpoint --show-stats              # Show buffer stats first
 - `--session` - Target specific session
 - `--reason` - Reason for checkpoint
 - `--show-stats` - Show buffer statistics
+- `--curator` - Override curator mode: `tier0`, `tier1`, `tier2`
 
 ## Memory Management
 
@@ -248,7 +249,14 @@ Check for stale memories.
 ```bash
 alex check            # Show stale memories
 alex check --json     # JSON output
+alex check --auto-verify-unchanged
+alex check --include-uncommitted
 ```
+
+**Options:**
+- `--json` - JSON output
+- `--auto-verify-unchanged` - Auto-verify memories whose files have not changed since last commit
+- `--include-uncommitted` - Include uncommitted file changes in staleness checks
 
 ### `alex verify <id>`
 
@@ -482,3 +490,6 @@ alex disclose --query "remind me about auth" -f text
 | `ALEXANDRIA_CONTEXT_THRESHOLD` | `50` | Context window % before suggesting clear |
 | `ALEXANDRIA_DISCLOSURE_THRESHOLD` | `15` | Events before re-evaluating disclosure |
 | `ALEXANDRIA_ERROR_BURST_THRESHOLD` | `3` | Consecutive errors before escalation |
+| `ALEXANDRIA_RECENCY_HALF_LIFE_DAYS` | `30` | Recency boost half-life for ranking |
+| `ALEXANDRIA_RECENCY_MAX_BOOST` | `0.2` | Max recency boost multiplier |
+| `ALEXANDRIA_TOKENIZER_PATH` | unset | Local tokenizer path for accurate token counts |

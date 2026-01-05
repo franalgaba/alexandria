@@ -15,6 +15,7 @@
  */
 
 import type { Database } from 'bun:sqlite';
+import { FTSIndex } from '../indexes/fts.ts';
 import { EventStore } from '../stores/events.ts';
 import { MemoryObjectStore } from '../stores/memory-objects.ts';
 import { SessionStore } from '../stores/sessions.ts';
@@ -87,10 +88,13 @@ const DEFAULT_CONFIG: CheckpointConfig = {
   curatorMode: 'tier0', // Start conservative, upgraded to tier1 if LLM available
 };
 
+const SIMILARITY_THRESHOLD = 0.8;
+
 export class Checkpoint {
   private db: Database;
   private eventStore: EventStore;
   private memoryStore: MemoryObjectStore;
+  private fts: FTSIndex;
   private sessionStore: SessionStore;
   private deterministicCurator: DeterministicCurator;
   private intelligentExtractor: IntelligentExtractor;
@@ -125,6 +129,7 @@ export class Checkpoint {
     this.db = db;
     this.eventStore = new EventStore(db);
     this.memoryStore = new MemoryObjectStore(db);
+    this.fts = new FTSIndex(db);
     this.sessionStore = new SessionStore(db);
     this.deterministicCurator = new DeterministicCurator();
     this.intelligentExtractor = new IntelligentExtractor(db, config.llmProvider);
@@ -489,7 +494,7 @@ export class Checkpoint {
    * Get deduplication key for candidate
    */
   private getCandidateKey(candidate: MemoryCandidate): string {
-    return candidate.content.toLowerCase().slice(0, 100).replace(/\s+/g, ' ').trim();
+    return this.getContentKey(candidate.content);
   }
 
   /**
@@ -571,7 +576,7 @@ export class Checkpoint {
           confidence: candidate.confidence,
           evidenceEventIds: candidate.evidenceEventIds,
           evidenceExcerpt: candidate.evidenceExcerpt,
-          reviewStatus: candidate.confidence === 'high' ? 'approved' : 'pending',
+          reviewStatus: this.shouldAutoApprove(candidate) ? 'approved' : 'pending',
           codeRefs: candidate.codeRefs,
         });
 
@@ -586,23 +591,81 @@ export class Checkpoint {
    * Find similar existing memory (simple content similarity)
    */
   private async findSimilarMemory(candidate: MemoryCandidate) {
-    // Simple approach: look for exact type + similar content
-    const allMemories = this.memoryStore.list({ status: ['active'] });
-
     const candidateKey = this.getCandidateKey(candidate);
+    const candidates = this.findCandidateMemories(candidate);
 
-    for (const memory of allMemories) {
+    for (const memory of candidates) {
       if (memory.objectType !== candidate.suggestedType) continue;
 
-      const memoryKey = memory.content.toLowerCase().slice(0, 100).replace(/\s+/g, ' ').trim();
+      const memoryKey = this.getContentKey(memory.content);
 
       // Simple similarity: same prefix
       if (candidateKey === memoryKey) {
         return memory;
       }
+
+      const similarity = this.calculateSimilarity(candidate.content, memory.content);
+      if (similarity >= SIMILARITY_THRESHOLD) {
+        return memory;
+      }
     }
 
     return null;
+  }
+
+  /**
+   * Determine whether a memory can be auto-approved
+   */
+  private shouldAutoApprove(candidate: MemoryCandidate): boolean {
+    const hasEvidence = candidate.evidenceEventIds.length > 0;
+    const hasCodeRefs = candidate.codeRefs && candidate.codeRefs.length > 0;
+    const isHighConfidence = candidate.confidence === 'high' || candidate.confidence === 'certain';
+    return isHighConfidence && (hasEvidence || hasCodeRefs);
+  }
+
+  /**
+   * Find likely candidate memories for deduplication
+   */
+  private findCandidateMemories(candidate: MemoryCandidate) {
+    const ftsResults = this.fts.searchObjects(candidate.content, ['active'], 10);
+    if (ftsResults.length > 0) {
+      return ftsResults.map((r) => r.object);
+    }
+
+    return this.memoryStore.list({ status: ['active'], limit: 200 });
+  }
+
+  /**
+   * Normalize content for quick comparison
+   */
+  private getContentKey(content: string): string {
+    return content.toLowerCase().slice(0, 100).replace(/\s+/g, ' ').trim();
+  }
+
+  /**
+   * Calculate content similarity (simple Jaccard-like)
+   */
+  private calculateSimilarity(a: string, b: string): number {
+    const tokensA = new Set(this.tokenize(a));
+    const tokensB = new Set(this.tokenize(b));
+
+    if (tokensA.size === 0 || tokensB.size === 0) return 0;
+
+    const intersection = new Set([...tokensA].filter((x) => tokensB.has(x)));
+    const union = new Set([...tokensA, ...tokensB]);
+
+    return intersection.size / union.size;
+  }
+
+  /**
+   * Tokenize text for comparison
+   */
+  private tokenize(text: string): string[] {
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter((t) => t.length > 2);
   }
 
   /**

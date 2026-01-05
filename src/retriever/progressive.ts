@@ -11,6 +11,7 @@ import type { Database } from 'bun:sqlite';
 import type { MemoryObject } from '../types/memory-objects.ts';
 import type { ProgressiveContextPack, SearchResult } from '../types/retriever.ts';
 // Note: formatContextPack expects the legacy pack format; we build a simpler ContextPack
+import { estimateTokens, estimateTokensAsync } from '../utils/tokens.ts';
 import { HybridSearch } from './hybrid-search.ts';
 import { RetrievalRouter } from './router.ts';
 import { existsSync, readFileSync } from 'node:fs';
@@ -155,7 +156,7 @@ export class ProgressiveRetriever {
       if (seenIds.has(memory.id)) return false;
       const contentKey = normalizeContentKey(memory.content);
       if (contentKey && seenContent.has(contentKey)) return false;
-      const tokens = this.estimateTokens(memory.content);
+      const tokens = estimateTokens(memory.content);
 
       const isConstraint = memory.objectType === 'constraint';
       let constraintKey = '';
@@ -247,7 +248,7 @@ export class ProgressiveRetriever {
 
     // 5. Include historical decisions
     if (config.includeHistory && options.query) {
-      const history = this.getHistoricalDecisions(options.query, tokenBudget - tokensUsed);
+      const history = await this.getHistoricalDecisions(options.query, tokenBudget - tokensUsed);
       for (const h of history) {
         addMemory(h);
       }
@@ -266,7 +267,7 @@ export class ProgressiveRetriever {
 
     const constraints = this.getConstraints();
     for (const c of constraints) {
-      const tokens = this.estimateTokens(c.content);
+      const tokens = estimateTokens(c.content);
       if (tokensUsed + tokens <= config.tokenBudget) {
         memories.push(c);
         tokensUsed += tokens;
@@ -275,7 +276,7 @@ export class ProgressiveRetriever {
 
     const warnings = this.getWarnings();
     for (const w of warnings) {
-      const tokens = this.estimateTokens(w.content);
+      const tokens = estimateTokens(w.content);
       if (tokensUsed + tokens <= config.tokenBudget) {
         memories.push(w);
         tokensUsed += tokens;
@@ -365,7 +366,7 @@ export class ProgressiveRetriever {
       for (const r of results) {
         if (seenIds.has(r.object.id)) continue;
 
-        const tokens = this.estimateTokens(r.object.content);
+        const tokens = await estimateTokensAsync(r.object.content);
         if (tokensUsed + tokens > tokenBudget) break;
 
         related.push(r.object);
@@ -380,7 +381,7 @@ export class ProgressiveRetriever {
   /**
    * Get historical decisions related to query
    */
-  private getHistoricalDecisions(query: string, tokenBudget: number): MemoryObject[] {
+  private async getHistoricalDecisions(query: string, tokenBudget: number): Promise<MemoryObject[]> {
     // Get decisions including stale ones for historical context
     const stmt = this.db.prepare(`
       SELECT * FROM memory_objects 
@@ -394,7 +395,7 @@ export class ProgressiveRetriever {
     let tokensUsed = 0;
 
     for (const d of decisions) {
-      const tokens = this.estimateTokens(d.content);
+      const tokens = await estimateTokensAsync(d.content);
       if (tokensUsed + tokens > tokenBudget) break;
       result.push(d);
       tokensUsed += tokens;
@@ -426,13 +427,6 @@ export class ProgressiveRetriever {
     // Maintain the order of the input IDs
     const rowMap = new Map(rows.map((row: any) => [row.id, row]));
     return ids.filter((id) => rowMap.has(id)).map((id) => this.rowToMemory(rowMap.get(id)));
-  }
-
-  /**
-   * Estimate token count (rough: ~4 chars per token)
-   */
-  private estimateTokens(text: string): number {
-    return Math.ceil(text.length / 4);
   }
 
   /**

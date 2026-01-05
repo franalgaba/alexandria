@@ -61,12 +61,14 @@ export class MemoryObjectStore {
         id, content, object_type, scope_type, scope_path,
         confidence, evidence_event_ids, evidence_excerpt,
         review_status, created_at, updated_at, code_refs, last_verified_at, structured,
+        supersedes,
         strength, outcome_score
       )
       VALUES (
         $id, $content, $objectType, $scopeType, $scopePath,
         $confidence, $evidenceEventIds, $evidenceExcerpt,
         $reviewStatus, $createdAt, $updatedAt, $codeRefs, $lastVerifiedAt, $structured,
+        $supersedes,
         $strength, $outcomeScore
       )
     `)
@@ -85,12 +87,14 @@ export class MemoryObjectStore {
         $codeRefs: JSON.stringify(codeRefs),
         $lastVerifiedAt: lastVerifiedAt?.toISOString() ?? null,
         $structured: serializeStructured(input.structured),
+        $supersedes: null,
         $strength: 1.0,
         $outcomeScore: 0.5,
       });
 
     // Index tokens for exact matching
     this.indexTokens(id, input.content);
+    this.insertCodeRefs(id, codeRefs);
 
     return {
       id,
@@ -200,6 +204,10 @@ export class MemoryObjectStore {
     `)
       .run(params as Record<string, string | number | null>);
 
+    if (input.codeRefs !== undefined) {
+      this.replaceCodeRefs(id, input.codeRefs);
+    }
+
     return this.get(id);
   }
 
@@ -208,6 +216,7 @@ export class MemoryObjectStore {
    */
   delete(id: string): boolean {
     this.deleteTokens(id);
+    this.deleteCodeRefs(id);
     const result = this.db
       .query(`
       DELETE FROM memory_objects WHERE id = $id
@@ -508,6 +517,59 @@ export class MemoryObjectStore {
       DELETE FROM object_tokens WHERE object_id = $objectId
     `)
       .run({ $objectId: objectId });
+  }
+
+  /**
+   * Insert normalized code refs for a memory
+   */
+  private insertCodeRefs(memoryId: string, refs: CodeReference[]): void {
+    if (refs.length === 0) return;
+
+    for (const ref of refs) {
+      const lineStart = ref.lineRange ? ref.lineRange[0] : null;
+      const lineEnd = ref.lineRange ? ref.lineRange[1] : null;
+      const refId = generateId();
+
+      this.db
+        .query(`
+        INSERT INTO memory_code_refs (
+          id, memory_id, path, ref_type, symbol, line_start, line_end, verified_at_commit, content_hash
+        )
+        VALUES (
+          $id, $memoryId, $path, $refType, $symbol, $lineStart, $lineEnd, $verifiedAtCommit, $contentHash
+        )
+      `)
+        .run({
+          $id: refId,
+          $memoryId: memoryId,
+          $path: ref.path,
+          $refType: ref.type,
+          $symbol: ref.symbol ?? null,
+          $lineStart: lineStart,
+          $lineEnd: lineEnd,
+          $verifiedAtCommit: ref.verifiedAtCommit ?? null,
+          $contentHash: ref.contentHash ?? null,
+        });
+    }
+  }
+
+  /**
+   * Replace normalized code refs for a memory
+   */
+  private replaceCodeRefs(memoryId: string, refs: CodeReference[]): void {
+    this.deleteCodeRefs(memoryId);
+    this.insertCodeRefs(memoryId, refs);
+  }
+
+  /**
+   * Delete normalized code refs for a memory
+   */
+  private deleteCodeRefs(memoryId: string): void {
+    this.db
+      .query(`
+      DELETE FROM memory_code_refs WHERE memory_id = $memoryId
+    `)
+      .run({ $memoryId: memoryId });
   }
 
   private rowToMemoryObject(row: MemoryObjectRow): MemoryObject {

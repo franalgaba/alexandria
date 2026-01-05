@@ -6,6 +6,7 @@ import type { ArgumentsCamelCase, Argv } from 'yargs';
 import { VectorIndex } from '../../indexes/vector.ts';
 import { closeConnection, getConnection } from '../../stores/connection.ts';
 import { MemoryObjectStore } from '../../stores/memory-objects.ts';
+import type { ReviewStatus } from '../../types/memory-objects.ts';
 import { error, info, success } from '../utils.ts';
 
 interface ExportArgs {
@@ -56,7 +57,11 @@ export async function handler(argv: ArgumentsCamelCase<ExportArgs>): Promise<voi
           scope: obj.scope,
           status: obj.status,
           confidence: obj.confidence,
+          reviewStatus: obj.reviewStatus,
+          evidenceEventIds: obj.evidenceEventIds,
           evidenceExcerpt: obj.evidenceExcerpt,
+          codeRefs: obj.codeRefs,
+          structured: obj.structured,
           createdAt: obj.createdAt.toISOString(),
         })),
       };
@@ -105,13 +110,21 @@ export async function handler(argv: ArgumentsCamelCase<ExportArgs>): Promise<voi
 
       for (const objData of importData.objects) {
         try {
+          const evidenceEventIds = Array.isArray(objData.evidenceEventIds)
+            ? objData.evidenceEventIds
+            : [];
+          const codeRefs = Array.isArray(objData.codeRefs) ? objData.codeRefs : [];
+          const reviewStatus = getImportReviewStatus(objData, evidenceEventIds, codeRefs);
           const obj = store.create({
             content: objData.content,
             objectType: objData.objectType,
             scope: objData.scope,
             confidence: objData.confidence || 'medium',
+            reviewStatus,
+            evidenceEventIds,
             evidenceExcerpt: objData.evidenceExcerpt,
-            reviewStatus: 'approved', // Auto-approve imports
+            codeRefs,
+            structured: objData.structured,
           });
 
           // Index for vector search
@@ -127,4 +140,21 @@ export async function handler(argv: ArgumentsCamelCase<ExportArgs>): Promise<voi
   } finally {
     closeConnection();
   }
+}
+
+function getImportReviewStatus(
+  objData: any,
+  evidenceEventIds: string[],
+  codeRefs: unknown[],
+): ReviewStatus {
+  const reviewStatus = objData.reviewStatus as ReviewStatus | undefined;
+  if (reviewStatus === 'approved' || reviewStatus === 'pending' || reviewStatus === 'rejected') {
+    return reviewStatus;
+  }
+
+  const isHighConfidence = objData.confidence === 'high' || objData.confidence === 'certain';
+  const hasEvidence = evidenceEventIds.length > 0;
+  const hasCodeRefs = codeRefs.length > 0;
+
+  return isHighConfidence && (hasEvidence || hasCodeRefs) ? 'approved' : 'pending';
 }

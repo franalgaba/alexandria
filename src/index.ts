@@ -68,6 +68,7 @@ export { generateId, generateShortId } from './utils/id.ts';
 export {
   type ExtractedToken,
   estimateTokens,
+  estimateTokensAsync,
   extractTokens,
   hashContent,
   type TokenType,

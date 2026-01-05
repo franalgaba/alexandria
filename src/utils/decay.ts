@@ -11,6 +11,11 @@ const DEFAULT_DECAY_RATE = Number(process.env.ALEXANDRIA_DECAY_RATE) || 0.05;
 // Default reinforcement boost when memory is accessed
 const DEFAULT_REINFORCE_BOOST = Number(process.env.ALEXANDRIA_REINFORCE_BOOST) || 0.15;
 
+// Recency boost config (half-life in days, max boost multiplier)
+const DEFAULT_RECENCY_HALF_LIFE_DAYS =
+  Number(process.env.ALEXANDRIA_RECENCY_HALF_LIFE_DAYS) || 30;
+const DEFAULT_RECENCY_MAX_BOOST = Number(process.env.ALEXANDRIA_RECENCY_MAX_BOOST) || 0.2;
+
 // Minimum strength before memory is considered for archival
 const MIN_STRENGTH = 0.01;
 
@@ -56,6 +61,19 @@ export function calculateEffectiveScore(
   // At very helpful (1.0): multiplier = 1.5
   // At unhelpful (0.0): multiplier = 0.5
   return baseScore * strength * (0.5 + outcomeScore);
+}
+
+/**
+ * Calculate recency multiplier (newer items get a small boost)
+ */
+export function calculateRecencyMultiplier(date?: Date): number {
+  if (!date || DEFAULT_RECENCY_HALF_LIFE_DAYS <= 0) {
+    return 1.0;
+  }
+
+  const days = daysSince(date);
+  const decay = Math.min(1, Math.max(0, Math.exp(-days / DEFAULT_RECENCY_HALF_LIFE_DAYS)));
+  return 1 + DEFAULT_RECENCY_MAX_BOOST * decay;
 }
 
 /**

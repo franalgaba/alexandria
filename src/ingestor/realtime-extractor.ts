@@ -7,6 +7,7 @@
  */
 
 import type { Database } from 'bun:sqlite';
+import { FTSIndex } from '../indexes/fts.ts';
 import { VectorIndex } from '../indexes/vector.ts';
 import { MemoryObjectStore } from '../stores/memory-objects.ts';
 import type { Event } from '../types/events.ts';
@@ -95,14 +96,17 @@ const MIN_WORD_COUNT = 6;
 
 // Maximum memories to extract per event
 const MAX_MEMORIES_PER_EVENT = 3;
+const DUPLICATE_SIMILARITY_THRESHOLD = 0.8;
 
 export class RealtimeExtractor {
   private store: MemoryObjectStore;
+  private fts: FTSIndex;
   private vector: VectorIndex;
   private recentHashes: Set<string> = new Set();
 
   constructor(db: Database) {
     this.store = new MemoryObjectStore(db);
+    this.fts = new FTSIndex(db);
     this.vector = new VectorIndex(db);
   }
 
@@ -132,7 +136,7 @@ export class RealtimeExtractor {
       }
 
       // Check for similar existing memories
-      const isDuplicate = await this.checkDuplicate(candidate.content);
+      const isDuplicate = await this.checkDuplicate(candidate);
       if (isDuplicate) {
         continue;
       }
@@ -308,9 +312,18 @@ export class RealtimeExtractor {
   /**
    * Check if similar memory already exists
    */
-  private async checkDuplicate(content: string): Promise<boolean> {
+  private async checkDuplicate(candidate: MemoryCandidate): Promise<boolean> {
+    const ftsResults = this.fts.searchObjects(candidate.content, ['active'], 5);
+    for (const result of ftsResults) {
+      if (result.object.objectType !== candidate.suggestedType) continue;
+      const similarity = this.calculateSimilarity(candidate.content, result.object.content);
+      if (similarity >= DUPLICATE_SIMILARITY_THRESHOLD) {
+        return true;
+      }
+    }
+
     try {
-      const results = await this.vector.searchSimilarObjects(content, 1);
+      const results = await this.vector.searchSimilarObjects(candidate.content, 1);
       // Low distance means high similarity (distance < 0.1 means very similar)
       if (results.length > 0 && results[0].distance < 0.1) {
         return true;
@@ -319,6 +332,32 @@ export class RealtimeExtractor {
       // Ignore errors
     }
     return false;
+  }
+
+  /**
+   * Calculate content similarity (simple Jaccard-like)
+   */
+  private calculateSimilarity(a: string, b: string): number {
+    const tokensA = new Set(this.tokenize(a));
+    const tokensB = new Set(this.tokenize(b));
+
+    if (tokensA.size === 0 || tokensB.size === 0) return 0;
+
+    const intersection = new Set([...tokensA].filter((x) => tokensB.has(x)));
+    const union = new Set([...tokensA, ...tokensB]);
+
+    return intersection.size / union.size;
+  }
+
+  /**
+   * Tokenize text for comparison
+   */
+  private tokenize(text: string): string[] {
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter((t) => t.length > 2);
   }
 
   /**

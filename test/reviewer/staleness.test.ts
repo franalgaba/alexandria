@@ -46,6 +46,25 @@ describe('StalenessChecker', () => {
     expect(result.reasons[0]).toContain('deleted');
   });
 
+  test('check detects missing symbol', () => {
+    const memory = store.create({
+      content: 'Test memory with missing symbol',
+      objectType: 'decision',
+      codeRefs: [
+        {
+          type: 'symbol',
+          path: 'src/cli/commands/check.ts',
+          symbol: 'DoesNotExist',
+        },
+      ],
+    });
+
+    const result = checker.check(memory);
+    expect(result.isStale).toBe(true);
+    expect(result.missingRefs).toHaveLength(1);
+    expect(result.reasons[0]).toContain('Symbol not found');
+  });
+
   test('check validates with current commit', () => {
     // Create memory verified at current commit
     const currentCommit = getCurrentCommit();
