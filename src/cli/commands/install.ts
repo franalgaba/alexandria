@@ -109,8 +109,8 @@ function installClaudeCode(integrationsDir: string, force: boolean): boolean {
 }
 
 function installPi(integrationsDir: string, force: boolean): boolean {
-  const source = join(integrationsDir, 'pi', 'hooks');
-  const targetDir = join(homedir(), '.pi', 'agent', 'hooks');
+  const source = join(integrationsDir, 'pi', 'extensions');
+  const targetDir = join(homedir(), '.pi', 'agent', 'extensions');
 
   if (!existsSync(source)) {
     console.error(colorize(`Source not found: ${source}`, 'red'));
@@ -122,14 +122,14 @@ function installPi(integrationsDir: string, force: boolean): boolean {
     mkdirSync(targetDir, { recursive: true });
   }
 
-  // Get list of hook files
-  const hookFiles = ['alexandria.ts', 'revalidation.ts'];
+  // Get list of extension files
+  const extensionFiles = ['alexandria.ts', 'revalidation.ts'];
   let installed = 0;
   let skipped = 0;
 
-  for (const file of hookFiles) {
+  for (const file of extensionFiles) {
     const sourceFile = join(source, file);
-    const targetFile = join(targetDir, `alexandria-${file}`);
+    const targetFile = join(targetDir, file);
 
     if (!existsSync(sourceFile)) {
       continue;
@@ -145,18 +145,18 @@ function installPi(integrationsDir: string, force: boolean): boolean {
   }
 
   if (installed === 0 && skipped > 0) {
-    console.log(colorize('⚠️  pi-coding-agent hooks already installed', 'yellow'));
+    console.log(colorize('⚠️  pi-coding-agent extensions already installed', 'yellow'));
     console.log(`   Use ${colorize('--force', 'cyan')} to overwrite`);
     console.log(`   Location: ${targetDir}`);
     return false;
   }
 
-  console.log(colorize('✓ Installed pi-coding-agent hooks', 'green'));
+  console.log(colorize('✓ Installed pi-coding-agent extensions', 'green'));
   console.log(`  Location: ${targetDir}`);
   console.log();
-  console.log('Hooks installed:');
-  console.log('  • alexandria-revalidation.ts - Interactive stale memory review');
-  console.log('  • alexandria-alexandria.ts - Session lifecycle integration');
+  console.log('Extensions installed:');
+  console.log('  • revalidation.ts - Interactive stale memory review');
+  console.log('  • alexandria.ts - Session lifecycle integration');
 
   return true;
 }
@@ -175,12 +175,22 @@ function uninstallClaudeCode(): boolean {
 }
 
 function uninstallPi(): boolean {
-  const targetDir = join(homedir(), '.pi', 'agent', 'hooks');
-  const hookFiles = ['alexandria-alexandria.ts', 'alexandria-revalidation.ts'];
+  const extensionsDir = join(homedir(), '.pi', 'agent', 'extensions');
+  const extensionFiles = ['alexandria.ts', 'revalidation.ts'];
+  const legacyHooksDir = join(homedir(), '.pi', 'agent', 'hooks');
+  const legacyHookFiles = ['alexandria-alexandria.ts', 'alexandria-revalidation.ts'];
   let removed = 0;
 
-  for (const file of hookFiles) {
-    const targetFile = join(targetDir, file);
+  for (const file of extensionFiles) {
+    const targetFile = join(extensionsDir, file);
+    if (existsSync(targetFile)) {
+      rmSync(targetFile);
+      removed++;
+    }
+  }
+
+  for (const file of legacyHookFiles) {
+    const targetFile = join(legacyHooksDir, file);
     if (existsSync(targetFile)) {
       rmSync(targetFile);
       removed++;
@@ -188,11 +198,11 @@ function uninstallPi(): boolean {
   }
 
   if (removed === 0) {
-    console.log(colorize('pi-coding-agent hooks not installed', 'dim'));
+    console.log(colorize('pi-coding-agent extensions not installed', 'dim'));
     return false;
   }
 
-  console.log(colorize(`✓ Uninstalled ${removed} pi-coding-agent hook(s)`, 'green'));
+  console.log(colorize(`✓ Uninstalled ${removed} pi-coding-agent extension(s)`, 'green'));
   return true;
 }
 

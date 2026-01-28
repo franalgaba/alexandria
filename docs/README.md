@@ -5,7 +5,7 @@
 - [Getting Started](./getting-started.md) - Installation and quick start
 - [CLI Reference](./cli-reference.md) - Complete command reference
 - [Memory Types](./memory-types.md) - When to use each type
-- [Integrations](./integrations.md) - Claude Code, pi-coding-agent, git hooks
+- [Integrations](./integrations.md) - Claude Code, pi-coding-agent extensions, git hooks
 - [Best Practices](./best-practices.md) - Tips for effective use
 
 ## Integration READMEs

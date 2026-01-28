@@ -155,7 +155,7 @@ alex install claude-code --uninstall
 
 ## pi-coding-agent
 
-The pi integration uses TypeScript hooks for full session lifecycle management.
+The pi integration uses TypeScript extensions for full session lifecycle management.
 
 ### Installation
 
@@ -163,28 +163,34 @@ The pi integration uses TypeScript hooks for full session lifecycle management.
 alex install pi
 ```
 
-This installs hooks to `~/.pi/agent/hooks/`.
+This installs extensions to `~/.pi/agent/extensions/`.
 
-### Hooks
+### Extensions
 
 | Event | Action |
 |-------|--------|
-| `session (start)` | Start session, generate context pack, inject via `pi.send()` |
-| `tool_call` | Buffer event (fire-and-forget) |
-| `tool_result` | Buffer event (fire-and-forget) |
-| `turn_end` | Buffer response, check for auto-checkpoint |
-| `session (end)` | Trigger checkpoint, end session |
+| `session_start` | Start session, generate context pack with hot memories, inject via `pi.sendMessage()` |
+| `before_agent_start` | Buffer user prompt, check for explicit memory queries, inject disclosure context |
+| `tool_call` | Buffer event (fire-and-forget), detect topic shifts |
+| `tool_result` | Buffer event with exit code, detect error bursts |
+| `turn_end` | Buffer response, check auto-checkpoint threshold |
+| `session_before_switch` | Trigger checkpoint before switching sessions |
+| `session_shutdown` | Trigger final checkpoint, show session stats |
 
 ### Context Injection
 
-At session start, memories are injected as a message via `pi.send()`:
+At session start, memories are injected as a message via `pi.sendMessage()`:
 
 ```typescript
-pi.send(`# Alexandria Memory Context
+pi.sendMessage({
+  customType: 'alexandria-context',
+  content: `# Alexandria Memory Context
 
 ${contextPack}
 
-These memories contain past decisions, constraints, known fixes, and conventions.`);
+These memories contain past decisions, constraints, known fixes, and conventions.`,
+  display: true,
+});
 ```
 
 ### Auto-Checkpoint
@@ -195,9 +201,9 @@ Every 10 events (configurable via `ALEXANDRIA_AUTO_CHECKPOINT_THRESHOLD`):
 2. **Tier 1** runs if API key available (Haiku extraction)
 3. Memories created as "pending" for review
 
-### Revalidation Hook
+### Revalidation Extension
 
-The `revalidation.ts` hook provides interactive stale memory review:
+The `revalidation.ts` extension provides interactive stale memory review:
 
 ```
 ┌─────────────────────────────────────────────┐

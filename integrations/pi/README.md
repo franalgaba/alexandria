@@ -36,7 +36,7 @@ Alexandria v2 uses checkpoint-driven curation with progressive disclosure. Both 
    - Decision stability rules prevent meta-commentary from becoming memories
 
 3. **Fire-and-Forget Capture**: Non-blocking event ingestion
-   - All hooks run fast
+   - All extensions run fast
    - Events buffered asynchronously
    - Doesn't slow down the main session
 
@@ -64,11 +64,15 @@ alex install pi
 Or manually:
 
 ```bash
-mkdir -p ~/.pi/agent/hooks
-cp integrations/pi/hooks/*.ts ~/.pi/agent/hooks/
+mkdir -p ~/.pi/agent/extensions
+cp integrations/pi/extensions/*.ts ~/.pi/agent/extensions/
+
+# Or project-local
+mkdir -p .pi/extensions
+cp integrations/pi/extensions/*.ts .pi/extensions/
 ```
 
-## Hooks
+## Extensions
 
 | Event | Action |
 |-------|--------|
@@ -118,7 +122,7 @@ When checkpoint runs:
    - Uses Claude Code's existing OAuth token (no separate API key needed!)
 4. Memories created as "pending" for review
 
-## Hook: revalidation.ts
+## Extension: revalidation.ts
 
 Interactive memory revalidation at session start.
 
@@ -164,4 +168,4 @@ export ALEXANDRIA_DISCLOSURE_THRESHOLD=15
 ## Requirements
 
 - Alexandria CLI (`alex`) in PATH
-- pi-coding-agent with hooks support
+- pi-coding-agent with extensions support

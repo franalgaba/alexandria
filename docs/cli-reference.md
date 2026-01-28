@@ -41,7 +41,7 @@ Ingest an event into the current session.
 # From argument
 alex ingest "Build failed with error X" --type error
 
-# From stdin (used by hooks)
+# From stdin (used by integrations/extensions)
 echo "tool output" | alex ingest --type tool_output --tool bash
 
 # With exit code (for error→fix detection)
@@ -360,7 +360,7 @@ Install agent integrations.
 
 ```bash
 alex install claude-code    # Claude Code plugin
-alex install pi             # pi-coding-agent hooks
+alex install pi             # pi-coding-agent extensions
 
 alex install pi --force     # Overwrite existing
 alex install pi --uninstall # Remove integration

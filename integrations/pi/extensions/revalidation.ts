@@ -1,24 +1,21 @@
 /**
- * Alexandria Revalidation Hook for pi-coding-agent
- *
- * Deprecated: pi hooks have been renamed to extensions.
- * Use integrations/pi/extensions/revalidation.ts instead.
+ * Alexandria Revalidation Extension for pi-coding-agent
  *
  * On session start, checks for stale memories and prompts
  * the user to verify, retire, or skip each one using the TUI.
  *
  * Installation:
  *   # Global
- *   cp integrations/pi/hooks/revalidation.ts ~/.pi/agent/hooks/
+ *   cp integrations/pi/extensions/revalidation.ts ~/.pi/agent/extensions/
  *
  *   # Or project-local
- *   cp integrations/pi/hooks/revalidation.ts .pi/hooks/
+ *   cp integrations/pi/extensions/revalidation.ts .pi/extensions/
  *
  *   # Or via command line
- *   pi --hook ./integrations/pi/hooks/revalidation.ts
+ *   pi -e ./integrations/pi/extensions/revalidation.ts
  */
 
-import type { HookAPI } from '@mariozechner/pi-coding-agent';
+import type { ExtensionAPI } from '@mariozechner/pi-coding-agent';
 
 interface StaleMemory {
   id: string;
@@ -33,7 +30,7 @@ interface CheckResult {
   stale: StaleMemory[];
 }
 
-export default function (pi: HookAPI) {
+export default function (pi: ExtensionAPI) {
   pi.on('session_start', async (_event, ctx) => {
     // Check if alex is available
     const { code: whichCode } = await pi.exec('which', ['alex']);

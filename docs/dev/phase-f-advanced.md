@@ -136,7 +136,7 @@ alex show <id>
 - [x] Suggest actions (verify/update/retire)
 - [x] Add `alex revalidate` interactive CLI command
 - [x] Create Claude Code plugin (`integrations/claude-code/`)
-- [x] Create pi-coding-agent hooks (`integrations/pi/hooks/`)
+- [x] Create pi-coding-agent extensions (`integrations/pi/extensions/`)
 
 ### Step 3: Symbol Extraction (60 min) ✅ COMPLETE
 - [x] Create `src/code/symbols.ts` with regex-based extraction

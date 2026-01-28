@@ -1,11 +1,8 @@
 /**
- * Alexandria Hook for Pi Coding Agent
- *
- * Deprecated: pi hooks have been renamed to extensions.
- * Use integrations/pi/extensions/alexandria.ts instead.
+ * Alexandria Extension for Pi Coding Agent
  *
  * Lifecycle-driven memory integration following Alexandria v2 architecture.
- * Matches Claude Code hook behavior for consistency.
+ * Matches Claude Code integration behavior for consistency.
  *
  * Session Start:
  *   - Start Alexandria session tracking
@@ -29,7 +26,7 @@
  *   - Tier 1 runs if Claude OAuth available (Haiku extraction)
  */
 
-import type { HookAPI } from '@mariozechner/pi-coding-agent';
+import type { ExtensionAPI } from '@mariozechner/pi-coding-agent';
 
 // Configuration from environment
 const AUTO_CHECKPOINT_THRESHOLD = parseInt(
@@ -39,7 +36,7 @@ const AUTO_CHECKPOINT_THRESHOLD = parseInt(
 const ERROR_BURST_THRESHOLD = parseInt(process.env.ALEXANDRIA_ERROR_BURST_THRESHOLD || '3', 10);
 const DISCLOSURE_THRESHOLD = parseInt(process.env.ALEXANDRIA_DISCLOSURE_THRESHOLD || '15', 10);
 
-export default function (pi: HookAPI) {
+export default function (pi: ExtensionAPI) {
   let currentSessionId: string | null = null;
   let eventCount = 0;
   let errorCount = 0;
@@ -360,7 +357,7 @@ ${stdout.trim()}`,
     let exitCode = isError ? '1' : '0';
     if (toolName === 'bash') {
       // Check details for exit code if available
-      const details = (event as any).details;
+      const details = event.details;
       if (details?.exitCode !== undefined) {
         exitCode = String(details.exitCode);
       } else {
